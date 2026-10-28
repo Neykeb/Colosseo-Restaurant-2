@@ -26,6 +26,7 @@
     "react-router": "latest"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@react-router/dev": "latest",
     "@tailwindcss/vite": "latest",
     "@testing-library/jest-dom": "latest",
@@ -34,9 +35,10 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
-    "eslint": "latest",
+    "eslint": "^9.39.5",
     "eslint-formatter-unix": "^9.0.1",
     "eslint-plugin-jsx-a11y": "latest",
+    "globals": "^16.0.0",
     "lightningcss": "^1.33.0",
     "tailwindcss": "latest",
     "typescript": "^5.9.3",
