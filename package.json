@@ -35,6 +35,7 @@
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
     "eslint": "latest",
+    "eslint-formatter-unix": "^9.0.1",
     "eslint-plugin-jsx-a11y": "latest",
     "lightningcss": "^1.33.0",
     "tailwindcss": "latest",
