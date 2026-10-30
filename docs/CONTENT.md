@@ -1,7 +1,7 @@
 # Inhalt und Lokalisierung
 
-**Status:** Phase 2 - freigegeben  
-**Letzte Aktualisierung:** 22.10.2026
+**Status:** Phase 2 freigegeben; Full-Stack-Inhaltsbedarf ergänzt
+**Letzte Aktualisierung:** 30.10.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Inhaltsarchitektur, Seitentexte, CTA-Texte, Lokalisierung, Metadateninhalte und Inhaltsstatus. Funktionale Seitenanforderungen stehen in `SPEC.md`; visuelle Darstellungsregeln stehen in `DESIGN_SYSTEM.md`.
 
@@ -13,7 +13,7 @@ Diese Datei ist die einzige verbindliche Quelle für Inhaltsarchitektur, Seitent
 - Angebot: Pizza, Pasta und weitere italienische Speisen.
 - Kernbotschaft als sachliche Grundlage: frische Zubereitung in der eigenen Küche mit einfachen Zutaten.
 - Kernzielgruppe: Menschen ab etwa 30 Jahren mit Interesse an italienischem Essen und frischen Zutaten.
-- Primäres Conversion-Ziel: Tisch über einen externen Reservierungsdienst oder telefonisch reservieren. Dienst und Ziel-URL sind noch `OFFEN`; ein eigenes Reservierungsformular ist nicht vorgesehen.
+- Primäres Conversion-Ziel: Tisch reservieren. Der ausdrückliche Full-Stack-Auftrag vom 30.10.2026 ersetzt die frühere Festlegung auf einen externen Dienst durch ein eigenes Reservierungssystem; bis zu dessen geprüfter Freigabe bleibt die bestätigte Telefonnummer der einzige aktive Reservierungsweg.
 - Sekundäre Ziele: Speisekarte einsehen sowie Feiern und Veranstaltungen anfragen.
 - Eine Online-Bestellfunktion für Essen ist nicht vorgesehen.
 - Verbindliche Sprachen: Deutsch, Englisch und Italienisch. Die Standardsprache ist `OFFEN`.
@@ -37,7 +37,7 @@ Nicht ausdrücklich freigegebene Angaben dürfen vor Veröffentlichung nicht als
 
 ## Benötigte Inputs
 
-- externer Reservierungsdienst mit Ziel-URL sowie konkreter Veranstaltungsanfrageweg
+- fachlich bestätigte Reservierungsregeln und Formularfelder sowie konkreter Veranstaltungsanfrageweg
 - reale Geschäftsdaten als Ersatz für sämtliche Platzhalter
 - Seiten- und Funktionsumfang
 - Markenstimme, gewünschte Tonalität und verbotene Formulierungen
@@ -59,7 +59,7 @@ Für jede freigegebene Seite werden Zweck, Zielgruppe, Kernbotschaft, Abschnitts
 4. **Feiern**: Möglichkeiten für private Feiern und Veranstaltungen mit externem Anfrageweg.
 5. **Kontakt**: Anfahrt, reale Öffnungszeiten, Telefon und rechtliche Verweise.
 
-Globale Aktionen: **Tisch reservieren**, Telefon, Sprachauswahl. Impressum und Datenschutz stehen ausschließlich im Footer und bleiben inhaltlich `OFFEN`.
+Globale Aktionen: **Tisch reservieren**, Telefon, Sprachauswahl. Die Reservierungsaktion führt erst nach freigegebener Full-Stack-Implementierung in den eigenen Buchungsablauf; bis dahin bleibt sie telefonisch. Impressum und Datenschutz stehen ausschließlich im Footer und bleiben inhaltlich `OFFEN`.
 
 Die Speisekarte erhält eine eigene Seite und darf zusätzlich als kurze Auswahl auf der Startseite erscheinen. Eine Online-Bestellstrecke wird nicht vorgesehen.
 

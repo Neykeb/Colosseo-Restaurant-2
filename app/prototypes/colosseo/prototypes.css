@@ -418,7 +418,7 @@
   will-change: transform;
 }
 .no-arrow {
-  position: absolute;
+  position: absolute; 
   z-index: 2;
   right: 4vw;
   bottom: 4vw;
