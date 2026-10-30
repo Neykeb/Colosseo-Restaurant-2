@@ -1,6 +1,6 @@
 import { List, Phone, X } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 
 import {
   locales,
