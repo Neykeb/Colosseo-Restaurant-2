@@ -1,5 +1,5 @@
 import { ArrowUpRight } from "@phosphor-icons/react";
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 
 import { locales, pathFor, type Locale, type PageKey } from "~/content/site-content";
 

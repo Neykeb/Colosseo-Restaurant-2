@@ -1,6 +1,6 @@
 import { ArrowDownRight, ArrowRight, List, MapPin, Phone, X } from "@phosphor-icons/react";
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 
 import { TextRotate, type TextRotateRef } from "~/components/ui/text-rotate";
 import { googleReviews, menuDishes, notteContent, notteImages, notteLinks, openingHours } from "~/content/notte.de";
@@ -146,6 +146,6 @@ export function NotteFooter({ locale }: { locale: "de" | "en" | "it" }) {
     <div className="no-footer-brand" data-reveal-item><strong>Ristorante Colosseo</strong><p>{content.statement}</p></div>
     <nav aria-label="Footer-Navigation" data-reveal-item><a href="#menu">{content.menu}</a><a href="#story">{content.restaurant}</a><a href="#events">{content.events}</a><a href="#reviews">{content.reviews}</a></nav>
     <div className="no-footer-contact" data-reveal-item><a href={notteLinks.phone}>{visit.phone}</a><p>{visit.addressLine1}<br />{visit.addressLine2}</p></div>
-    <nav className="no-footer-languages" aria-label={content.languages} data-reveal-item>{(["de", "en", "it"] as const).map((language) => <Link aria-current={locale === language ? "page" : undefined} key={language} to={`/${language}`}>{language.toUpperCase()}</Link>)}</nav>
+    <nav className="no-footer-languages" aria-label={content.languages} data-reveal-item>{(["de", "en", "it"] as const).map((language) => <Link aria-current={locale === language ? "page" : undefined} key={language} to="/$lang" params={{ lang: language }} search={{}}>{language.toUpperCase()}</Link>)}</nav>
   </footer>;
 }

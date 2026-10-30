@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "react-router dev",
-    "build": "react-router build",
-    "typecheck": "react-router typegen && tsc --noEmit",
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "oxlint ."
@@ -15,6 +15,7 @@
     "@fontsource/instrument-serif": "^5.3.0",
     "@gsap/react": "latest",
     "@phosphor-icons/react": "latest",
+    "@tanstack/react-router": "^1.170.46",
     "gsap": "latest",
     "i18next": "latest",
     "isbot": "^5",
@@ -22,11 +23,9 @@
     "motion": "^14.6.0",
     "react": "latest",
     "react-dom": "latest",
-    "react-i18next": "latest",
-    "react-router": "latest"
+    "react-i18next": "latest"
   },
   "devDependencies": {
-    "@react-router/dev": "latest",
     "@tailwindcss/vite": "latest",
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",

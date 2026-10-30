@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useRef } from "react";
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 
 import { pathFor, siteContent, type Locale } from "~/content/site-content";
 
