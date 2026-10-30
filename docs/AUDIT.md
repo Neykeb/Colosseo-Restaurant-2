@@ -1,7 +1,7 @@
 # Discovery- und Referenz-Audit
 
-**Status:** Phase 1 - freigegeben  
-**Letzte Aktualisierung:** 10.10.2026  
+**Status:** Phase 1 freigegeben; technischer Full-Stack-Bestandsaudit ergänzt
+**Letzte Aktualisierung:** 30.10.2026
 **Referenz:** <https://ballenacabo.com/>  
 **Prüfumfang:** Startseite im echten Browser bei 1280 × 720 sowie 390 × 844; DOM-, Stylesheet- und Script-Inspektion. Unterseiten, vollständige Animations-Timelines und Performance-Messungen wurden noch nicht geprüft.
 
@@ -145,3 +145,57 @@ Noch keine Funktion ist freigegeben. Zu klären sind:
 ## 8. Gate
 
 Die für eine kreative Konzeption wesentlichen Business-Grundlagen sind erfasst. Die verbleibenden offenen Angaben werden als klar markierte Abhängigkeiten weitergeführt. Phase 1 wurde am 10.10.2026 freigegeben; Details stehen im Freigabeprotokoll von `TASKS.md`.
+
+## 9. Technischer Bestandsaudit zur Full-Stack-Erweiterung
+
+### Verifizierter Ist-Zustand am 30.10.2026
+
+- Das Repository ist eine React-/TypeScript-Anwendung im Strict Mode mit React Router Framework Mode und Vite.
+- `react-router.config.ts` setzt `ssr: false` und rendert die bekannten Sprachrouten beim Build statisch vor.
+- Netlify veröffentlicht ausschließlich `build/client`; der aktuelle Betrieb benötigt keine Server-Runtime.
+- Es existieren weder Server-Endpunkte noch Datenbankverbindung, Migrationen, Authentifizierung, Rollenmodell oder E-Mail-Integration.
+- Restaurant-, Speisekarten- und Öffnungszeitendaten liegen derzeit als lokale TypeScript-Inhalte im Repository. Änderungen benötigen einen neuen Build und ein Deployment.
+- Die öffentliche Website, ihre Notte-Komposition, die dreisprachige Routenstruktur und die vorhandenen Medien sind bereits umfangreich umgesetzt und müssen bei der Erweiterung regressionsfrei erhalten bleiben.
+- Die vorhandenen Unit-Tests prüfen Menü- und Routingdaten. Integrations-, API-, Datenbank- und End-to-End-Tests für geschützte oder schreibende Abläufe fehlen naturgemäß noch.
+- Die bisherige Spezifikation schließt ein eigenes Reservierungs-Backend, Benutzerkonten und CMS ausdrücklich aus. Der neue Nutzerauftrag vom 30.10.2026 verlangt genau diese Funktionen und ist daher eine wesentliche, noch freizugebende Architekturänderung.
+
+### Architekturfolgen
+
+- Ein rein statischer Client kann weder Secrets schützen noch eine verbindliche Verfügbarkeitsentscheidung treffen. Für Reservierungen und Administration ist eine serverseitige Vertrauensgrenze erforderlich.
+- Eine Reservierung benötigt mehr als ein Kontaktformular: Kapazitätsmodell, Öffnungs- und Sperrzeiten, Aufenthaltsdauer, Kombinierbarkeit von Tischen und eine atomare Abschlussprüfung müssen fachlich definiert sein.
+- E-Mail-Bestätigungen dürfen nicht die Quelle des Reservierungsstatus sein. Der Datenbankstatus ist führend; Benachrichtigungen sind nachgelagerte, wiederholbare Nebenwirkungen.
+- Das Admin-Dashboard verarbeitet personenbezogene Daten und erfordert Authentifizierung, serverseitige Autorisierung, Auditierbarkeit und eine definierte Aufbewahrung.
+- Der aktuelle Netlify-Host kann erhalten bleiben. Eine Backend-Erweiterung über serverlose Funktionen vermeidet vorerst einen separaten dauerhaft laufenden Anwendungsserver.
+
+### Zwischenzeitliche, inzwischen ersetzte Stack-Vorgabe am 30.10.2026
+
+- Der Nutzer hatte zunächst Node.js, Express, TypeScript, PostgreSQL, Prisma, Render und Resend als Zielstack festgelegt. PostgreSQL und Prisma wurden anschließend am selben Tag durch MongoDB und die nachfolgend bewertete Prisma-Alternative ersetzt.
+- Die Prüfung ergibt: Der Stack ist mit dem bestehenden React-Router-/Vite-Projekt kompatibel. Express kann die API und im Produktionsbetrieb den erzeugten React-Build unter einer gemeinsamen Origin ausliefern.
+- Netlify Functions und Supabase sind damit als Zielarchitektur verworfen. Die bestehende Netlify-Konfiguration bleibt bis zu einer freigegebenen Render-Migration lediglich als funktionsfähiger Ist-Zustand erhalten und wird nicht voreilig entfernt.
+- Der Lernzweck ist Teil der Anforderung: Validierung, API, Authentifizierung, Reservierungslogik, Geschäftslogik und Datenzugriff werden im Projekt selbst entwickelt.
+- Render-Web-Services besitzen ein flüchtiges Dateisystem. Verwaltbare Speisekartenbilder benötigen deshalb später einen freigegebenen externen Objektspeicher oder eine ausdrücklich begründete Render-Disk; diese Entscheidung ist noch `OFFEN`.
+
+### Letzte Datenbankanpassung am 30.10.2026
+
+- PostgreSQL und Prisma wurden auf Nutzerwunsch verworfen. Ziel ist MongoDB mit einer Prisma-Alternative.
+- `VORSCHLAG` Mongoose ist die passendste Alternative. Es ist ein MongoDB-spezifischer Object Document Mapper mit Schema-, Modell-, Validierungs-, Index- und Transaktionsunterstützung sowie offiziellen TypeScript-Typen.
+- `VORSCHLAG` MongoDB Atlas stellt die Datenbank bereit; der eigene Express-Server bleibt auf Render. Atlas dokumentiert die direkte Integration mit Render einschließlich Connection String und Netzwerkfreigabe.
+- Eine selbst gehostete MongoDB-Instanz auf Render ist technisch möglich, benötigt jedoch Private Service, persistenten Datenträger, Backups und eigenen Datenbankbetrieb. Für das auf Lernen der Anwendungslogik fokussierte Finalprojekt ist Atlas die wartungsärmere Wahl.
+- MongoDB-Transaktionen benötigen ein Replica Set. Atlas erfüllt diese Voraussetzung; die lokale Entwicklungsumgebung muss deshalb ebenfalls als Replica Set laufen, wenn Transaktions- und Parallelitätstests realistisch sein sollen.
+
+### Anpassung der Admin-Authentifizierung am 30.10.2026
+
+- Der Nutzer hat Clerk mit OAuth verbindlich für die Admin-Anmeldung ausgewählt. Die zuvor geplante eigene Passwort- und Sessionimplementierung entfällt.
+- Clerk ist mit React/Vite und Express kompatibel. Das Express SDK prüft Clerk-Sessions aus Cookies beziehungsweise Headern und stellt den Authentifizierungszustand serverseitig bereit.
+- Authentifizierung und fachliche Autorisierung bleiben getrennt: Clerk bestätigt die Identität; das eigene Backend prüft zusätzlich ein aktives MongoDB-Adminprofil und dessen Rolle.
+- Ein erfolgreich bei Clerk angemeldeter Benutzer erhält daher nicht automatisch Zugriff auf `/admin` oder geschützte APIs.
+- OAuth-Anbieter, zugelassene Adminidentitäten und Verhalten bei entzogenem Zugang bleiben `OFFEN`.
+
+### Risiken
+
+- Ohne reale Tisch- und Betriebsregeln kann keine korrekte automatische Zusage implementiert werden.
+- Eine nicht atomare Kombination aus „Verfügbarkeit prüfen“ und „Reservierung speichern“ erzeugt bei parallelen Anfragen Doppelbelegungen.
+- Direkter Browserzugriff mit privilegiertem Datenbankschlüssel würde sämtliche Administrationsdaten gefährden.
+- Unbegrenzte öffentliche Reservierungs- und Anfrageendpunkte sind anfällig für Spam, Enumeration und E-Mail-Missbrauch.
+- Reservierungsdaten, Freitextanfragen, E-Mails und Telefonnummern erfordern vor Produktion eine rechtliche Prüfung, Datenschutzerklärung sowie Lösch- und Auskunftsprozesse.
+- Menü- und Öffnungszeitenpflege kann den statisch vorgerenderten Inhalt veralten lassen. Cache-, Veröffentlichungs- und Fallbackverhalten müssen vor der CMS-Umstellung festgelegt werden.

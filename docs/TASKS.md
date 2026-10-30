@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Phase 5 aktiv – „Notte“ ist als deutsche Hauptseite aktiviert; finale Messungen und reale Daten stehen aus  
-**Letzte Aktualisierung:** 27.10.2026
+**Status:** Full-Stack-Phase `FS0` – Analyse, Backend-Cockpit und Tagesplan abgeschlossen; Implementierung wartet auf Gate-Freigabe und ausdrückliches `GO für FS1`
+**Letzte Aktualisierung:** 30.10.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -144,6 +144,7 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 10.10.2026 | Gate 1 | Freigegeben | Nutzer: „Okay, macht weiter.“ Phase 2 autorisiert. |
 | 10.10.2026 | Gate 2 | Freigegeben | Nutzer: „okay weiter“. Phase 3 autorisiert. |
 | 10.10.2026 | Gate 3 | Freigegeben | Nutzer: „Phase drei ist freigegeben.“ Phase 4 autorisiert. |
+| 30.10.2026 | FS0-Dokumentation | Freigegeben | Nutzer: „go“. Autorisiert wurden Backend-Cockpit und Zwei-Personen-Tagesplan; dies ist ausdrücklich keine Gate-Freigabe für `FS1`. |
 
 ## Aktuelle Blocker
 
@@ -163,3 +164,124 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 
 - Phase 4: `gpt-taste` vor jedem ersten UI-Code anwenden und den geforderten `<design_plan>` erstellen.
 - Die dort deterministisch gewählte Typografie ersetzt den früheren Schriftvorschlag und wird anschließend in `DESIGN_SYSTEM.md` konkretisiert.
+
+## Full-Stack-Erweiterung – Gate-basierte Roadmap
+
+Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich. Die bestehende Phase 6 der Marketing-Website bleibt mit ihren offenen Qualitätspunkten bestehen; Full-Stack-Arbeiten werden separat als `FS0` bis `FS8` verfolgt. Jede Phase endet mit Dokumentation, tatsächlich ausgeführten Tests, Ergebnisbericht und einem neuen Gate.
+
+### FS0 – Bestandsanalyse und Architekturentwurf
+
+- [x] Repository, Build, Routing, Hosting, Inhalte und vorhandene Tests prüfen.
+- [x] Konflikt zur früheren Abgrenzung „kein eigenes Backend/CMS“ identifizieren.
+- [x] Sicherheits-, Datenschutz-, Parallelitäts- und Betriebsrisiken erfassen.
+- [x] Zielarchitektur, Domänenmodell, API-Inventar, Teststrategie und Phasenfolge als `VORSCHLAG` dokumentieren.
+- [x] Dauerhafte Backend-, Datenbank- und Gate-Regeln in `AGENTS.md` ergänzen.
+- [x] `docs/BACKEND.md` als schnellen, nicht duplizierenden Einstieg in Architektur, Regeln, Quellen und nächsten zulässigen Schritt erstellen.
+- [x] `docs/DAILY_PLAN.md` als operative Zwei-Personen-Planung für 02.11.–20.11.2026 samt Tagesstart, Tagesabschluss, Blockaden und Übergabeformat erstellen.
+- [x] Technische Baseline verifizieren: Typecheck, Lint, 7 Unit-Tests und Production-Build erfolgreich. Ein initial parallel zu Typecheck gestarteter Testlauf kollidierte im gemeinsamen React-Router-Typegen-Ausgabeordner; der anschließende isolierte Testlauf war erfolgreich. CI muss Typegen-verwendende Schritte seriell oder mit getrennten Ausgabeverzeichnissen ausführen.
+- [ ] Fachliche und betriebliche Fragen mit dem Nutzer klären.
+- [ ] **GATE FS0:** Zielarchitektur und Umfang ausdrücklich freigeben; erst danach darf `FS1` beginnen.
+
+### FS1 – Plattformgrundlage und reproduzierbare Datenbank
+
+**Benötigt vor Start:** GO für `FS1`, Bestätigung von MongoDB Atlas, Atlas-Konto/Region sowie Entscheidung, ob lokal ein MongoDB-Replica-Set über Docker bereitgestellt werden soll. Mongoose, Render-Konto und Finalprojekt-Nutzung sind bestätigt.
+
+- [ ] Lokale Entwicklungs- und Umgebungsvariablenstrategie ohne Secrets im Repository einrichten.
+- [ ] Node-/Express-/TypeScript-Serverstruktur und getrennte `app`-/`server`-Startpunkte etablieren.
+- [ ] Mongoose-Verbindung, Schemas/Modelle, Seed nur für klar künstliche Entwicklungsdaten und typisierten Repository-Zugriff etablieren.
+- [ ] Kernschema für Einstellungen, Servicezeiten, Sondertage, Bereiche, Tische, Reservierungen, Zuweisungen, Ereignisse und Outbox umsetzen.
+- [ ] MongoDB-Indizes, gering privilegierten Atlas-Datenbankbenutzer und idempotente Migrationsskripte samt Tests ergänzen.
+- [ ] Express-Grundgerüst mit Healthcheck, Fehlerformat, Korrelations-ID, sicherer Basiskonfiguration und statischer Produktionsauslieferung aufsetzen.
+- [ ] Bestehenden öffentlichen Build unverändert regressionsprüfen.
+- [ ] **GATE FS1:** Schema, lokale Einrichtung, Tests und Sicherheitsgrenzen präsentieren; auf GO für `FS2` warten.
+
+### FS2 – Admin-Authentifizierung und geschütztes Grundlayout
+
+**Benötigt vor Start:** Clerk-Konto/Anwendung, gewünschte OAuth-Anbieter, erste Owner-Identität und Rollenmatrix.
+
+- [ ] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren.
+- [ ] OAuth-Anmeldung, Abmeldung, Sessionablauf, Redirect-Allowlist und Fehlerzustände umsetzen.
+- [ ] Eigenes `admin_profiles`-Modell und sicheren Owner-Bootstrap für Clerk-User-IDs implementieren.
+- [ ] `/admin` mit Lade-, Zugriff-verweigert- und geschützten Layoutzuständen erstellen.
+- [ ] Owner-/Staff-Rechte als serverseitige Middleware-, Service- und API-Tests verankern.
+- [ ] Admin aus Sitemap/Indexierung und öffentlicher Navigation ausschließen.
+- [ ] Accessibility- und Security-Tests durchführen.
+- [ ] **GATE FS2:** geschützten Zugang und Rollenprüfung präsentieren; auf GO für `FS3` warten.
+
+### FS3 – Reservierungs- und Verfügbarkeitskern
+
+**Benötigt vor Start:** reale Tischliste, Bereiche, Kombinationsregeln, Servicezeiten, Dauer/Buffer, Vorlauf, Buchungshorizont, Gruppengrenzen, Sperr- und Bestätigungsregeln.
+
+- [ ] Pure Domainlogik für Zeitfenster und Statusübergänge umsetzen.
+- [ ] Atomare Tischzuweisung einschließlich Parallelitätsschutz implementieren.
+- [ ] Öffentliche Config-/Availability-/Reservation-API mit Validierung, Rate-Limit und Idempotenz erstellen.
+- [ ] Admin-API für manuelle Reservierungen und Sperrzeiten ergänzen.
+- [ ] Concurrency-, Grenzzeit-, Zeitzonen- und Ausgebucht-Tests ausführen.
+- [ ] **GATE FS3:** Reservierungskern per API und Tests präsentieren; auf GO für `FS4` warten.
+
+### FS4 – Öffentliche Reservierungsstrecke und Benachrichtigungen
+
+**Benötigt vor Start:** freigegebene Formularfelder/-texte in DE/EN/IT, Datenschutzgrundlage, Stornoregeln, Absenderdomain, Restaurantempfänger und E-Mail-Anbieter.
+
+- [ ] Reservierungsoberfläche in das bestehende Design integrieren, ohne Hero oder öffentliche Dramaturgie unnötig zu verändern.
+- [ ] Zugängliche Datum-, Uhrzeit-, Personen- und Kontaktdateneingabe mit vollständigen Zuständen umsetzen.
+- [ ] Outbox-Verarbeitung und idempotente Gast-/Restaurant-E-Mails integrieren.
+- [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
+- [ ] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und E2E-Prüfungen ausführen.
+- [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
+
+### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
+
+- [ ] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen.
+- [ ] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren.
+- [ ] Sonderöffnungen, Schließungen und Sperrzeiten verwalten.
+- [ ] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren.
+- [ ] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen.
+- [ ] **GATE FS5:** operative Verwaltung präsentieren; auf GO für `FS6` warten.
+
+### FS6 – Speisekarte, Öffnungszeiten und Medienverwaltung
+
+- [ ] Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung und Aktivstatus verwalten.
+- [ ] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren.
+- [ ] Reguläre Öffnungszeiten und datierte Abweichungen pflegen.
+- [ ] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen.
+- [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
+- [ ] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen.
+- [ ] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentieren; auf GO für `FS7` warten.
+
+### FS7 – Datenschutz, Sicherheit, Betrieb und vollständige QA
+
+- [ ] Aufbewahrung, Löschung, Auskunft und Datenexport technisch umsetzen und dokumentieren.
+- [ ] Auditlog, Monitoring, Alarmierung, Rate-Limits und Secret-Rotation prüfen.
+- [ ] Backup und Wiederherstellung in einer Nicht-Produktionsumgebung nachweislich testen.
+- [ ] Dependency-, Auth-, Autorisierungs-, IDOR-, XSS-, Upload-, CORS-/CSRF- und Log-Leak-Prüfungen durchführen.
+- [ ] Gesamte Regression für öffentliche Website, Admin, API, Datenbank, E-Mails, Accessibility, Mobile und Performance ausführen.
+- [ ] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden.
+- [ ] **GATE FS7:** Abnahmebericht und offene Produktionsrisiken präsentieren; auf GO für `FS8` warten.
+
+### FS8 – Produktionsmigration und kontrollierter Livegang
+
+**Benötigt vor Start:** ausdrückliche Deployment-Erlaubnis, bestätigte Rechts- und Geschäftsdaten, produktive Render-/Resend-Konten, Domain, Verantwortliche und Rollbackfenster.
+
+- [ ] Produktionsmigration und validierte Ausgangsdaten vorbereiten.
+- [ ] Render Web Service und MongoDB Atlas möglichst regionsnah, Domain, E-Mail-DNS, Umgebungsvariablen, Monitoring und Backups konfigurieren.
+- [ ] Smoke-Tests, Rollbackplan und Abnahmecheckliste ausführen.
+- [ ] Erst nach gesonderter Freigabe deployen und keine Test-E-Mails an reale Gäste senden.
+- [ ] **GATE FS8:** Livegang abnehmen und Betriebsübergabe dokumentieren.
+
+## Offene Entscheidungen vor der Reservierungsimplementierung
+
+1. `OFFEN` Welche realen Tische existieren, wie viele Plätze haben sie, welche dürfen kombiniert werden und gibt es getrennte Bereiche?
+2. `OFFEN` Welche Zeiten sind tatsächlich reservierbar – unabhängig von den allgemeinen Öffnungszeiten?
+3. `OFFEN` Wie lange gilt eine Belegung je Gruppengröße und ist ein Puffer zwischen Reservierungen nötig?
+4. `OFFEN` Wie weit im Voraus, mit welchem Mindestvorlauf und bis zu welcher Gruppengröße darf automatisch gebucht werden?
+5. `OFFEN` Soll jede passende Anfrage sofort bestätigt werden oder benötigen bestimmte Zeiten/Gruppen eine manuelle Freigabe?
+6. `OFFEN` Welche Änderungs-, Storno-, No-show- und Verspätungsregeln gelten?
+7. `OFFEN` Welche Pflichtfelder dürfen erhoben werden und wie lange werden Reservierungen, Anfragen und Logs gespeichert?
+8. `OFFEN` Wer erhält Restaurant-E-Mails, welche Absenderdomain wird verwendet und wer verwaltet Render und Resend?
+9. `OFFEN` Welche Personen erhalten Adminzugang und welche Rechte benötigen Owner und Mitarbeitende?
+10. `OFFEN` Sollen bestehende Reservierungen oder andere Daten importiert werden?
+11. `OFFEN` Soll die lokale MongoDB als Replica Set über Docker laufen oder ist bereits eine transaktionsfähige MongoDB-Entwicklungsumgebung vorhanden?
+12. `OFFEN` Welcher externe Objektspeicher darf später für hochgeladene Speisekartenbilder verwendet werden?
+13. `OFFEN` Welcher Clerk-OAuth-Anbieter soll erlaubt werden: Google, Microsoft oder beide?
+14. `OFFEN` Existiert bereits ein Clerk-Konto beziehungsweise eine Clerk-Anwendung, und welche Identität soll erster Owner werden?
