@@ -1,9 +1,11 @@
 # Funktionale und technische Spezifikation
 
-**Status:** Phase 3 freigegeben – Umsetzung in Phase 5 geprüft  
-**Letzte Aktualisierung:** 27.10.2026
+**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS0` als nicht freigegebener Architekturentwurf
+**Letzte Aktualisierung:** 30.10.2026
 
-Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Sämtliche Festlegungen bleiben bis Gate 3 `VORSCHLAG`.
+Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. Neue Full-Stack-Festlegungen bleiben bis Gate `FS0` `VORSCHLAG`.
+
+> **Änderungsauftrag 30.10.2026:** Die Abschnitte 20 bis 29 planen ein eigenes Reservierungs-Backend, Administration und Inhaltsverwaltung. Der zuletzt festgelegte Zielstack ist Node.js/Express/TypeScript, MongoDB mit Mongoose, Render, Resend und Clerk OAuth für die Admin-Anmeldung. MongoDB Atlas ist noch als Betriebsform zu bestätigen. Die konkrete Umsetzung bleibt bis Gate `FS0` gesperrt. Bis dahin bleibt die laufende statische Website unverändert maßgeblich.
 
 ## 1. Ziel und Abgrenzung
 
@@ -406,4 +408,198 @@ Die Implementierung gilt erst als vollständig, wenn:
 
 ## Gate
 
-Diese Spezifikation ist ein Phase-3-Entwurf. Projektinitialisierung oder UI-Code beginnen erst nach ausdrücklicher Gate-3-Freigabe.
+Die ursprüngliche Spezifikation wurde am 10.10.2026 mit Gate 3 freigegeben und anschließend umgesetzt. Dieser historische Gate-Status autorisiert nicht die nachfolgend geplante Full-Stack-Erweiterung.
+
+## 20. Full-Stack-Zielbild (`VORSCHLAG`)
+
+Der neue Umfang erweitert die bestehende Marketing-Website, ohne deren Gestaltung oder öffentliche Inhaltsreihenfolge neu zu bauen:
+
+- Gäste prüfen buchbare Zeitfenster und senden eine Reservierung mit Datum, Uhrzeit, Personenanzahl und notwendigen Kontaktdaten.
+- Das Backend entscheidet innerhalb einer atomaren Operation anhand der zu diesem Zeitpunkt gültigen Regeln und Kapazitäten, ob die Reservierung bestätigt wird.
+- Gäste und Restaurant erhalten statusabhängige Transaktions-E-Mails.
+- Autorisierte Mitarbeitende verwalten Reservierungen, Kalender/Sperrzeiten, Tische, Speisekarte, Öffnungszeiten und Veranstaltungsanfragen.
+- Änderungen an Speisekarte und Öffnungszeiten erhalten einen kontrollierten Veröffentlichungsstatus; die öffentliche Website besitzt einen sicheren Fallback, falls das Backend zeitweise nicht erreichbar ist.
+
+Weiter ausgeschlossen bleiben Online-Essensbestellung, Warenkorb und Zahlungsabwicklung, solange sie nicht separat spezifiziert und freigegeben werden.
+
+## 21. Architekturentscheidung
+
+### Empfohlene Zielarchitektur
+
+| Schicht | Vorschlag | Begründung |
+|---|---|---|
+| Öffentliche UI und Admin-UI | bestehendes React Router/Vite/TypeScript-Projekt | Bewahrt Routen, Design, Komponenten und Buildsystem; Admin wird als lazy geladener, geschützter Bereich ergänzt. |
+| Server | eigener Node.js-/Express-/TypeScript-Server | API, Authentifizierung, Validierung und Geschäftslogik bleiben selbst entwickelt und nachvollziehbar. |
+| Produktionsbetrieb | ein Render Web Service für Express, API und statischen React-Build | Gemeinsame Origin vereinfacht sichere Cookie-Sessions, CSRF-Schutz und Deployment. Express bindet an `0.0.0.0` und den von Render gelieferten `PORT`. |
+| Datenbank | MongoDB Atlas; Region möglichst nah am Render Web Service | Verwalteter MongoDB-Betrieb mit Replica Set für Transaktionen; Render und Atlas besitzen eine dokumentierte Integration. |
+| ODM und Strukturmigrationen | Mongoose sowie eingecheckte, idempotente Migrationsskripte | MongoDB-native Schemas, Modelle, Validierung, Indizes und Transaktionen mit offizieller TypeScript-Unterstützung. |
+| Admin-Authentifizierung | Clerk mit OAuth über `@clerk/react` und `@clerk/express` | Clerk übernimmt Identität, OAuth-Ablauf und Sessionprüfung. Anbieter und zugelassene Identitäten bleiben zu konfigurieren. |
+| Autorisierung | eigene MongoDB-basierte Rollenprüfung mit `owner` und `staff` | Jede geschützte Route prüft zusätzlich zur Clerk-Session ein aktives Adminprofil und die erforderliche Rolle serverseitig. Exakte Rechte-Matrix bleibt `OFFEN`. |
+| Bilder | externer Objektspeicher `OFFEN`; MongoDB speichert nur Metadaten und URLs | Render-Web-Service-Dateien sind flüchtig. Uploadanbieter und Rechteprüfung werden vor `FS6` festgelegt. |
+| E-Mail | Resend über eine eigene Mail-Service-Schicht und Outbox | Domänenbasierter Transaktionsversand und Idempotenz; Absenderdomain und Empfänger bleiben `OFFEN`. |
+
+Render unterstützt Node-/Express-Web-Services und erwartet die Bindung an den bereitgestellten `PORT`. Das Dateisystem des Web Service ist flüchtig; dauerhafte Fachdaten liegen in MongoDB Atlas. Der Atlas-Connection-String bleibt ein Render-Secret. Ein kostenloser Render-Web-Service kann nach Inaktivität schlafen; dies wird für das Finalprojekt akzeptiert, aber nicht als Produktionsziel eines realen Reservierungsbetriebs bewertet.
+
+### Prozess- und Verzeichnisstruktur (`VORSCHLAG`)
+
+```text
+app/                         bestehendes React-Frontend
+server/
+  src/
+    app.ts                   Express-Konfiguration ohne listen()
+    server.ts                Prozessstart und Graceful Shutdown
+    config/                  validierte Umgebungsvariablen
+    routes/                  HTTP-Routen und Router
+    controllers/             HTTP-Übersetzung, keine Geschäftslogik
+    services/                Reservierung, Auth, Menü, Mail
+    repositories/            Mongoose-Datenzugriff
+    models/                  Mongoose-Schemas und Modelle
+    middleware/              Auth, Rollen, Fehler, Rate-Limit, CSRF
+    validation/              Request-/Response-Schemas
+    jobs/                    Outbox-Verarbeitung und Aufräumjobs
+    lib/                     Logger, Zeit, IDs, gemeinsame Helfer
+database/migrations/         versionierte Struktur-/Datenmigrationen
+tests/
+  unit/
+  integration/
+  e2e/
+```
+
+Im lokalen Betrieb laufen Vite und Express als getrennte Prozesse; Vite leitet `/api` an Express weiter. Im Produktionsbetrieb beantwortet Express zuerst `/api/*`, Healthcheck und Admin-Sicherheitsrouten und liefert danach `build/client` einschließlich kontrolliertem SPA-Fallback aus. So bleibt der React-Build selbst statisch optimierbar, während API und sichere Sessions dieselbe Origin verwenden.
+
+### Bewusste Nichtentscheidungen
+
+- `BESTÄTIGT` Ein Render-Konto besteht; Render dient zunächst ausschließlich dem Finalprojekt.
+- `OFFEN` Render- und Atlas-Region, Tarif sowie Eigentümer des Atlas- und Resend-Kontos.
+- `OFFEN` Node-LTS- und konkrete Mongoose-Hauptversion; sie werden in `FS1` nach Kompatibilitätsprüfung fixiert und nicht als `latest` offen gelassen.
+- `OFFEN` ob öffentliche, veröffentlichte Menü-/Öffnungszeitendaten direkt über eine lesende API oder als beim Build erzeugter Snapshot ausgeliefert werden. Ziel ist Aktualität ohne Verlust der statischen Ausfallsicherheit.
+- `OFFEN` Objektspeicher für Speisekartenbilder, Staging-/Produktionsdienste sowie Domain-/DNS-Verantwortung.
+
+## 22. Sicherheits- und Vertrauensgrenzen (`VORSCHLAG`)
+
+- Öffentliche Eingaben werden serverseitig gegen ein gemeinsames Schema validiert, normalisiert und größenbeschränkt.
+- Reservierungs- und Anfrageendpunkte erhalten Rate-Limits, Bot-/Spam-Schutz, generische Fehlermeldungen und keine Auskunft darüber, ob eine E-Mail bereits bekannt ist.
+- Schreibende Admin-Endpunkte akzeptieren nur eine vom Clerk Express SDK serverseitig verifizierte Session und prüfen zusätzlich aktives Adminprofil und Rolle. Clientseitige Clerk-Komponenten oder UI-Sichtbarkeit ersetzen keine Autorisierung.
+- Der Zugang zum Adminbereich wird nicht allein durch einen möglichen Clerk-Sign-in beschränkt. Nur vorher zugelassene Clerk-User-IDs erhalten ein aktives `admin_profiles`-Dokument; alle anderen authentifizierten Benutzer erhalten `403 Forbidden`.
+- Clerk Publishable Key darf im Vite-Client verfügbar sein. Clerk Secret Key bleibt ausschließlich als Render-Secret im Express-Backend. Development- und Production-Instanzen sowie Redirect-URLs werden getrennt konfiguriert.
+- OAuth-Redirects und `authorizedParties` werden auf die tatsächlichen lokalen und Render-Domains begrenzt. Zustandsänderungen bleiben durch Clerk-Sessionprüfung sowie passende Origin-/CSRF-Maßnahmen geschützt.
+- Login- und OAuth-Sicherheitsfunktionen werden nicht selbst nachgebaut. Reservierungs-, Rollen-, Daten- und Geschäftslogik bleiben vollständig im eigenen Backend.
+- Da Produktion dieselbe Origin verwendet, bleibt CORS standardmäßig geschlossen. Nur ausdrücklich benötigte Preview-/Entwicklungsursprünge werden freigegeben.
+- Mutationen erzeugen unveränderliche Audit-Ereignisse mit Akteur, Zeitpunkt, Objekt, Aktion und minimal erforderlicher Änderungsinformation; Passwörter, Tokens und unnötige personenbezogene Inhalte werden nie protokolliert.
+- E-Mail-Versand läuft über eine Outbox mit eindeutigen Ereignisschlüsseln. Wiederholungen dürfen keine doppelten Bestätigungen erzeugen.
+- Backups, Wiederherstellungstest, Secret-Rotation, Monitoring und Incident-Ablauf sind Produktionskriterien, keine späteren Extras.
+
+### Eigene Autorisierungsobjekte neben Clerk
+
+- `admin_profiles`: eindeutige Clerk-User-ID, interne Rolle, Aktivstatus, Anzeigename, Erstellungs-/Änderungszeit und optional letzter erfolgreicher Adminzugriff.
+- `audit_events`: administrative Aktion, Clerk-Akteur-ID, Zielobjekt, Zeitpunkt und sichere Metadaten ohne Tokens oder unnötige Gastdaten.
+
+Clerk bleibt Quelle für Identität und Session. MongoDB bleibt Quelle für die fachliche Adminberechtigung. Rollen werden nicht aus frei änderbaren Benutzer-Metadaten übernommen.
+
+## 23. Fachliches Reservierungsmodell (`ENTWURF`)
+
+### Kernobjekte
+
+- `restaurant_settings`: Zeitzone, Buchungshorizont, Vorlauf, Standarddauer und veröffentlichte Regeln.
+- `dining_areas`: optionale Bereiche wie Gastraum oder Terrasse; reale Bereiche sind `OFFEN`.
+- `restaurant_tables`: interner Name, Mindest-/Maximalkapazität, Bereich, aktiv/inaktiv und gegebenenfalls Kombinationsgruppe.
+- `service_periods`: wöchentliche buchbare Servicezeiten getrennt von bloßen Öffnungszeiten.
+- `special_openings` und `closures`: datierte Abweichungen, Feiertage, private Veranstaltungen und Sperrzeiten.
+- `reservations`: öffentlicher Referenzcode, Gastdaten, Personenanzahl, Start/Ende, Locale, Status, Quelle, Datenschutzzeitpunkte und interne Notiz getrennt von Gastnotizen.
+- `reservation_table_assignments`: Zuordnung einer Reservierung zu einem oder mehreren Tischen.
+- `reservation_locks`: technische Sperrdokumente pro Tisch und Zeitsegment mit eindeutigem zusammengesetztem Index gegen Doppelbelegungen.
+- `reservation_events`: Statushistorie für Bestätigung, Änderung, Storno, No-show und manuelle Eingriffe.
+- `inquiries`: Veranstaltungsanfragen mit eigenem Status und minimal erforderlichen Kontaktdaten.
+- `menu_categories` und `menu_items`: mehrsprachige Inhalte, Preise als Decimal/Minor-Unit-Entscheidung `OFFEN`, Sortierung, Aktiv- und Veröffentlichungsstatus.
+- `menu_item_images`: Speicher-URL, Dimensionen, MIME-Typ, Alternativtexte, Rechte-/Quellstatus und Sortierung.
+- `opening_hours` und `opening_hour_exceptions`: öffentlich angezeigte reguläre Zeiten und datierte Abweichungen; buchbare `service_periods` bleiben fachlich getrennt.
+- `email_outbox`: Ereignistyp, Empfängerreferenz, Payloadversion, Idempotenzschlüssel, Versuche, nächster Versuch und Versandstatus.
+
+### Statusmodell
+
+`pending`, `confirmed`, `declined`, `cancelled_by_guest`, `cancelled_by_restaurant`, `seated`, `completed`, `no_show`.
+
+Ob eine Anfrage sofort `confirmed` oder zunächst `pending` wird, hängt von den noch offenen Betriebsregeln ab. Ein Status darf nur über erlaubte Übergänge verändert werden; jede Änderung erzeugt ein Ereignis.
+
+### Atomare Verfügbarkeitsentscheidung
+
+1. Eingabe und Zeitzone validieren.
+2. Servicezeit, Sonderöffnung, Sperrung, Vorlauf, Buchungshorizont und Gruppengröße prüfen.
+3. Geeignete aktive Tische beziehungsweise erlaubte Kombinationen bestimmen.
+4. Deterministisch die kleinste passende zulässige Belegung auswählen.
+5. Innerhalb einer MongoDB-Transaktion für jeden belegten Tisch und jedes betroffene Zeitsegment Sperrdokumente mit eindeutigem zusammengesetztem Index anlegen. Ein Indexkonflikt bedeutet, dass eine parallele Anfrage zuvor gewonnen hat.
+6. Bei Konflikt erneut berechnen oder ablehnen; ansonsten Reservierung, Tischzuordnung und Sperrdokumente gemeinsam speichern oder vollständig zurückrollen.
+7. Erst nach erfolgreichem Commit ein Outbox-Ereignis für E-Mails erzeugen.
+
+Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließlich der erfolgreiche Transaktionsabschluss bestätigt die Buchung. Mongoose-Transaktionen laufen nicht mit parallelen Operationen innerhalb derselben Session; alle beteiligten Schreibschritte werden bewusst seriell ausgeführt.
+
+## 24. Vorläufiges API-Inventar (`VORSCHLAG`)
+
+### Öffentlich
+
+- `GET /api/public/config` – veröffentlichte Buchungsregeln und notwendige Formularoptionen.
+- `GET /api/public/availability?date=…&partySize=…` – verfügbare Startzeiten ohne interne Tischdetails.
+- `POST /api/public/reservations` – atomare Reservierungsanfrage; wiederholte Übermittlung über Idempotency-Key absichern.
+- `POST /api/public/reservations/:reference/cancel` – nur mit sicherem, zeitlich begrenztem Gast-Token; genaue Stornoregel `OFFEN`.
+- `GET /api/public/menu` und `GET /api/public/opening-hours` – ausschließlich veröffentlichte Inhalte.
+- `POST /api/public/inquiries` – Veranstaltung anfragen; Felder und Empfänger `OFFEN`.
+
+### Geschützt
+
+- `/api/admin/reservations` – Listen, Details, Anlegen, Ändern, Stornieren, Statuswechsel und Tischzuordnung.
+- `/api/admin/calendar` – Tages-/Wochenbelegung, Sperrungen und Sonderöffnungen.
+- `/api/admin/tables` und `/api/admin/settings` – Kapazität und Buchungsregeln.
+- `/api/admin/menu` – Kategorien, Gerichte, Preise, Beschreibungen, Bilder, Sortierung und Veröffentlichung.
+- `/api/admin/opening-hours` – reguläre und datierte Abweichungen.
+- `/api/admin/inquiries` – Eingang, Status und interne Bearbeitung.
+
+Fehler verwenden stabile maschinenlesbare Codes, eine sichere Nutzermeldung und eine serverseitige Korrelations-ID. Personenbezogene Details erscheinen nicht in URLs oder Logs.
+
+## 25. Admin-Dashboard (`VORSCHLAG`)
+
+- Eigene Route unter `/admin`; nicht in öffentliche Navigation, Sitemap oder `hreflang` aufnehmen und mit `noindex` ausliefern.
+- Clerk-OAuth-Anmeldung, Sessionablauf, Abmeldung, Fehlerzustände und Fokusführung sind vor fachlichen Modulen umzusetzen. Nicht zugelassene, aber erfolgreich authentifizierte Personen erhalten eine verständliche Zugriff-verweigert-Ansicht.
+- Startansicht: heutige Reservierungen, offene Anfragen, nächste Sperrung und klar gekennzeichnete Fehlerzustände.
+- Kalender: Tag/Woche, verständliche Statuslegende und zugängliche Listenalternative; Drag-and-drop ist höchstens progressive Verbesserung.
+- Reservierungen: Suche, Filter, Detail, Statuswechsel, Tischzuordnung und nachvollziehbare Historie.
+- Speisekarte und Öffnungszeiten: Entwurf/Veröffentlicht, Vorschau, explizites Publizieren und Warnung bei ungespeicherten Änderungen.
+- Destruktive Aktionen benötigen Bestätigung; fachlich relevante Datensätze werden bevorzugt deaktiviert oder storniert statt hart gelöscht.
+- Das öffentliche Notte-Design bleibt erhalten. Das Dashboard verwendet dieselben Grundtokens, aber eine nüchterne, dichte Arbeitsoberfläche ohne Marketing-Motion.
+
+## 26. Datenschutz und Aufbewahrung (`OFFEN`)
+
+Vor `FS4` müssen mindestens festgelegt und rechtlich geprüft sein:
+
+- Pflichtfelder, Zweck und Rechtsgrundlage je Formular.
+- Aufbewahrungsfrist für Reservierungen, stornierte Buchungen, No-shows, Anfragen, Auditdaten und E-Mail-Ereignisse.
+- Prozess für Auskunft, Berichtigung und Löschung sowie Verantwortlicher im Restaurant.
+- Datenschutzerklärung, Auftragsverarbeitungsverträge, Anbieterregionen und gegebenenfalls Drittlandtransfer.
+- Inhalt und Zeitpunkt der Einwilligung, falls Daten über die reine Reservierungsabwicklung hinaus verwendet werden.
+
+Marketing-Einwilligung wird nicht mit der Reservierung gebündelt. Zahlungsdaten und besondere Kategorien personenbezogener Daten werden nicht erhoben.
+
+## 27. Teststrategie der Full-Stack-Erweiterung (`VORSCHLAG`)
+
+- Unit-Tests: Zeitfenster, Statusübergänge, Validierung, Locale- und Preisformatierung.
+- Datenbanktests: Schema- und Indexregeln, idempotente Migrationen, gering privilegierter Atlas-Datenbankbenutzer, atomare Zuweisung und parallele Reservierungsversuche auf einem Replica Set.
+- API-Integration: Authentifizierung, Autorisierung, Rate-Limits, Idempotenz, Fehlercodes und E-Mail-Outbox.
+- Komponenten-/Browsertests: Reservierungsformular, alle Zustände, Admin-Login, Tastaturfluss, Kalender-Listenalternative und Inhaltseditoren.
+- End-to-End: erfolgreiche Zusage, ausgebuchter Slot, parallele letzte Kapazität, Storno, manuelle Änderung, E-Mail-Wiederholung und Veröffentlichung von Menü/Öffnungszeiten.
+- Sicherheitsprüfung: Zugriff ohne/falsche Rolle, IDOR, Eingabegrenzen, XSS, Uploadtypen, Secret-Leaks, CORS/CSRF und Dependency-Audit.
+- Regression: bestehende öffentliche Routen, Motion-Fallbacks, Speisekartenoverlay, dreisprachige Navigation, Build und visuelle Kernansichten.
+
+## 28. Abnahmekriterien für die Gesamtfunktion (`ENTWURF`)
+
+- Zwei parallele Anfragen können dieselbe letzte Tischkapazität nicht doppelt bestätigen.
+- Öffnungs-, Service-, Sperr-, Vorlauf-, Dauer- und Gruppengrößenregeln werden serverseitig erzwungen.
+- Gäste erhalten genau eine zur gespeicherten Statusentscheidung passende E-Mail; ein Mailfehler ändert eine bestätigte Reservierung nicht rückwirkend.
+- Nicht angemeldete und unberechtigte Benutzer erhalten keinen Zugriff auf Admin- oder personenbezogene Daten.
+- Jede fachliche Adminänderung ist einem Akteur und Zeitpunkt zuordenbar.
+- Veröffentlichte Menü- und Öffnungszeitendaten erscheinen konsistent, während Entwürfe öffentlich unsichtbar bleiben.
+- Die bestehende Website bleibt in Gestaltung, öffentlicher Route und Performancebudget regressionsfrei; neue Admin-/Backend-Chunks werden nicht für den Hero geladen.
+- Typecheck, Lint, Unit-, Datenbank-, Integrations-, E2E-, Accessibility- und Production-Build-Prüfungen sind tatsächlich erfolgreich ausgeführt und dokumentiert.
+- Datenschutztexte, Aufbewahrung, Anbietervereinbarungen, Backup/Restore und Produktionsmonitoring sind vor Livegang bestätigt.
+
+## 29. Full-Stack-Gate
+
+`FS0` endet mit dieser Analyse und Roadmap. Es wurden weder Anwendungscode noch Datenbankschema noch Abhängigkeiten implementiert. Vor `FS1` sind ein ausdrückliches `GO` und die in `TASKS.md` für `FS1` bezeichneten Entscheidungen erforderlich. Die frühere Gate-3-Freigabe der Marketing-Website gilt nicht als Freigabe dieser Erweiterung.
