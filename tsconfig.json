@@ -1,5 +1,5 @@
 {
-  "include": ["app/**/*", ".react-router/types/**/*", "vite.config.ts", "react-router.config.ts"],
+  "include": ["app/**/*", "vite.config.ts"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["node", "vite/client"],
@@ -13,7 +13,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "rootDirs": [".", "./.react-router/types"],
+    "rootDirs": ["."],
     "paths": {
       "~/*": ["./app/*"]
     }
