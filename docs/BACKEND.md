@@ -2,7 +2,7 @@
 
 **Status:** Orientierung für Full-Stack-Phase `FS0`; noch kein Backend-Anwendungscode implementiert  
 **Phase:** `FS0` – Analyse, Entscheidungen und Gate-Freigabe  
-**Letzte Aktualisierung:** 30.10.2026
+**Letzte Aktualisierung:** 02.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
@@ -10,7 +10,8 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 
 - Die bestehende öffentliche React-/TypeScript-Website bleibt erhalten.
 - Das neue Backend ist geplant, aber noch nicht implementiert.
-- Zielstack: Node.js, Express, TypeScript, MongoDB mit Mongoose, Clerk für OAuth und Sessions, Resend für E-Mails sowie Render für das Finalprojekt.
+- Zielstack: React, TypeScript, Vite und TanStack Router im Frontend; Node.js, Express und TypeScript im Backend; MongoDB mit Mongoose, Clerk für OAuth und Sessions, Resend für E-Mails sowie Render für das Finalprojekt.
+- Der aktuelle Code nutzt noch React Router. Der Wechsel zu TanStack Router ist geplant, aber noch nicht implementiert.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.
 - Aktuelle Phase: `FS0`. Vor `FS1` fehlen die ausdrückliche Gate-Freigabe und die in `docs/TASKS.md` genannten Betriebsentscheidungen.
 - Das `GO` vom 30.10.2026 autorisiert ausschließlich diese Dokumentations- und Planungsübersicht, nicht die Implementierung von `FS1`.
@@ -98,6 +99,7 @@ Die ausführlichen Regeln stehen in `AGENTS.md` und `docs/SPEC.md`. Für den sch
 
 ### Bestätigt
 
+- Frontend-Routing im Zielsystem: TanStack Router
 - Backend: Node.js, Express und TypeScript
 - Datenzugriff: MongoDB mit Mongoose
 - Admin-Anmeldung: Clerk OAuth
@@ -109,6 +111,7 @@ Die ausführlichen Regeln stehen in `AGENTS.md` und `docs/SPEC.md`. Für den sch
 - ausdrückliche Freigabe von Gate `FS0` und separates `GO` für `FS1`
 - Bestätigung von MongoDB Atlas, Konto und Region
 - Entscheidung zur lokalen transaktionsfähigen MongoDB-Umgebung beziehungsweise Docker-Replica-Set
+- Festlegung der Prerender-/SEO-Strategie nach der Migration von React Router zu TanStack Router
 
 ### Vor späteren Phasen offen
 
