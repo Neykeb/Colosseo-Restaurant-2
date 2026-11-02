@@ -11,6 +11,7 @@ import { NottePrototype } from "~/prototypes/colosseo/prototype-variants";
 import { SiteFooter } from "~/components/site-footer";
 import { SiteHeader } from "~/components/site-header";
 import { ColosseoPrototypesPage } from "~/components/colosseo-prototypes-page";
+import { ActionLabel } from "~/components/ui/atoms/action-label";
 import { Link } from "@tanstack/react-router";
 import "~/prototypes/colosseo/prototypes.css";
 import "~/i18n/config";
@@ -96,7 +97,7 @@ function ContentPage({ copy, locale, pageKey, reserveLabel }: { copy: { title: s
     <main className="content-page" id="main-content">
       <section className="content-hero"><div><h1>{copy.title}</h1><p>{copy.intro}</p></div><img alt="Konzeptbild für diese Seite" src={image} /></section>
       <section className="content-grid">{copy.sections.map((section) => <article key={section.title}><h2>{section.title}</h2><p>{section.body}</p></article>)}</section>
-      <section className="content-action"><h2>{reserveLabel}</h2><span className="button button-primary button-disabled" aria-disabled="true">{reserveLabel}</span><Link className="text-link" to="/$lang" params={{ lang: locale }} search={{}}>Ristorante Colosseo</Link></section>
+      <section className="content-action"><h2>{reserveLabel}</h2><ActionLabel>{reserveLabel}</ActionLabel><Link className="text-link" to="/$lang" params={{ lang: locale }} search={{}}>Ristorante Colosseo</Link></section>
     </main>
   );
 }

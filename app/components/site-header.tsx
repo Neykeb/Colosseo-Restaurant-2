@@ -1,4 +1,4 @@
-import { List, Phone, X } from "@phosphor-icons/react";
+import { List, X } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 
@@ -8,6 +8,8 @@ import {
   type Locale,
   type PageKey,
 } from "~/content/site-content";
+import { BrandMark } from "./ui/atoms/brand-mark";
+import { HeaderActions } from "./ui/molecules/header-actions";
 
 type Props = {
   locale: Locale;
@@ -66,10 +68,7 @@ export function SiteHeader({
 
   return (
     <header className="site-header">
-      <Link className="wordmark" to={pathFor(locale, "home")}>
-        <span>Ristorante</span>
-        Colosseo
-      </Link>
+      <BrandMark href={pathFor(locale, "home")} />
 
       <nav aria-label="Hauptnavigation" className="desktop-nav">
         {pages.map((page) => (
@@ -83,24 +82,16 @@ export function SiteHeader({
         ))}
       </nav>
 
-      <div className="header-actions">
-        <a className="phone-link" href="tel:+4900000000000" aria-label={callLabel}>
-          <Phone aria-hidden="true" size={19} weight="regular" />
-        </a>
-        <span className="button button-primary button-disabled" aria-disabled="true" title="Reservierungs-URL folgt">
-          {reserveLabel}
-        </span>
-        <button
-          aria-expanded={open}
-          aria-label={open ? menuCloseLabel : menuOpenLabel}
-          className="menu-toggle"
-          onClick={() => setOpen((value) => !value)}
-          ref={triggerRef}
-          type="button"
-        >
-          {open ? <X aria-hidden="true" size={25} /> : <List aria-hidden="true" size={25} />}
-        </button>
-      </div>
+      <HeaderActions
+        callLabel={callLabel}
+        menuCloseLabel={menuCloseLabel}
+        menuButtonRef={triggerRef}
+        menuIcon={open ? <X aria-hidden="true" size={25} /> : <List aria-hidden="true" size={25} />}
+        menuOpenLabel={menuOpenLabel}
+        onMenuToggle={() => setOpen((value) => !value)}
+        open={open}
+        reserveLabel={reserveLabel}
+      />
 
       {open ? (
         <div aria-label="Mobile Navigation" aria-modal="true" className="mobile-menu" ref={menuRef} role="dialog">
