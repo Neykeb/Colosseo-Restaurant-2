@@ -2,6 +2,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  notFound,
   Outlet,
   redirect,
   useParams,
@@ -66,15 +67,15 @@ declare module "@tanstack/react-router" {
 }
 
 function getRouteData(lang: string, page?: string): { locale: Locale; pageKey: PageKey } {
-  if (!isLocale(lang)) throw new Error("Not found");
+  if (!isLocale(lang)) throw notFound();
   const pageKey = getPageKey(lang, page);
-  if (!pageKey) throw new Error("Not found");
+  if (!pageKey) throw notFound();
   return { locale: lang, pageKey };
 }
 
 function SiteRoute() {
   const { lang, page } = useParams({ strict: false });
-  if (!lang) throw new Error("Not found");
+  if (!lang) throw notFound();
   const { locale, pageKey } = getRouteData(lang, page);
   const copy = siteContent[locale];
 

@@ -5,11 +5,12 @@ import { Link } from "@tanstack/react-router";
 import { TextRotate, type TextRotateRef } from "~/components/ui/text-rotate";
 import { googleReviews, menuDishes, notteContent, notteImages, notteLinks, openingHours } from "~/content/notte.de";
 
+import type { NotteIntroCopy } from "~/content/notte-locales";
+
 import { MaskedWords } from "./atoms";
 import { ReviewCard } from "./molecules";
 
-export function NotteNavigation() {
-  const content = notteContent.navigation;
+export function NotteNavigation({ content }: { content: NotteIntroCopy["navigation"] }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -23,14 +24,13 @@ export function NotteNavigation() {
 
   return <header className="p-nav p-nav-dark no-site-nav">
     <a className="p-logo" href="#top"><small>{content.brandEyebrow}</small>{content.brandName}</a>
-    <nav aria-label="Hauptnavigation" className={open ? "is-open" : undefined}><a href="#menu" onClick={() => setOpen(false)}>{content.menu}</a><a href="#events" onClick={() => setOpen(false)}>{content.events}</a><a href="#contact" onClick={() => setOpen(false)}>{content.contact}</a></nav>
-    <button aria-expanded={open} aria-label={open ? "Navigation schließen" : "Navigation öffnen"} className="no-nav-toggle" onClick={() => setOpen((value) => !value)} type="button">{open ? <X size={22} /> : <List size={22} />}</button>
+    <nav aria-label={content.label} className={open ? "is-open" : undefined}><a href="#menu" onClick={() => setOpen(false)}>{content.menu}</a><a href="#events" onClick={() => setOpen(false)}>{content.events}</a><a href="#contact" onClick={() => setOpen(false)}>{content.contact}</a></nav>
+    <button aria-expanded={open} aria-label={open ? content.close : content.open} className="no-nav-toggle" onClick={() => setOpen((value) => !value)} type="button">{open ? <X size={22} /> : <List size={22} />}</button>
     <a className="p-nav-cta" href={notteLinks.phone}><Phone size={17} /> {content.reserve}</a>
   </header>;
 }
 
-export function HeroSection() {
-  const content = notteContent.hero;
+export function HeroSection({ content }: { content: NotteIntroCopy["hero"] }) {
   return <section className="no-hero">
     <video className="no-hero-video" preload="metadata" muted playsInline poster={notteImages.heroPoster} aria-hidden="true" disablePictureInPicture>
       <source media="(hover: hover) and (pointer: fine) and (min-width: 768px)" src="/videos/pizza-scroll.mp4" type="video/mp4" />
@@ -41,8 +41,7 @@ export function HeroSection() {
   </section>;
 }
 
-export function WelcomeSection() {
-  const content = notteContent.welcome;
+export function WelcomeSection({ content }: { content: NotteIntroCopy["welcome"] }) {
   return <section className="no-intro" id="story">
     <figure className="no-intro-media"><img src={notteImages.interior} alt={content.imageAlt} width="960" height="960" sizes="(max-width: 900px) 88vw, 40vw" loading="lazy" decoding="async" /></figure>
     <div className="no-intro-copy"><h2 data-word-reveal><MaskedWords text={content.title} /></h2><p>{content.body}</p><p className="no-intro-signature">{content.signature}</p></div>
@@ -91,8 +90,7 @@ export function MenuPreviewSection({ onOpenMenu, triggerRef }: { onOpenMenu: () 
   </section>;
 }
 
-export function FamilyStorySection() {
-  const content = notteContent.family;
+export function FamilyStorySection({ content }: { content: NotteIntroCopy["family"] }) {
   return <section className="no-family" id="family" aria-labelledby="family-title">
     <img className="no-family-background" src="/images/colosseo/exterior-entrance.png" alt={notteContent.visit.imageAlt} width="1630" height="965" loading="lazy" decoding="async" />
     <div className="no-family-wash" aria-hidden="true" />
@@ -100,8 +98,7 @@ export function FamilyStorySection() {
   </section>;
 }
 
-export function EventsSection() {
-  const content = notteContent.events;
+export function EventsSection({ content }: { content: NotteIntroCopy["events"] }) {
   return <section className="no-events" id="events">
     <div><p className="no-events-support">{content.eyebrow}</p><h2 data-word-reveal><MaskedWords text={content.title} /></h2><p className="no-events-support">{content.body}</p><a className="no-events-support" href={notteLinks.events}>{content.action} <ArrowRight /></a></div>
     <img className="no-events-image" src={notteImages.events} alt={content.imageAlt} width="1122" height="1402" loading="lazy" decoding="async" />
