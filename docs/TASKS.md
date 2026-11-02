@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
 **Status:** Full-Stack-Phase `FS0` – Analyse, Backend-Cockpit und Tagesplan abgeschlossen; Implementierung wartet auf Gate-Freigabe und ausdrückliches `GO für FS1`
-**Letzte Aktualisierung:** 30.10.2026
+**Letzte Aktualisierung:** 02.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -178,6 +178,9 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [x] Dauerhafte Backend-, Datenbank- und Gate-Regeln in `AGENTS.md` ergänzen.
 - [x] `docs/BACKEND.md` als schnellen, nicht duplizierenden Einstieg in Architektur, Regeln, Quellen und nächsten zulässigen Schritt erstellen.
 - [x] `docs/DAILY_PLAN.md` als operative Zwei-Personen-Planung für 02.11.–20.11.2026 samt Tagesstart, Tagesabschluss, Blockaden und Übergabeformat erstellen.
+- [x] Kursunterlagen intern als Vollständigkeitskontrolle prüfen, ohne eine detaillierte Lernstoff- oder Quellenmatrix im Projekt abzulegen.
+- [x] Zielentscheidung TanStack Router dokumentieren und Migration vom aktuellen React Router einschließlich Prerender-/SEO-Risiko in `FS1` einplanen.
+- [x] `docs/DAILY_PLAN.md` nach Nutzerentscheidung auf 02.11.–13.11.2026 verdichten und zusätzliche Projektthemen separat kennzeichnen.
 - [x] Technische Baseline verifizieren: Typecheck, Lint, 7 Unit-Tests und Production-Build erfolgreich. Ein initial parallel zu Typecheck gestarteter Testlauf kollidierte im gemeinsamen React-Router-Typegen-Ausgabeordner; der anschließende isolierte Testlauf war erfolgreich. CI muss Typegen-verwendende Schritte seriell oder mit getrennten Ausgabeverzeichnissen ausführen.
 - [ ] Fachliche und betriebliche Fragen mit dem Nutzer klären.
 - [ ] **GATE FS0:** Zielarchitektur und Umfang ausdrücklich freigeben; erst danach darf `FS1` beginnen.
@@ -187,6 +190,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 **Benötigt vor Start:** GO für `FS1`, Bestätigung von MongoDB Atlas, Atlas-Konto/Region sowie Entscheidung, ob lokal ein MongoDB-Replica-Set über Docker bereitgestellt werden soll. Mongoose, Render-Konto und Finalprojekt-Nutzung sind bestätigt.
 
 - [ ] Lokale Entwicklungs- und Umgebungsvariablenstrategie ohne Secrets im Repository einrichten.
+- [ ] Bestehendes React-Router-Frontend kontrolliert auf TanStack Router migrieren; Sprachrouten, Direktaufruf, Reload, Lazy Loading, SEO-Metadaten, Prerender-/Buildstrategie und Produktionsfallback regressionsprüfen, bevor alte Router-Dateien oder Abhängigkeiten entfernt werden.
 - [ ] Node-/Express-/TypeScript-Serverstruktur und getrennte `app`-/`server`-Startpunkte etablieren.
 - [ ] Mongoose-Verbindung, Schemas/Modelle, Seed nur für klar künstliche Entwicklungsdaten und typisierten Repository-Zugriff etablieren.
 - [ ] Kernschema für Einstellungen, Servicezeiten, Sondertage, Bereiche, Tische, Reservierungen, Zuweisungen, Ereignisse und Outbox umsetzen.
