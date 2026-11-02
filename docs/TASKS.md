@@ -1,6 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
 **Status:** Full-Stack-Phase `FS0` – Analyse, Backend-Cockpit und Tagesplan abgeschlossen; Implementierung wartet auf Gate-Freigabe und ausdrückliches `GO für FS1`
+**Phase:** `FS0` – Vorbereitung; Gate offen
 **Letzte Aktualisierung:** 02.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
@@ -185,17 +186,26 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [ ] Fachliche und betriebliche Fragen mit dem Nutzer klären.
 - [ ] **GATE FS0:** Zielarchitektur und Umfang ausdrücklich freigeben; erst danach darf `FS1` beginnen.
 
+### Vorbereitungsstand und Freigabeumfang – 02.11.2026
+
+- [x] Server-/API-Vorbereitung als Vorschlag in `SPEC.md`, Abschnitt 21, konkretisieren und offene Reservierungsfragen nach benötigter Phase bündeln.
+- [x] Router-Ist-Zustand durch Quelltextprüfung feststellen: TanStack Router ist vorhanden; vollständige Migration und Auslieferung bleiben ungeprüft. Die frühere Aussage „React Router ist aktuell implementiert“ ist durch diesen Befund überholt.
+- **Freigabe 02.11.2026:** Das erste GO dieser Arbeitseinheit autorisierte die Bestandsaufnahme und Planerstellung. Das anschließende GO autorisiert ausschließlich die vorgestellten Änderungen an `SPEC.md`, `TASKS.md`, `BACKEND.md` und `DAILY_PLAN.md`. Weder Gate `FS0` noch `FS1` sind damit freigegeben.
+- **Prüfung:** Quelltexte, Konfiguration und Dokumentation gelesen; keine Typ-, Lint-, Build-, Funktions- oder Browsertests in dieser Vorbereitung ausgeführt.
+
 ### FS1 – Plattformgrundlage und reproduzierbare Datenbank
 
 **Benötigt vor Start:** GO für `FS1`, Bestätigung von MongoDB Atlas, Atlas-Konto/Region sowie Entscheidung, ob lokal ein MongoDB-Replica-Set über Docker bereitgestellt werden soll. Mongoose, Render-Konto und Finalprojekt-Nutzung sind bestätigt.
 
 - [ ] Lokale Entwicklungs- und Umgebungsvariablenstrategie ohne Secrets im Repository einrichten.
-- [ ] Bestehendes React-Router-Frontend kontrolliert auf TanStack Router migrieren; Sprachrouten, Direktaufruf, Reload, Lazy Loading, SEO-Metadaten, Prerender-/Buildstrategie und Produktionsfallback regressionsprüfen, bevor alte Router-Dateien oder Abhängigkeiten entfernt werden.
+- [ ] Bereits im Quelltext vorhandene TanStack-Router-Migration vollständig prüfen und erforderliche Restarbeiten umsetzen; Sprachrouten, Direktaufruf, Reload, Lazy Loading, SEO-Metadaten, Prerender-/Buildstrategie und Produktionsfallback regressionsprüfen, bevor alte Router-Dateien oder Abhängigkeiten entfernt werden.
 - [ ] Node-/Express-/TypeScript-Serverstruktur und getrennte `app`-/`server`-Startpunkte etablieren.
 - [ ] Mongoose-Verbindung, Schemas/Modelle, Seed nur für klar künstliche Entwicklungsdaten und typisierten Repository-Zugriff etablieren.
 - [ ] Kernschema für Einstellungen, Servicezeiten, Sondertage, Bereiche, Tische, Reservierungen, Zuweisungen, Ereignisse und Outbox umsetzen.
 - [ ] MongoDB-Indizes, gering privilegierten Atlas-Datenbankbenutzer und idempotente Migrationsskripte samt Tests ergänzen.
-- [ ] Express-Grundgerüst mit Healthcheck, Fehlerformat, Korrelations-ID, sicherer Basiskonfiguration und statischer Produktionsauslieferung aufsetzen.
+- [ ] Express-App und Prozessstart getrennt implementieren; Konfiguration und geordnetes Herunterfahren prüfen.
+- [ ] Healthcheck, Fehlerformat, Korrelations-ID und sichere Basiskonfiguration nach `SPEC.md`, Abschnitt 21, implementieren und per API-Tests prüfen.
+- [ ] API-404 und statische Produktionsauslieferung nach freigegebener Buildstrategie umsetzen und Fallback-Abgrenzung prüfen.
 - [ ] Bestehenden öffentlichen Build unverändert regressionsprüfen.
 - [ ] **GATE FS1:** Schema, lokale Einrichtung, Tests und Sicherheitsgrenzen präsentieren; auf GO für `FS2` warten.
 
@@ -289,3 +299,189 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 12. `OFFEN` Welcher externe Objektspeicher darf später für hochgeladene Speisekartenbilder verwendet werden?
 13. `OFFEN` Welcher Clerk-OAuth-Anbieter soll erlaubt werden: Google, Microsoft oder beide?
 14. `OFFEN` Existiert bereits ein Clerk-Konto beziehungsweise eine Clerk-Anwendung, und welche Identität soll erster Owner werden?
+
+### Entscheidungsbündel und spätester Klärungszeitpunkt
+
+Die nummerierte Liste oben bleibt die einzige Liste der offenen Detailfragen. Diese Zuordnung legt nur die Reihenfolge ihrer Klärung fest:
+
+| Zeitpunkt | Benötigte Entscheidungen |
+|---|---|
+| Vor FS1 | Atlas-Bestätigung, Konto/Region und lokale transaktionsfähige Datenbank (Frage 11); Gate FS0 und eigenes GO FS1 |
+| Innerhalb FS1 vor Auslieferungs-/Router-Restarbeiten | Prerender-/SEO-Strategie und konsistenter Build-/Hostingpfad gemäß `SPEC.md`, Abschnitt 21 |
+| Vor FS2 | Adminpersonen und Rollen (9), OAuth-Anbieter (13), Clerk-Anwendung und erster Owner (14) |
+| Vor FS3 | Kapazität und Kombinationen (1), Servicezeiten (2), Dauer/Puffer (3), Vorlauf/Horizont/Gruppen (4), Bestätigung (5), betriebliche Statusregeln (6); Importbedarf (10) vor betroffenen Migrationen |
+| Vor FS4 | Gastseitige Änderungs-/Stornoregeln (6), Pflichtfelder und Aufbewahrung (7), E-Mail-Empfänger und Absender (8) |
+| Vor FS6 | Objektspeicher (12) |
+
+Aufbewahrungs- und Betriebsentscheidungen sind vor den jeweils betroffenen Implementierungen festzulegen; spätere Gates erlauben keine vorzeitige Verarbeitung ungeklärter personenbezogener Daten.
+
+## Kleinschrittiger Router-Prüfauftrag – 02.11.2026
+
+**Freigabe:** Nutzer-GO „für alle Schritte“ autorisiert die sieben vorgestellten Schritte des lokalen Installations-/Router-Prüfauftrags einschließlich Netlify-Korrektur und Dokumentation. Keine Veröffentlichung, kein Backend-Code und keine stillschweigende Auswahl noch offener Betriebs- oder SEO-Entscheidungen. Gate FS0 und GO FS1 bleiben offen.
+
+- [x] Schritt 1: `npm ci --cache /tmp/colosseo-npm-cache --no-audit --no-fund` erfolgreich (109 Pakete). Sandbox-Versuch wegen EAI_AGAIN abgebrochen; Wiederholung mit Netzwerkfreigabe erfolgreich. Router war bei erster Prüfung bereits lokal installiert. Paketdateien unverändert.
+- [x] Schritt 2: `npm run typecheck`, `npm run lint`, `npm test` (2 Dateien, 7 Tests) und `npm run build` erfolgreich. Aktuell kein Typegen-Schritt in diesen Scripts. Buildwarnungen: Drittanbieter-`use client`-Direktiven und JavaScript-Chunk über 500 kB (701,78 kB, gzip 231,22 kB); Lazy-Loading-Abnahme offen.
+- [x] Schritt 3: `netlify.toml` veröffentlicht `dist` passend zum tatsächlich ausgeführten Vite-Build; `dist/` in `.gitignore` ergänzt. Kein Deployment und keine Netlify-Liveprüfung.
+- [-] Schritt 4: Browserprüfung von Sprachrouten, Direktaufrufen, Reloads, unbekannten URLs und Navigation; Ergebnis siehe nachfolgender Prüfbericht.
+- [-] Schritt 5: SEO-/Prerendering-Bestand und Lösungsvorschlag in `SPEC.md` dokumentiert. Konkrete Lösungsauswahl und Detailplan offen.
+- [ ] Schritt 6: Vollständige Router-Abnahme erst nach geklärten und erfolgreich geprüften Restpunkten.
+- [-] Schritt 7: FS1-Eingangsentscheidungen einzeln angefragt; Atlas-Konto/Region und lokale Umgebung bleiben bis Nutzerantwort OFFEN. Kein neues Phasen-GO erteilt.
+
+**Skill-Verfügbarkeit:** `break-ui` und `gpt-taste` sind weder im verfügbaren Katalog noch in den geprüften lokalen Skill-Verzeichnissen vorhanden. In diesem Auftrag wird kein React-/UI-Code geändert. Die gezielte Routerprüfung ersetzt keine vollständige visuelle oder break-ui-Abnahme.
+
+### Browser-Prüfbericht und offene Korrekturaufgaben
+
+Headless-Chrome gegen lokalen `vite preview` des Production-Builds; Prüfung per DOM-Auswertung, keine visuelle Abnahme und kein Netlify-Livetest:
+
+- [x] `/` leitet clientseitig auf `/de` weiter.
+- [x] Direktaufruf und anschließender Reload rendern `/de`, `/en`, `/it`, `/de/speisekarte`, `/en/menu`, `/it/menu`.
+- [x] Navigationsklick von `/de/restaurant` auf `/de/speisekarte` und Browser-Zurück nach `/de/restaurant` erfolgreich. Keine vollständige Navigation aller Seiten oder Sprachwechsel abgenommen.
+- [x] `/de/a/b` zeigt bei Direktaufruf und Reload die vorhandene deutsche 404-Ansicht. HTTP-404-Status auf Netlify bleibt ungeprüft; SPA-Fallback ist keine Statusgarantie.
+- [x] R1 (behoben und erneut geprüft; siehe Abschluss unten): `/de/unbekannt` und `/xx` zeigen bei Direktaufruf und Reload „Something went wrong!“ statt 404. Ursache im Quelltext: generischer Fehler für ungültige Locale/Seite. Korrektur gesondert planen; danach ungültige Locale, unbekanntes Segment und tiefen Pfad erneut prüfen.
+- [ ] R2: `/en` und `/it` zeigen weiterhin die deutsche Startseite. Sprachinhalte gegen Freigabestand in `CONTENT.md` prüfen, fehlende Übersetzungen nicht erfinden; Korrekturplan vor UI-Änderung vorlegen.
+- [ ] R3: Dokument-`lang` bleibt auch auf englischen/italienischen Unterseiten `de`; generischer Titel und fehlender Canonical in geprüften Routen. Metadaten und Dokument-Sprache zusammen mit freigegebenem SEO-Plan korrigieren.
+- [ ] R4: Prerendering, Canonical-Domain, hreflang, echte Hosting-404 und Lazy Loading fehlen noch als abgenommene Ergebnisse. Erst nach deren Prüfung Schritt 6 abschließen.
+
+R1–R4 sind vor ihrer Behebung erfasste Befunde. UI-Korrekturen wurden nicht begonnen; erforderliche Skills sind derzeit nicht verfügbar. Einzeleinsatz des Browsers ersetzt keine `break-ui`-, Accessibility- oder responsive Sichtprüfung.
+
+**Buildartefakte:** `dist` enthält bereits versionierte Dateien. Der Prüflauf hatte diese regeneriert; ausschließlich diese vom Prüflauf verursachten Änderungen wurden anschließend auf den zuvor sauberen Repository-Stand zurückgesetzt. `.gitignore` wirkt nicht rückwirkend auf versionierte Dateien. Eine spätere Bereinigung der Versionsverwaltung ist separat zu entscheiden.
+
+### Erneute Router-Verifikation – 02.11.2026
+
+**Freigabe:** separates GO für erneute Prüfung und Dokumentation; keine Codekorrekturen. Routercode und Paketdateien stimmen mit dem vorherigen Prüflauf überein.
+
+**Ausgeführt:** `npm run build -- --outDir /tmp/colosseo-router-verification` erfolgreich. Headless-Chrome mit Reduced Motion gegen lokalen Vite-Preview dieses Builds; DOM-/URL-Prüfung ohne visuelle Abnahme. Keine erneute Installation und kein erneuter Type-/Lint-/Unit-Lauf, da Anwendungscode unverändert blieb.
+
+| Prüffall | Ergebnis |
+|---|---|
+| 15 öffentliche Inhaltsrouten: Start, Menü, Restaurant, Feiern, Kontakt in DE/EN/IT | Alle bei Direktaufruf und anschließendem Reload gerendert; Route und Überschrift geprüft. Inhaltliche Vollständigkeit nicht abgenommen. |
+| 15 Hauptnavigationslinks, jeweils von der Restaurantseite der Sprache aus angeklickt | Alle erwarteten Zielpfade erreicht. Keine komplette Prüfung der abweichenden Startseiten-/Hash-Navigation oder mobilen Navigation. |
+| `/` | clientseitige Weiterleitung auf `/de` bestätigt |
+| Klick `/de/restaurant` → `/de/speisekarte` und Browser-Zurück | erwartete Pfade bestätigt |
+| `/de/unbekannt`, `/xx`, jeweils mit Reload | R1 erneut bestätigt: allgemeine Fehleransicht statt 404 |
+| `/de/a/b`, mit Reload | deutsche 404-Ansicht bestätigt; HTTP-Status des Livehostings nicht geprüft |
+| `/en`, `/it` | R2 erneut bestätigt: deutsche Startseitenüberschrift und Inhalte |
+| Dokument-Sprache und Metadaten der 15 Inhaltsrouten | R3 bestätigt: `html lang=de`, gleicher generischer Titel, kein Canonical |
+
+**Ergebnis:** technische Erreichbarkeit und geprüfte Navigationsziele bestätigt; vollständige Router-Abnahme wegen R1–R4 weiterhin offen. Sprachwechsel, responsive Sichtprüfung, Hash-Navigation und Netlify-Liveverhalten sind weiterhin nicht abgenommen. Keine Fehlerbehebung in diesem Prüfschritt.
+
+**Nächste einzelne Aufgabe (`VORSCHLAG`):** R1 beheben: in `app/router.tsx` ungültige Locale/Seite über TanStacks Not-found-Behandlung statt generischer Fehler melden; bestehende 404-Ansicht erhalten. Danach bekannte Routen sowie ungültige Locale, unbekannte Seite und tiefer Pfad per Direktaufruf/Reload regressionsprüfen, Typecheck/Lint/Tests/Build ausführen. Vor Umsetzung separates GO einholen; keine Übersetzungs- oder SEO-Änderungen in diesem Schritt.
+
+### Abschluss R1 – Not-found-Behandlung – 02.11.2026
+
+- **Freigabe:** separates Nutzer-GO für die vorgestellte einzelne Routerkorrektur samt Regression; keine SEO-, Übersetzungs- oder Layoutänderungen.
+- **Umsetzung:** `app/router.tsx` meldet ungültige/fehlende Locale und unbekannte Seiten über `throw notFound()` statt generischem Fehler. Die bestehende 404-Komponente bleibt unverändert. Dies ist eine Routing-Fehlerkorrektur ohne neuen React-/UI-Aufbau; keine neue Gestaltung oder neue UI-Texte.
+- **Ausgeführt und erfolgreich:** `npm run typecheck`, `npm run lint`, `npm test` (2 Dateien/7 Tests), `npm run build -- --outDir /tmp/colosseo-router-r1`. Buildwarnungen zu Drittanbieter-Direktiven und Chunkgröße bestehen weiter; versioniertes `dist` blieb unverändert.
+- **Browserregression:** isolierter Headless-Chrome gegen lokalen Production-Preview, Reduced Motion. `/de/unbekannt`, `/en/unknown`, `/it/sconosciuto`, `/xx`, `/xx/menu`, `/de/a/b` zeigen bei Direktaufruf und Reload die bestehende 404-Ansicht. `/de`, `/en/menu`, `/it/ristorante` rendern bei Direktaufruf und Reload weiterhin ihre erwarteten Überschriften. Automatischer Vergleich der sechs Fehlerfälle erfolgreich.
+- **Grenzen:** bestehende 404-Texte bleiben deutsch, auch unter EN/IT. Lokalisierung der Fehleransicht ist ein separater offener Punkt. Keine Aussage über echte HTTP-404-Status auf Netlify, keine vollständige visuelle/Accessibility-Abnahme. R2–R4 und vollständige Router-Abnahme bleiben offen.
+- **Nächste Aufgabe:** R2 zuerst gegen freigegebene Inhaltsquellen prüfen und kleinen Korrekturplan vorstellen; erst nach weiterem GO umsetzen.
+
+### R2 – Inhaltsbestandsprüfung – 02.11.2026
+
+- [x] Separates GO für Bestandsprüfung aufgenommen; aktuelle Notte-Ressourcen, ältere EN-/IT-Texte, i18next und Locale-Übergabe geprüft.
+- [x] Inhaltsbestand, fehlende Freigaben und betroffene Bereiche ausschließlich in `CONTENT.md`, „Bestandsprüfung der Notte-Lokalisierung“, dokumentiert.
+- [ ] R2 bleibt offen: keine Übersetzungen oder UI-Anpassungen mit dieser Prüfung umgesetzt. Nächster kleiner Vorschlag ist ein zur Prüfung vorgelegter EN-/IT-Textentwurf für Navigation, Hero und Begrüßung. Weitere Inhalte und technische Integration folgen separat.
+- **Prüfung:** ausschließlich Quelltext-/Dokumentationsabgleich; keine neuen Typ-, Lint-, Unit-, Build- oder Browserläufe, da kein Anwendungscode geändert wurde. Vor technischem UI-Aufbau gelten weiterhin die Skill-Voraussetzungen aus `AGENTS.md`.
+
+### R2 – Textteilfreigabe und Dokumentation – 02.11.2026
+
+- [x] EN-/IT-Entwürfe für Navigation, Hero, Begrüßung und zugehörigen Bildalternativtext vorlegen und ausdrückliches Nutzer-GO erhalten.
+- [x] Nach separatem Dokumentations-GO Texte und Freigabeumfang in `CONTENT.md`, „Freigegebene EN-/IT-Texte: Notte-Navigation, Hero und Begrüßung“, festhalten. Texte werden hier nicht dupliziert.
+- **Freigabeumfang:** ausschließlich die vorgelegten Texte und anschließend ihre Dokumentation; keine technische Integration, kein neues Phasen-GO und keine Veröffentlichung.
+- **Prüfung:** gespeicherte Texte gegen die freigegebene Chatvorlage abgeglichen; `git diff --check` erfolgreich. Keine ausführbaren Anwendungstests, da ausschließlich Dokumentation geändert wurde.
+- [ ] Technische Integration dieser Teilinhalte separat planen und freigeben lassen. Restliche Inhalte und R2 als Gesamtbefund bleiben offen; die EN-/IT-Startseiten sind noch nicht vollständig lokalisiert.
+
+### R2 – Technische Teilintegration – 02.11.2026
+
+- **Freigabe:** Nutzer erteilt nach erklärter Nichtverfügbarkeit von `gpt-taste` eine einmalige Ausnahme für die vorgestellte Textintegration von Navigation, Hero und Begrüßung. Keine dauerhafte Aufhebung der Skill-Regel, keine Gestaltungs-/Motionänderung und kein Full-Stack-Phasen-GO.
+- [x] Typisierte Teilressourcen in `app/content/notte-locales.ts` mit freigegebenem Wortlaut und deutschen Referenzen anlegen.
+- [x] Locale-Auswahl in `NottePage` und Text-Props für die drei Abschnitte ergänzen; zugängliche Navigationsnamen, Öffnen-/Schließen-Beschriftungen und Bildalternativtext einbinden.
+- **Technische Prüfungen erfolgreich:** Typecheck, Lint, Vitest (2 Dateien/7 Tests), Production-Build nach `/tmp/colosseo-intro-build`. Keine Paketinstallation, versioniertes `dist` unberührt. Bestehende Buildwarnungen bleiben.
+- **Restumfang:** übrige Startseitenabschnitte einschließlich Overlay/Footer, Dokument-Sprache und SEO unverändert. R2 bleibt insgesamt offen. `break-ui` weiterhin nicht verfügbar; gezielte Browserprüfungen sind keine vollständige Skill-Abnahme.
+
+**Browserergebnis der Teilintegration:** Headless-Chrome mit Reduced Motion gegen frischen Production-Preview; DE/EN/IT jeweils bei 390, 768 und 1440 px geprüft. Hero-Überschrift automatisch verglichen; Begrüßung, Alternativtext und Navigationslabels anhand erfasster DOM-Werte mit freigegebenen Ressourcen abgeglichen. Menü-Öffnen ändert `aria-expanded` und Schließen-Beschriftung, Escape setzt es zurück. Kein horizontaler Dokumentüberlauf in den neun Fällen. Footer-Sprachwechsel EN → IT → DE zeigt passende URL und Hero-Überschrift. Mobile Hero-Screenshots aller drei Sprachen visuell geprüft, ohne erkennbaren Textbeschnitt. Tablet/Desktop per DOM und Überlaufmessung geprüft, keine vollständige visuelle Abnahme. Gesamtprüfskript erfolgreich (0 Fehler). `git diff --check` erfolgreich. Keine vollständige Keyboard-/Accessibility-, Hash-/Anker- oder break-ui-Abnahme.
+
+### R2 – Textfreigabe Familiengeschichte dokumentiert – 02.11.2026
+
+- [x] EN-/IT-Entwürfe für Überschrift und Fließtext der Familiengeschichte vorlegen und ausdrückliches Nutzer-GO erhalten.
+- [x] Nach separatem Dokumentations-GO Wortlaut und Freigabeumfang in `CONTENT.md`, „Freigegebene EN-/IT-Texte: Familiengeschichte“, festhalten. Keine Textduplikate in dieser Datei.
+- **Freigabeumfang:** Texte und ihre Dokumentation; keine UI-Integration, keine Erweiterung der früheren einmaligen Skill-Ausnahme, kein Phasen-GO und keine Veröffentlichung.
+- **Prüfung:** gespeicherten Wortlaut mit der freigegebenen Chatvorlage abgeglichen; `git diff --check` erfolgreich. Keine Anwendungstests für diese reine Dokumentationsänderung ausgeführt.
+- [ ] Technische Integration der Familiengeschichte separat planen und freigeben lassen; R2 bleibt insgesamt offen.
+
+### R2 – Familiengeschichte technisch integriert – 02.11.2026
+
+- **Freigabe:** separates Nutzer-GO für den konkreten Integrationsplan einschließlich einmaliger `gpt-taste`-Ausnahme für die Familiengeschichte. Keine dauerhafte Skill-Ausnahme, keine weiteren UI-Aufgaben und kein neues Full-Stack-Gate.
+- [x] `family` in `app/content/notte-locales.ts` typisiert ergänzen; deutsche Inhalte referenzieren und freigegebene EN-/IT-Texte übernehmen.
+- [x] `NottePage` übergibt die gewählte Fassung an `FamilyStorySection`; diese liest Überschrift und Fließtext aus Props. Bild, Bildalternativtext, Layout und Motion unverändert.
+- **Technische Prüfungen erfolgreich:** `npm run typecheck`, `npm run lint`, `npm test` (2 Dateien/7 Tests), `npm run build -- --outDir /tmp/colosseo-family-build`. Vorhandene Buildwarnungen bestehen weiter; keine Paketänderung und kein regeneriertes versioniertes `dist`.
+- **Restpunkte:** übrige EN-/IT-Inhalte und Bildalternativtext der Familiengeschichte noch offen; R2 insgesamt nicht abgeschlossen. R3/R4 bleiben offen. `break-ui` nicht verfügbar; gezielte Prüfung ersetzt keine vollständige Skill-Abnahme.
+
+**Browserprüfung Familiengeschichte:** DE/EN/IT jeweils bei 390, 768 und 1440 px gegen frischen Production-Preview mit Reduced Motion geprüft. Überschrift und vollständiger Fließtext automatisch gegen die freigegebene Vorlage verglichen; neun Fälle erfolgreich, ohne horizontalen Dokumentüberlauf. Footer-Sprachwechsel EN → IT → DE aktualisiert URL und beide Texte; Gesamtprüfskript mit 0 Fehlern beendet. Repräsentative Screenshots EN/Mobil, IT/Tablet und DE/Desktop visuell geprüft: Familiengeschichte lesbar ohne erkennbaren Textbeschnitt. Keine vollständige Accessibility-/Motion-/break-ui-Abnahme. `git diff --check` erfolgreich.
+
+### R2 – Textfreigabe Feiern-Section dokumentiert – 02.11.2026
+
+- [x] EN-/IT-Entwürfe für Abschnittstitel, Überschrift, Fließtext, Aktion und Bildalternativtext vorlegen und ausdrückliches Nutzer-GO erhalten.
+- [x] Nach separatem Dokumentations-GO Wortlaut und Freigabeumfang in `CONTENT.md`, „Freigegebene EN-/IT-Texte: Feiern-Section“, festhalten; hier keine Textduplikate.
+- **Freigabeumfang:** ausschließlich vorgelegte Texte und anschließende Dokumentation; keine UI-Integration, keine neue Skill-Ausnahme, kein Full-Stack-Phasen-GO und keine Veröffentlichung.
+- **Prüfung:** gespeicherten Wortlaut mit der freigegebenen Chatvorlage abgeglichen; `git diff --check` erfolgreich. Keine Anwendungstests für diese reine Dokumentationsänderung ausgeführt.
+- [ ] Technische Integration der Feiern-Section separat planen und freigeben lassen. R2 bleibt insgesamt offen.
+
+### R2 – Feiern-Section technisch integriert – 02.11.2026
+
+- **Freigabe:** Nutzer-GO nach vorgestelltem Integrationsplan und Installation von `gpt-taste`; Umfang ausschließlich fünf freigegebene Texte je Sprache. Keine neue Gestaltung, keine zusätzlichen Leistungen und kein Deployment.
+- **Skillstand:** `gpt-taste` ist unter `/home/simon/.codex/skills/gpt-taste/SKILL.md` installiert und wurde gelesen. Frühere Nichtverfügbarkeitsangaben beschreiben den damaligen Stand. Designplan vor UI-Änderung ausgegeben. Bestehende Architektur, Typografie und GSAP bleiben gemäß begrenztem Nutzerauftrag erhalten; eine neue zufällige Gestaltung würde diesen Umfang überschreiten. Keine vollständige visuelle Neugestaltung oder pauschale Skill-Konformität behauptet.
+- [x] Sprachressourcen um `events` ergänzen, deutsches Original referenzieren und freigegebene EN-/IT-Texte übernehmen.
+- [x] `NottePage` übergibt Texte an `EventsSection`; Abschnittstitel, Überschrift, Fließtext, Aktion und Bildalternativtext stammen aus Props.
+- **Technische Prüfungen erfolgreich:** Typecheck, Lint, Vitest (2 Dateien/7 Tests), Production-Build nach `/tmp/colosseo-events-build`. Bestehende Buildwarnungen bestehen weiter; versioniertes `dist` unverändert.
+- **Restpunkte:** übrige Lokalisierung und R3/R4 bleiben offen. `break-ui` weiterhin nicht verfügbar; keine vollständige Skill-, Accessibility- oder Motion-Abnahme.
+
+**Browserergebnis Feiern-Section:** DE/EN/IT jeweils bei 390, 768 und 1440 px gegen frischen Production-Preview mit Reduced Motion geprüft. Alle fünf Texte automatisch mit der Vorlage verglichen; Anfrageziel in jedem Fall unverändert. Neun Viewport-/Sprachfälle sowie Footer-Sprachwechsel EN → IT → DE erfolgreich (0 Fehler im Text-/URL-/Überlaufvergleich), kein horizontaler Dokumentüberlauf. Repräsentative Screenshots EN/Mobil, IT/Tablet, DE/Desktop angesehen. Texte werden vollständig gerendert; die Sichtprüfung ergab jedoch den nachfolgenden separaten Befund. Keine vollständige visuelle Abnahme.
+
+- [x] V1 (begrenzte Korrektur umgesetzt und regressionsgeprüft; Abschluss unten): Bei 768 px überlagert die bestehende fixe Navigation nach `scrollIntoView()` der Feiern-Section den Abschnittstitel beziehungsweise die Überschrift. Im IT-Screenshot reproduziert; Ursache/Umfang bei manueller Navigation noch gesondert prüfen. Vor Behebung dokumentiert; Layoutkorrektur nicht Bestandteil der Textintegration. Nächsten kleinen Diagnoseplan separat vorstellen. `git diff --check` erfolgreich.
+
+### Skill-Übersicht anlegen – 02.11.2026
+
+- **Freigabe:** Nutzer-GO für die vorgestellte `SKILLS.md` im Repository-Hauptverzeichnis und Ergänzung ihrer überschneidungsfreien Zuständigkeit in `AGENTS.md`.
+- [x] Projektbezogene Skill-Übersicht erstellt; lokale Fundstellen erneut geprüft und aktuellen Verfügbarkeitsstand dort dokumentiert.
+- [x] Zuständigkeit in `AGENTS.md` ergänzt; verbindliche Regeln und historische Einsatzprotokolle nicht in die Übersicht kopiert.
+- **Prüfung:** Dokumentationsverweise und Skill-Fundstellen abgeglichen; `git diff --check` erfolgreich. Keine Anwendungstests für reine Dokumentation ausgeführt.
+- **Umfang:** keine Skill-Installation, UI-Änderung, neue Ausnahme oder Phasenfreigabe. Bestehende Restpunkte bleiben offen.
+
+### V1 – Überlagerung diagnostiziert – 02.11.2026
+
+**Freigabe:** GO ausschließlich für Diagnose und Korrekturplan; keine UI-/CSS-Änderung.
+
+**Ausgeführt:** vorhandenen unveränderten Production-Prüfbuild lokal mit Vite-Preview und Headless-Chrome verwendet. Italienische Startseite, Reduced Motion, Viewporthöhe 900 px; bei 390, 768 und 1440 px jeweils `scrollIntoView()` und tatsächlichen Klick auf den Headerlink zu `#events` verglichen. Mobil vorher Menü geöffnet. Nach Scrollende Elementrechtecke gemessen; Quelltext von Navigation, Motion und CSS abgeglichen. Keine erneuten Type-/Lint-/Unit-/Buildläufe, da kein Anwendungscode geändert wurde.
+
+| Viewport | Header-Unterkante | Abschnittstitel oben | Überschrift oben | Ergebnis beider Sprungmethoden |
+|---|---:|---:|---:|---|
+| 390 px | 64 px | 80,36 px | 114,36 px | kein vertikaler Überlappungsbereich |
+| 768 px | 106 px | 53,38 px | 86,64 px | Überschrift reicht ca. 19,36 px in Headerbereich; V1 auch beim normalen Linkklick bestätigt |
+| 1440 px | 82 px | 252,34 px | 285,61 px | kein vertikaler Überlappungsbereich |
+
+**Ursache:** Tablet-Regeln bis 900 px erzeugen eine zweizeilige Navigation mit Mindesthöhe 98 px und 8 px Abstand zum oberen Rand. Die einzeilige mobile Headerregel greift erst bis 767 px. Der Inhalt der einspaltigen Feiern-Section beginnt bei 768 px nach ca. 53,76 px Innenabstand; der fixe Header reserviert keinen Platz. Es gibt weder `scroll-margin-top` am Sprungziel noch `scroll-padding-top` am Dokument. Reduced Motion beendet die Motion-Initialisierung vor der richtungsabhängigen Header-Ausblendung; der Header bleibt daher sichtbar. Eine kaschierende Ausblendung darf nicht Voraussetzung für lesbare Ankerziele sein.
+
+**Grenzen:** Messung mit Reduced Motion und IT; normale GSAP-/Lenis-Variante, andere Sprachen, weitere Tabletbreiten und andere Anker noch nicht umfassend geprüft. Kein allgemeiner Accessibility-Nachweis.
+
+**Korrekturplan (`VORSCHLAG`, Umsetzung wartet auf GO):** ausschließlich für das Sprungziel `#events` im Tabletbereich 768–900 px einen tokenbasierten Scrollabstand für den sichtbaren Header vorsehen. Headerhöhe und oberer Versatz als benannte Werte in der zuständigen Tokenquelle dokumentieren; CSS nutzt daraus `scroll-margin-top`. Keine neue Scrollsteuerung, keine Inhalts-/Typografie-/Motionänderung. Betroffene Dateien: `app/prototypes/colosseo/prototypes.css`, `docs/DESIGN_SYSTEM.md`, `docs/TASKS.md`, `docs/DAILY_PLAN.md`. Anschließend Linkklick und direktes Anspringen in DE/EN/IT, Reduced Motion und normale Motion, besonders bei 767/768/900/901 px sowie Mobil/Desktop prüfen; bestehende Typ-/Lint-/Test-/Buildprüfungen ausführen. Andere Anker erhalten bei Bedarf eigene Befunde und Aufgaben.
+
+### V1 – Begrenzten Tablet-Scrollabstand implementieren – 02.11.2026
+
+- **Freigabe:** separates GO zum vorgestellten tokenbasierten Scrollabstand für `#events` zwischen 768 und 900 px einschließlich Dokumentation und Regression.
+- **Umsetzung:** ausschließlich `prototypes.css` um lokal begrenzte Tokens für die vorhandene Headerhöhe/Position und daraus berechnetes `scroll-margin-top` ergänzt; Werte in `DESIGN_SYSTEM.md` dokumentiert. Keine Text-, Layout-, Typografie- oder Motionänderung.
+- **Skill:** bereits gelesenen `gpt-taste` berücksichtigt und begrenzten Designplan vor Änderung ausgegeben; keine neue Architektur-/Typografieauswahl bei dieser ausdrücklich begrenzten QA-Korrektur.
+- **Technische Prüfungen erfolgreich:** `npm run typecheck`, `npm run lint`, `npm test` (2 Dateien/7 Tests), `npm run build -- --outDir /tmp/colosseo-v1-fixed-build`. Bestehende Buildwarnungen unverändert; versioniertes `dist` bleibt unberührt.
+- **Browserregression:** abgeschlossen; siehe Ergebnis und Prüfgrenzen unten.
+
+**Abschluss V1:** korrigierter Browserprüflauf mit Pflichtprüfung des geladenen Inhalts erfolgreich: 72 gültige Fälle (390/767/768/900/901/1440 px × DE/EN/IT × direktes Anspringen/Headerlink × Reduced Motion/normaler Motion), kein gemessener vertikaler Überlappungsbereich zwischen Header und Abschnittstitel und kein horizontaler Dokumentüberlauf. 106 px Scrollabstand nur im vorgesehenen Bereich aktiv. Bei 768 px/IT/Reduced Motion beginnt die Überschrift nach dem Sprung bei ca. 192,64 px statt 86,64 px; Headerunterkante weiterhin 106 px. Screenshots dieses Tablet-Falls für beide Motion-Einstellungen visuell angesehen. Kein Deployment und keine vollständige Accessibility-/Motion-Abnahme; andere Anker bleiben außerhalb des Umfangs.
+
+**Prüflaufkorrektur:** Der erste lange Browserlauf verlor den lokalen Preview-Prozess. Fehlende DOM-Messwerte wurden zunächst nicht korrekt als Fehler gewertet; dessen pauschale Erfolgsausgabe wurde verworfen. Preview in stabiler Terminal-Sitzung neu gestartet, Prüfung um Pflichtnachweis geladener Inhalte ergänzt und alle 72 Fälle erneut ausgeführt. Nur dieser zweite vollständige Lauf ist Grundlage des Abschlusses. `git diff --check` erfolgreich.
+
+### README als Projekteinstieg – 02.11.2026
+
+- **Freigabe:** Nutzer-GO für die vorgestellte README mit Projektbeschreibung, lokalem Start, Prüfbefehlen, Verzeichnisübersicht und Quellenverweisen.
+- [x] `README.md` anhand vorhandener Paket-/Hostingkonfiguration und Verzeichnisse erstellt; implementiertes Frontend und geplantes Backend unterschieden.
+- [x] Überschneidungsfreie Zuständigkeit als Projekteinstieg in `AGENTS.md` ergänzt.
+- **Prüfung:** lokale Markdown-Ziele auf Existenz und genannte npm-Scripts gegen `package.json` automatisiert geprüft; Kompatibilitätsangaben aus den Vite-/Vitest-Einträgen des Lockfiles abgeleitet; `git diff --check` erfolgreich. Keine erneuten Anwendungstests oder Builds für diese Dokumentationsänderung ausgeführt. Preview-Beispiel nicht in dieser Aufgabe gestartet.
+- **Umfang:** kein Anwendungscode, keine Installation, keine Veröffentlichung und keine neue Phasenfreigabe. Bestehende Restpunkte bleiben offen.

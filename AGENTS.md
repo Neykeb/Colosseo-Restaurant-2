@@ -1,5 +1,9 @@
 # Projektanweisungen für Agenten
 
+**Status:** Verbindliche Projektregeln
+**Phase:** Marketing-Website und Full-Stack-Erweiterung; Phasenstatus siehe `docs/TASKS.md`
+**Letzte Aktualisierung:** 02.11.2026
+
 ## Geltungsbereich
 
 Diese Datei gilt für das gesamte Repository. Sie ist die verbindliche Quelle für dauerhafte Arbeitsregeln, Coding-Standards und den Projektprozess. Fachliche Entscheidungen gehören ausschließlich in die jeweils zuständige Datei unter `docs/`.
@@ -12,6 +16,8 @@ Diese Datei gilt für das gesamte Repository. Sie ist die verbindliche Quelle f�
 
 ## Verbindliche Quellen
 
+- `README.md`: Projekteinstieg, lokale Start-/Prüfbefehle und Verweise auf zuständige Quellen; keine eigenständige Anforderungs-, Freigabe- oder Fortschrittsquelle.
+- `SKILLS.md`: projektbezogene Skill-Übersicht mit Zweck, Fundstellen und geprüftem Verfügbarkeitsstand; Einsatzregeln bleiben ausschließlich hier, historische Einsätze und Ausnahmen in `docs/TASKS.md`.
 - `docs/AUDIT.md`: geprüfte Referenzbeobachtungen und daraus abgeleitete Chancen, nicht das Zielsystem.
 - `docs/SPEC.md`: freigegebene funktionale und technische Anforderungen sowie Akzeptanzkriterien.
 - `docs/DESIGN_SYSTEM.md`: freigegebene visuelle Tokens, Layout-, Komponenten- und Motion-Regeln.

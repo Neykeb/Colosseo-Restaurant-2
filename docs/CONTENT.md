@@ -1,7 +1,8 @@
 # Inhalt und Lokalisierung
 
-**Status:** Phase 2 freigegeben; Full-Stack-Inhaltsbedarf ergänzt
-**Letzte Aktualisierung:** 30.10.2026
+**Status:** Phase 2 freigegeben; Full-Stack-Inhaltsbedarf ergänzt; EN-/IT-Teilfreigaben der Notte-Startseite dokumentiert
+**Phase:** Inhaltsbestand der Marketing-Website; Full-Stack-Planung `FS0`
+**Letzte Aktualisierung:** 02.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Inhaltsarchitektur, Seitentexte, CTA-Texte, Lokalisierung, Metadateninhalte und Inhaltsstatus. Funktionale Seitenanforderungen stehen in `SPEC.md`; visuelle Darstellungsregeln stehen in `DESIGN_SYSTEM.md`.
 
@@ -204,3 +205,83 @@ Der Prompt ist nur eine Art-Direction-Grundlage. Für jedes spätere Bild sind M
 ## Gate
 
 Informationsarchitektur und Tonalität wurden am 10.10.2026 durch „okay weiter“ freigegeben. Die einzelnen als `ENTWURF` markierten Texte benötigen weiterhin eine Inhaltsprüfung, bevor sie als endgültige Geschäftsaussagen veröffentlicht werden.
+
+## Bestandsprüfung der Notte-Lokalisierung – 02.11.2026
+
+**Status der ursprünglichen Bestandsprüfung:** Quelltext und dokumentierte Freigaben geprüft; dabei keine neuen Übersetzungen erstellt oder freigegeben. Die anschließende Teilfreigabe steht im folgenden Freigabeabschnitt.
+
+| Inhaltsbereich | Verifizierter Bestand | Freigabe-/Reststatus |
+|---|---|---|
+| Aktuelle Notte-Startseite | deutsche Texte in `app/content/notte.de.ts`; direkte Verwendung in `organisms.tsx` | Freigaben einzelner deutscher Texte stehen oben; keine pauschale neue Freigabe durch diese Prüfung |
+| EN-/IT-Homepage in `app/content/site-content.ts` | Texte für ältere Homepage-Struktur vorhanden; abweichende Hero-Aussage, fehlende aktuelle Begrüßung/Familiengeschichte und aktuelle Bewertungs-/Besuchsstruktur; veralteter Hinweis auf spätere externe Reservierung | kein vollständiger Ersatz für Notte; sprachliche Prüfung und Freigabe der aktuellen Notte-Fassungen OFFEN |
+| Sprachübergabe | Route → `NottePrototype` → `NottePage` vorhanden; dort nur an Footer weitergegeben | Abschnitte beziehen deutsche Ressourcen unabhängig von Locale; technische Ursache von R2 |
+| i18next | Ressourcen aus `site-content.ts`, deutsches Fallback | aktuelle Notte-Ressourcen dort nicht eingebunden; Konfiguration allein lokalisiert die Abschnitte nicht |
+| Navigation und Accessibility | deutsche Beschriftungen auch direkt in Komponenten; Footer-Sprachlinks vorhanden | Übersetzungen von Navigation, Menüaktionen, zugänglichen Namen und Bildalternativen OFFEN |
+| Menü-Vorschau und Overlay | Originaldaten und deutsch verifizierte Texte; Overlay ohne Locale-Prop | EN-/IT-Fassungen OFFEN; insbesondere Allergene nicht ungeprüft übersetzen oder mit alten Platzhalterdaten ersetzen |
+| Bewertungen und Öffnungszeiten | Originalzitate, relative deutsche Datumsangaben, deutsche Tages-/Zeitbeschriftungen | fremdsprachige Rahmentexte und Umgang mit Originalzitaten festlegen; Aktualitätsstatus der Geschäftsdaten bleibt unverändert |
+
+### Ursprünglicher Inhaltsvorschlag und verbleibender Umfang
+
+Zuerst ausschließlich einen EN-/IT-Textentwurf für Navigation, Hero und Begrüßung der aktuellen Notte-Startseite zur Prüfung vorlegen. Keine Geschäftsangaben ergänzen und keine alten Homepage-Aussagen automatisch übernehmen. Übersetzungen bleiben bis zur fachlichen/sprachlichen Prüfung `ENTWURF`.
+
+Danach schrittweise die übrigen Abschnitte einschließlich Alternativtexte und Accessibility-Beschriftungen prüfen. Menüoriginale und Bewertungszitate benötigen eine ausdrückliche Regel für Originalsprache/Übersetzung. Erst mit abgestimmtem Inhalt die technische Locale-Auswahl und Übergabe an die Abschnitte planen und einzeln freigeben. Ein vollständiges deutsches Fallback unter EN-/IT-URLs gilt nicht als fertige Lokalisierung.
+
+## Freigegebene EN-/IT-Texte: Notte-Navigation, Hero und Begrüßung
+
+**Status:** `FREIGEGEBEN` durch ausdrückliches Nutzer-GO am 02.11.2026 nach Vorlage der folgenden Textentwürfe. Ein weiteres GO autorisiert deren Dokumentation. Keine technische Integration, keine Veröffentlichung und keine Freigabe der übrigen Startseiteninhalte. Die Freigabe dokumentiert die Nutzerentscheidung; eine zusätzliche externe Sprachprüfung wird nicht behauptet.
+
+„Ristorante Colosseo“ bleibt unverändert. Der Hero-Auftakt **Una sera al Colosseo** und die Begrüßungssignatur **Buon Appetito!** bleiben in beiden Fassungen erhalten. Die Hero-Überschriften sind sinngemäß übertragen.
+
+| Inhalt | Englisch (`en`) | Italienisch (`it`) |
+|---|---|---|
+| Navigation: Speisekarte | Menu | Menu |
+| Navigation: Feiern | Celebrations | Eventi |
+| Navigation: Kontakt | Contact | Contatti |
+| Navigation: Reservieren | Book a table | Prenota un tavolo |
+| Navigation öffnen | Open navigation | Apri la navigazione |
+| Navigation schließen | Close navigation | Chiudi la navigazione |
+| Zugänglicher Navigationsname | Main navigation | Navigazione principale |
+| Hero-Überschrift | An evening worth lingering over. | Una serata da vivere senza fretta. |
+| Hero-Reservierungsaktion | Book a table | Prenota un tavolo |
+| Hero-Speisekartenaktion | Explore the menu | Scopri il menu |
+| Begrüßungsüberschrift | Dear guests and amici | Cari ospiti e amici |
+| Begrüßungstext | Welcome to our Italian restaurant. For us, it’s all about good, honest food without unnecessary fuss — simple, fresh and delicious. | Benvenuti nel nostro ristorante italiano. Per noi conta la buona cucina, senza inutili fronzoli: semplice, fresca e gustosa. |
+| Bildalternativtext der Begrüßung | Dining room at Ristorante Colosseo with set tables and a bar. | Sala del Ristorante Colosseo con tavoli apparecchiati e bancone del bar. |
+
+Die frühere Bestandsprüfung bleibt als zeitlicher Befund erhalten. Deren Status OFFEN ist für genau die hier freigegebenen Texte überholt. Weitere Inhaltsfreigaben folgen gegebenenfalls in den nachstehenden Abschnitten. Speisekarteninhalte, Bewertungsrahmentexte, Öffnungszeitenbeschriftungen und Footer bleiben hinsichtlich EN-/IT-Freigabe offen. Die Teilfreigabe bedeutet keine vollständige Lokalisierung von `/en` oder `/it`.
+
+### Technischer Integrationsstand der Teilfreigabe – 02.11.2026
+
+Die oben freigegebenen Texte für Navigation, Hero und Begrüßung sind in `app/content/notte-locales.ts` eingebunden. Deutsche Ausgangstexte bleiben aus `notte.de.ts` referenziert; die Sprachauswahl folgt der Route. Die historische Bestandsprüfung beschreibt den Zustand vor dieser Teilintegration. Die übrigen Bereiche sind weiterhin nicht lokalisiert; diese Änderung beseitigt R2 nicht vollständig. Architektur und Prüfergebnisse stehen in `SPEC.md` beziehungsweise `TASKS.md`.
+
+## Freigegebene EN-/IT-Texte: Familiengeschichte
+
+**Status:** `FREIGEGEBEN` durch ausdrückliches Nutzer-GO am 02.11.2026 nach Vorlage dieser Textentwürfe. Ein anschließendes separates GO autorisiert ausschließlich deren Dokumentation. Keine technische Integration oder Veröffentlichung. Die Nutzerfreigabe wird dokumentiert; eine zusätzliche externe Sprachprüfung wird nicht behauptet.
+
+### Englisch (`en`)
+
+**Family-run for over 30 years.**
+
+With fresh ingredients and carefully selected recipes, we hope to bring you the flavours of Italy. Whether you join us for a leisurely lunch or a relaxed dinner, we look forward to welcoming you.
+
+### Italienisch (`it`)
+
+**A gestione familiare da oltre 30 anni.**
+
+Con ingredienti freschi e ricette selezionate, desideriamo farvi scoprire i sapori d’Italia. Che sia per un piacevole pranzo o una cena in tranquillità, saremo felici di accogliervi.
+
+Der deutsche Ausgangstext bleibt unverändert. Diese Freigabe umfasst ausschließlich Überschrift und Fließtext der Familiengeschichte; sie umfasst keine neuen Geschäftsfakten, Bildalternativtexte oder andere Abschnitte. Die Familiengeschichte ist nach separatem Integrations-GO am 02.11.2026 in `app/content/notte-locales.ts` eingebunden. Überschrift und Fließtext folgen der Route; der vorhandene deutsche Bildalternativtext wurde entsprechend dem begrenzten Auftrag unverändert belassen. Prüfergebnisse stehen in `TASKS.md`.
+
+## Freigegebene EN-/IT-Texte: Feiern-Section
+
+**Status:** `FREIGEGEBEN` durch ausdrückliches Nutzer-GO am 02.11.2026 nach Vorlage der folgenden Textentwürfe. Ein separates anschließendes GO autorisiert deren Dokumentation. Keine technische Integration oder Veröffentlichung. Die Nutzerfreigabe wird dokumentiert; eine zusätzliche externe Sprachprüfung wird nicht behauptet.
+
+| Inhalt | Englisch (`en`) | Italienisch (`it`) |
+|---|---|---|
+| Abschnittstitel | Celebrations at Colosseo | Eventi al Colosseo |
+| Überschrift | A table for the people who matter to you. | Un tavolo per le persone a cui tieni. |
+| Fließtext | Please contact us directly to enquire about private events, weddings and catering. | Per eventi privati, matrimoni e catering, contattateci direttamente. |
+| Aktion | Enquire about a celebration | Richiedi informazioni per un evento |
+| Bildalternativtext | Guests raising a toast over an Italian meal. | Ospiti che brindano durante un pasto italiano. |
+
+Diese Freigabe umfasst ausschließlich die fünf vorgelegten Texte je Sprache. Die Bestätigung der angebotenen Leistungen bleibt vom Übersetzungsstatus getrennt; es werden keine neuen Geschäftsfakten oder Kontaktwege freigegeben. Der deutsche Ausgangstext bleibt unverändert. Nach separater Vorstellung des Integrationsplans und Nutzer-GO am 02.11.2026 sind die fünf Texte je Sprache in `app/content/notte-locales.ts` eingebunden und werden entsprechend der Route an die Feiern-Section übergeben. Der deutsche Ausgangstext und das Anfrageziel bleiben erhalten. Weitere Inhaltsbereiche und vollständige EN-/IT-Lokalisierung bleiben offen.
