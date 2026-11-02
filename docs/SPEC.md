@@ -1,11 +1,13 @@
 # Funktionale und technische Spezifikation
 
 **Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS0` als nicht freigegebener Architekturentwurf
-**Letzte Aktualisierung:** 30.10.2026
+**Letzte Aktualisierung:** 02.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. Neue Full-Stack-Festlegungen bleiben bis Gate `FS0` `VORSCHLAG`.
 
 > **Änderungsauftrag 30.10.2026:** Die Abschnitte 20 bis 29 planen ein eigenes Reservierungs-Backend, Administration und Inhaltsverwaltung. Der zuletzt festgelegte Zielstack ist Node.js/Express/TypeScript, MongoDB mit Mongoose, Render, Resend und Clerk OAuth für die Admin-Anmeldung. MongoDB Atlas ist noch als Betriebsform zu bestätigen. Die konkrete Umsetzung bleibt bis Gate `FS0` gesperrt. Bis dahin bleibt die laufende statische Website unverändert maßgeblich.
+
+> **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. Der Ist-Zustand bleibt bis zur ausdrücklich freigegebenen Migration React Router Framework Mode. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
 
 ## 1. Ziel und Abgrenzung
 
@@ -428,7 +430,7 @@ Weiter ausgeschlossen bleiben Online-Essensbestellung, Warenkorb und Zahlungsabw
 
 | Schicht | Vorschlag | Begründung |
 |---|---|---|
-| Öffentliche UI und Admin-UI | bestehendes React Router/Vite/TypeScript-Projekt | Bewahrt Routen, Design, Komponenten und Buildsystem; Admin wird als lazy geladener, geschützter Bereich ergänzt. |
+| Öffentliche UI und Admin-UI | bestehendes React-/Vite-/TypeScript-Projekt, geplant mit TanStack Router | Der aktuelle React Router wird kontrolliert migriert. Öffentliche Sprachrouten, Design und Komponenten bleiben erhalten; der Adminbereich wird lazy geladen und geschützt ergänzt. |
 | Server | eigener Node.js-/Express-/TypeScript-Server | API, Authentifizierung, Validierung und Geschäftslogik bleiben selbst entwickelt und nachvollziehbar. |
 | Produktionsbetrieb | ein Render Web Service für Express, API und statischen React-Build | Gemeinsame Origin vereinfacht sichere Cookie-Sessions, CSRF-Schutz und Deployment. Express bindet an `0.0.0.0` und den von Render gelieferten `PORT`. |
 | Datenbank | MongoDB Atlas; Region möglichst nah am Render Web Service | Verwalteter MongoDB-Betrieb mit Replica Set für Transaktionen; Render und Atlas besitzen eine dokumentierte Integration. |
@@ -466,6 +468,15 @@ tests/
 ```
 
 Im lokalen Betrieb laufen Vite und Express als getrennte Prozesse; Vite leitet `/api` an Express weiter. Im Produktionsbetrieb beantwortet Express zuerst `/api/*`, Healthcheck und Admin-Sicherheitsrouten und liefert danach `build/client` einschließlich kontrolliertem SPA-Fallback aus. So bleibt der React-Build selbst statisch optimierbar, während API und sichere Sessions dieselbe Origin verwenden.
+
+### Frontend-Router-Migration (`VORSCHLAG`)
+
+- TanStack Router übernimmt öffentliche Sprachrouten und den späteren geschützten Adminbereich.
+- Die vorhandenen URLs `/de`, `/en`, `/it` sowie bestehende Hash-/Section-Ziele dürfen sich nicht unbemerkt ändern.
+- Route-Komponenten und Admin-Chunks werden lazy geladen; Backend-Routen unter `/api/*` bleiben ausschließlich Express zugeordnet.
+- Vor Entfernung von React Router müssen äquivalente Tests für Locale-Auflösung, Navigation, Direktaufruf, Reload, unbekannte Routen und Produktionsfallback bestehen.
+- Die bisherige statische Vorabgenerierung aus React Router Framework Mode steht mit dem Routerwechsel nicht automatisch weiter zur Verfügung. Vor Umsetzung wird in `FS1` festgelegt und getestet, ob die öffentliche Website über einen kompatiblen Vite-Prerender-Schritt, statische Snapshots oder eine andere ausdrücklich dokumentierte Lösung ausgeliefert wird.
+- React Router-Abhängigkeiten und `react-router.config.ts` werden erst entfernt, wenn TanStack Router und die neue Build-/Prerender-Strategie vollständig verifiziert sind.
 
 ### Bewusste Nichtentscheidungen
 
