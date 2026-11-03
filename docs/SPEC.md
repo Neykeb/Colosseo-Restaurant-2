@@ -1,14 +1,13 @@
 # Funktionale und technische Spezifikation
 
 **Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS0` als nicht freigegebener Architekturentwurf
-**Phase:** Marketing-Website nach Gate 3; Full-Stack-Planung `FS0`
 **Letzte Aktualisierung:** 02.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. Neue Full-Stack-Festlegungen bleiben bis Gate `FS0` `VORSCHLAG`.
 
 > **Änderungsauftrag 30.10.2026:** Die Abschnitte 20 bis 29 planen ein eigenes Reservierungs-Backend, Administration und Inhaltsverwaltung. Der zuletzt festgelegte Zielstack ist Node.js/Express/TypeScript, MongoDB mit Mongoose, Render, Resend und Clerk OAuth für die Admin-Anmeldung. MongoDB Atlas ist noch als Betriebsform zu bestätigen. Die konkrete Umsetzung bleibt bis Gate `FS0` gesperrt. Bis dahin bleibt die laufende statische Website unverändert maßgeblich.
 
-> **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. VERIFIZIERT am 02.11.2026 durch Quelltextprüfung: `app/router.tsx` und `app/main.tsx` verwenden bereits TanStack Router; `package.json` enthält keine React-Router-Abhängigkeit. Eine vollständige Migrationsabnahme ist damit nicht nachgewiesen. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
+> **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. Der Ist-Zustand bleibt bis zur ausdrücklich freigegebenen Migration React Router Framework Mode. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
 
 ## 1. Ziel und Abgrenzung
 
@@ -58,7 +57,7 @@ Technische Referenzen: offizielle Dokumentation zu [React Router Framework Mode]
 
 - React Router Framework Mode mit `ssr: false`.
 - Alle bekannten Sprach- und Inhaltsrouten werden über `prerender` in `react-router.config.ts` vorab erzeugt.
-- Historisch freigegeben war die statische Vorabgenerierung mit React Router. Der aktuelle Vite-/TanStack-Build ist eine Client-SPA ohne Prerendering; dessen Abnahme bleibt offen (Abschnitt 21). Netlify ist als erster Hostinganbieter bestätigt; `netlify.toml` baut mit `npm run build`, veröffentlicht seit der Korrektur am 02.11.2026 `dist`, leitet `/` auf `/de` und stellt für unbekannte clientseitige Pfade ergänzend den SPA-Fallback bereit.
+- Ausgabe ist statisch hostbar. Netlify ist als erster Hostinganbieter bestätigt; `netlify.toml` baut mit `npm run build`, veröffentlicht `build/client`, leitet `/` auf `/de` und stellt für unbekannte clientseitige Pfade ergänzend den SPA-Fallback bereit.
 - Für unbekannte URLs wird eine lokalisierbare 404-Seite vorgerendert oder hostingspezifisch zugeordnet.
 - Eine SPA-Fallback-Datei darf nur ergänzend verwendet werden; kanonische Inhaltsrouten müssen eigenes HTML besitzen.
 - Form- oder Reservierungsdaten werden nicht serverseitig gespeichert.
@@ -79,7 +78,7 @@ Weitere Regeln:
 
 - `/` leitet auf `/de` weiter. Eine automatische Browser-Sprachumleitung wird nicht erzwungen, damit URLs stabil und vorhersehbar bleiben.
 - Der Sprachwechsel führt stets auf die inhaltlich entsprechende Route.
-- Unbekannte lokalisierte Pfade sollen eine 404-Seite in der erkannten Pfadsprache zeigen. VERIFIZIERT am 02.11.2026: ungültige Locale/Seite wird im aktuellen TanStack-Router über `notFound()` an die bestehende 404-Komponente geleitet; deren Texte sind derzeit ausschließlich deutsch. Die lokalisierte Fehleransicht und echte HTTP-404-Auslieferung bleiben offen.
+- Unbekannte lokalisierte Pfade zeigen eine 404-Seite in der erkannten Pfadsprache.
 - Impressum und Datenschutz werden erst nach Lieferung echter Inhalte als eigene lokalisierte Routen ergänzt. Bis dahin dürfen keine scheinbar vollständigen Rechtsseiten veröffentlicht werden.
 - Jede Route definiert eigene Titel, Beschreibung, Canonical, Open-Graph-Daten und `hreflang`-Alternativen.
 
@@ -158,7 +157,7 @@ tests/
 - **Molecules:** kleine fachliche Kombinationen wie `ReviewCard`.
 - **Organisms:** eigenständige Seitenabschnitte wie `HeroSection`, `MenuPreviewSection`, `EventsSection`, `ReviewsSection`, `ReservationSection` und `VisitSection`.
 - **Page Composition:** `NottePage` legt ausschließlich Reihenfolge, Dialogzustand und Fokus-Rückgabe fest; fachliche Section-Markups liegen nicht mehr in der Page-Komponente.
-- Die bestätigten deutschen Notte-Inhalte und Geschäftswerte liegen zentral in `app/content/notte.de.ts`. Die freigegebenen Sprachfassungen für Navigation, Hero, Begrüßung, Familiengeschichte und Feiern werden in `app/content/notte-locales.ts` als typisierte Teilressourcen geführt; Deutsch referenziert die bestehenden Inhalte. `NottePage` wählt anhand der Route aus und übergibt Text-Props an diese fünf Abschnitte. Übrige Abschnitte bleiben bis zu ihrer gesonderten Lokalisierung deutsch; keine vollständige EN-/IT-Abnahme. Inhaltliche Freigaben stehen ausschließlich in `CONTENT.md`.
+- Die bestätigten deutschen Notte-Inhalte und Geschäftswerte liegen zentral in `app/content/notte.de.ts`. Komponenten enthalten keine duplizierten sichtbaren Texte.
 - Die vorhandene GSAP-Orchestrierung bleibt als seitenbezogene Motion-Schicht vom Section-Markup getrennt. Eine weitere Aufteilung ist erst erforderlich, wenn dieselben Motion-Patterns auf anderen Seiten wiederverwendet werden.
 
 ### Vollbild-Speisekarte
@@ -431,7 +430,7 @@ Weiter ausgeschlossen bleiben Online-Essensbestellung, Warenkorb und Zahlungsabw
 
 | Schicht | Vorschlag | Begründung |
 |---|---|---|
-| Öffentliche UI und Admin-UI | bestehendes React-/Vite-/TypeScript-Projekt, geplant mit TanStack Router | TanStack Router ist bereits im Quelltext vorhanden; die vollständige Migration wird kontrolliert geprüft und abgenommen. Öffentliche Sprachrouten, Design und Komponenten bleiben erhalten; der Adminbereich wird lazy geladen und geschützt ergänzt. |
+| Öffentliche UI und Admin-UI | bestehendes React-/Vite-/TypeScript-Projekt, geplant mit TanStack Router | Der aktuelle React Router wird kontrolliert migriert. Öffentliche Sprachrouten, Design und Komponenten bleiben erhalten; der Adminbereich wird lazy geladen und geschützt ergänzt. |
 | Server | eigener Node.js-/Express-/TypeScript-Server | API, Authentifizierung, Validierung und Geschäftslogik bleiben selbst entwickelt und nachvollziehbar. |
 | Produktionsbetrieb | ein Render Web Service für Express, API und statischen React-Build | Gemeinsame Origin vereinfacht sichere Cookie-Sessions, CSRF-Schutz und Deployment. Express bindet an `0.0.0.0` und den von Render gelieferten `PORT`. |
 | Datenbank | MongoDB Atlas; Region möglichst nah am Render Web Service | Verwalteter MongoDB-Betrieb mit Replica Set für Transaktionen; Render und Atlas besitzen eine dokumentierte Integration. |
@@ -468,24 +467,9 @@ tests/
   e2e/
 ```
 
-Im lokalen Betrieb laufen Vite und Express als getrennte Prozesse; Vite leitet `/api` an Express weiter. Im Produktionsbetrieb beantwortet Express zuerst `/api/*`, Healthcheck und Admin-Sicherheitsrouten und liefert danach den freigegebenen Buildordner (aktuell `dist`) einschließlich kontrolliertem SPA-Fallback aus. So bleibt der React-Build selbst statisch optimierbar, während API und sichere Sessions dieselbe Origin verwenden.
+Im lokalen Betrieb laufen Vite und Express als getrennte Prozesse; Vite leitet `/api` an Express weiter. Im Produktionsbetrieb beantwortet Express zuerst `/api/*`, Healthcheck und Admin-Sicherheitsrouten und liefert danach `build/client` einschließlich kontrolliertem SPA-Fallback aus. So bleibt der React-Build selbst statisch optimierbar, während API und sichere Sessions dieselbe Origin verwenden.
 
-### Server- und API-Grundgerüst für FS1 (`VORSCHLAG`, noch nicht implementiert)
-
-- `server/src/app.ts` erstellt die Express-App ohne Netzwerkstart. Dadurch können HTTP-Verhalten und Middleware ohne produktiven Prozess geprüft werden.
-- `server/src/server.ts` validiert die Konfiguration, startet Infrastruktur und HTTP-Listener und beendet Listener sowie Datenbankverbindung geordnet bei Prozesssignalen.
-- `server/src/config/env.ts` prüft serverseitige Umgebungsvariablen vor dem Start. Eine eingecheckte `.env.example` enthält nur beschriebene Beispielwerte; Secrets erhalten niemals ein `VITE_`-Präfix.
-- `server/src/routes/health.ts` stellt `GET /api/health` als Prozess-Healthcheck ohne interne Konfigurations- oder Verbindungsdetails bereit. Datenbankbereitschaft ist davon getrennt zu prüfen; ein lebender Prozess garantiert keine betriebsbereite Datenbank.
-- `server/src/middleware/request-id.ts` erzeugt serverseitige Korrelations-IDs; `error-handler.ts` übersetzt Fehler in `{ error: { code, message, correlationId } }`. Unbekannte API-Routen liefern JSON mit HTTP 404 und gelangen nie in den HTML-Fallback. Unerwartete Fehler liefern HTTP 500 ohne Stacktrace oder Secrets.
-- HTTP-Routen und Controller übersetzen Requests; Services enthalten Geschäftsabläufe, Repositories kapseln den Datenzugriff. Fachliche Reservierungsendpunkte werden erst in ihrer freigegebenen Phase umgesetzt.
-- Basiskonfiguration begrenzt Requestgrößen und erlaubt keine pauschale CORS-Freigabe. Vite leitet lokal `/api` an Express weiter; statische Produktionsauslieferung folgt erst nach Entscheidung über Buildpfad und Prerendering.
-- Ein eigener Server-TypeScript-Build trennt Node-Konfiguration und Ausgabe vom Frontend. Geplante Anpassungen betreffen `package.json`, Lockfile, Server-TS-Konfiguration, `vite.config.ts`, `.env.example` und gegebenenfalls `.gitignore`. Paketversionen und notwendige Zusatzabhängigkeiten werden vor Installation auf Kompatibilität geprüft und begründet.
-
-**Geplante Prüfungen:** gültige/ungültige Konfiguration, Healthcheck, Korrelations-ID, API-404, sichere 500-Antwort, geordnetes Herunterfahren und API-/HTML-Abgrenzung. Ergänzend vorhandene Type-, Lint-, Unit- und Buildprüfungen sowie nach Festlegung der Auslieferung Direktaufruf-/Reload-Regression. Dies sind Prüfaufträge, keine ausgeführten Tests.
-
-### Frontend-Router-Migration und Abnahme (`VORSCHLAG`)
-
-**VERIFIZIERT – Quelltextprüfung 02.11.2026:** Das Frontend nutzt bereits TanStack Router mit clientseitigem `createRoot`. Die aktuelle Vite-Konfiguration enthält keinen Prerender-Schritt und kein angepasstes Ausgabeverzeichnis. Der anschließend erfolgreich ausgeführte Build erzeugt `dist`; `netlify.toml` wurde im freigegebenen Folgeauftrag auf `dist` korrigiert. Die vorhandenen Routing-Unit-Tests prüfen Pfadhelfer, keine Browsernavigation. Die ursprüngliche Bestandsaufnahme enthielt keine ausführbaren Prüfungen. Ergebnisse des anschließend freigegebenen Prüflaufs werden in `TASKS.md` dokumentiert; die vollständige Migrationsabnahme bleibt offen. Die vorstehenden historischen Abschnitte 2–5 beschreiben den früher freigegebenen React-Router-Aufbau; für den aktuellen Routerstand gilt dieser Abschnitt. Eine Freigabe der neuen Auslieferungsstrategie steht aus.
+### Frontend-Router-Migration (`VORSCHLAG`)
 
 - TanStack Router übernimmt öffentliche Sprachrouten und den späteren geschützten Adminbereich.
 - Die vorhandenen URLs `/de`, `/en`, `/it` sowie bestehende Hash-/Section-Ziele dürfen sich nicht unbemerkt ändern.
@@ -630,11 +614,3 @@ Marketing-Einwilligung wird nicht mit der Reservierung gebündelt. Zahlungsdaten
 ## 29. Full-Stack-Gate
 
 `FS0` endet mit dieser Analyse und Roadmap. Es wurden weder Anwendungscode noch Datenbankschema noch Abhängigkeiten implementiert. Vor `FS1` sind ein ausdrückliches `GO` und die in `TASKS.md` für `FS1` bezeichneten Entscheidungen erforderlich. Die frühere Gate-3-Freigabe der Marketing-Website gilt nicht als Freigabe dieser Erweiterung.
-
-### SEO-/Prerendering-Klärung vom 02.11.2026 (`VORSCHLAG`, keine Implementierungsfreigabe)
-
-Der aktuelle Production-Build liefert eine gemeinsame `index.html` mit leerem Root, deutschem Dokument-`lang` und generischem Titel. Routenspezifische Canonicals, `hreflang` und vorgerenderte Inhalte sind damit nicht wiederhergestellt. Ein erfolgreicher Build allein erfüllt die SEO-Abnahmekriterien nicht.
-
-Vorgeschlagene Richtung: öffentliche Inhaltsrouten beim Build in statische HTML-Dokumente mit passenden Metadaten umwandeln und clientseitige Navigation erhalten. Das eigene Express-Backend bleibt zuständig für APIs; ein weiterer Full-Stack-Frameworkwechsel ist nicht vorausgesetzt. Vor Umsetzung sind Verfahren, zusätzliche Abhängigkeiten, Browser-Globals/Motion beim Rendern, Hydrierung, kanonische Domain und echte HTTP-404-Auslieferung konkret zu planen und freizugeben. Keine Domain erfinden.
-
-Technische Grundlagen: [Vite: statische Auslieferung](https://vite.dev/guide/static-deploy.html), [TanStack Router: SSR](https://tanstack.com/router/latest/docs/guide/ssr), [TanStack Router: Head Management](https://tanstack.com/router/latest/docs/guide/document-head-management). Head Management allein erzeugt noch keine statischen HTML-Dateien.

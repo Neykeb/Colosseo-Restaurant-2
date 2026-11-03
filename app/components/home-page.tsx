@@ -6,7 +6,6 @@ import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 
 import { pathFor, siteContent, type Locale } from "~/content/site-content";
-import { ActionLabel } from "./ui/atoms/action-label";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -87,7 +86,7 @@ export function HomePage({ locale, copy, common }: { locale: Locale; copy: HomeC
           <h1 data-hero-item>{copy.heroTitle}</h1>
           <p className="hero-body" data-hero-item>{copy.heroBody}</p>
           <div className="hero-actions" data-hero-item>
-            <ActionLabel>{common.reserve}</ActionLabel>
+            <span className="button button-primary button-disabled" aria-disabled="true">{common.reserve}</span>
             <Link className="button button-ghost" to={pathFor(locale, "menu")}>{common.menu}</Link>
           </div>
         </div>
@@ -192,7 +191,7 @@ export function HomePage({ locale, copy, common }: { locale: Locale; copy: HomeC
           <p>{copy.reserveBody}</p>
           <h2>{copy.reserveTitle}</h2>
           <div className="stack-actions">
-            <ActionLabel variant="light">{common.reserve}</ActionLabel>
+            <span className="button button-light button-disabled" aria-disabled="true">{common.reserve}</span>
             <a className="button button-outline-light" href="tel:+4900000000000"><Phone aria-hidden="true" size={18} />{common.call}</a>
           </div>
         </article>

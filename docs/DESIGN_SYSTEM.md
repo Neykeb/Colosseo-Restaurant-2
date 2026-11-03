@@ -1,8 +1,7 @@
 # Designsystem
 
 **Status:** Phase 2 - freigegeben  
-**Phase:** Marketing-Website – freigegebene Gestaltung und gezielte QA-Korrekturen
-**Letzte Aktualisierung:** 02.11.2026
+**Letzte Aktualisierung:** 27.10.2026
 
 Diese Datei ist die einzige verbindliche Quelle für visuelle Tokens, Typografie, Farben, Abstände, Raster, Breakpoints, Komponentenvarianten, Medienverhältnisse, Zustände und Motion-Regeln. Sämtliche Festlegungen sind bis Gate 2 `VORSCHLAG`.
 
@@ -308,14 +307,3 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 ## Gate
 
 Dieses Designsystem wurde am 10.10.2026 durch „okay weiter“ freigegeben. Offene Punkte bleiben ausdrücklich offen und werden vor ihrer Umsetzung aufgelöst.
-
-## Tablet-Ankerabstand der Feiern-Section – 02.11.2026
-
-**Status:** durch Nutzer-GO zur begrenzten Korrektur V1 freigegeben.
-
-| Token | Wert | Bedeutung |
-|---|---|---|
-| `--notte-tablet-header-height` | `98px` | vorhandene Mindesthöhe der zweizeiligen Tablet-Navigation |
-| `--notte-tablet-header-top` | `8px` | vorhandener oberer Versatz der Tablet-Navigation |
-
-Geltungsbereich: `.notte`, ausschließlich Viewportbreiten von 768 bis einschließlich 900 px. Das Sprungziel `#events` erhält `scroll-margin-top` aus der Summe beider Tokens (106 px), damit die sichtbare Navigation beim Anspringen keinen Inhalt verdeckt. Der Abstand gilt unabhängig davon, ob die Navigation durch Motion vorübergehend ausgeblendet ist. Section-Padding, Typografie, Bilder und Motion bleiben unverändert. Andere Sprungziele und Breakpoints werden damit nicht umgestaltet.

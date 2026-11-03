@@ -2579,15 +2579,3 @@
   font-style: italic;
   font-weight: 400;
 }
-
-/* Keep the tablet anchor target below the visible two-row navigation. */
-@media (min-width: 768px) and (max-width: 900px) {
-  .notte {
-    --notte-tablet-header-height: 98px;
-    --notte-tablet-header-top: 8px;
-  }
-
-  .notte #events {
-    scroll-margin-top: calc(var(--notte-tablet-header-height) + var(--notte-tablet-header-top));
-  }
-}
