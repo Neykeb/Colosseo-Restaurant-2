@@ -9,6 +9,8 @@ Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, 
 
 > **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. Der Ist-Zustand bleibt bis zur ausdrücklich freigegebenen Migration React Router Framework Mode. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
 
+> **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. Der Ist-Zustand bleibt bis zur ausdrücklich freigegebenen Migration React Router Framework Mode. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
+
 ## 1. Ziel und Abgrenzung
 
 Gebaut wird eine dreisprachige Marketing-Website für das Ristorante Colosseo. Sie stellt Restaurant, Speisekarte und Feiern vor und führt Gäste zu einer externen Tischreservierung oder zum Telefonanruf.
