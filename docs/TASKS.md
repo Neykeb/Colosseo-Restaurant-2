@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS0` – Analyse, Backend-Cockpit und Tagesplan abgeschlossen; Implementierung wartet auf Gate-Freigabe und ausdrückliches `GO für FS1`
-**Letzte Aktualisierung:** 02.11.2026
+**Status:** Full-Stack-Phase `FS1` – MongoDB-Atlas-Verbindung verifiziert; übrige Plattformaufgaben offen
+**Letzte Aktualisierung:** 03.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -104,6 +104,7 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 - [x] Familiengeschichte als 70svh großes, bildfüllendes Sticky-Kapitel mit Parallax, dunklem Scrim, einmaliger Textchoreografie und Reduced-Motion-Fallback ausführen; dekorative Jahreszahl entfernen.
 - [x] Bewertungssection auf zwölf direkt im angemeldeten Google-Unternehmensprofil verifizierte Vier- und Fünf-Sterne-Stimmen erweitern; zwei gegenläufige Reihen, visuelle Sterne, Hover-/Fokus-Pause, Reduced-Motion-Scroll und nach neuer Nutzerentscheidung exakt 50svh Höhe umsetzen.
 - [x] Reservierungsabschluss direkt nach den Bewertungen als responsives 7/5-Editorial-Raster mit bestätigter Telefonaktion, Wort-Reveal, transformbasierter Eintrittschoreografie und Reduced-Motion-Fallback umsetzen; offenen externen Reservierungslink nicht erfinden.
+- [x] Reservierungsabschluss nach Nutzerfreigabe um eine performante „Vino Ember“-WebGL-Fläche erweitern; Bewegung auf sichtbare Desktop-/Tablet-Zustände begrenzen und statische Mobile-, Reduced-Motion- sowie WebGL-Fallbacks erhalten.
 - [x] Vorhandene Section „Feiern im Colosseo“ um eine eigene einmalige GSAP-Choreografie für Bild, Begleittext und Anfrageaktion ergänzen; Wort-Reveal beibehalten und Reduced Motion respektieren.
 - [x] Redundante Mittag-/Abend-Section nach Nutzerentscheidung vollständig aus Markup, Responsive-Regeln und Styles entfernen.
 - [x] Nutzerfreigegebene Seitenreihenfolge umsetzen: Hero, Begrüßung, Speisekarte, Familiengeschichte, Feiern, Bewertungen, Reservierung und Besuchsabschluss.
@@ -125,8 +126,8 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 - [x] Richtungsfehler des Menübildwechsels korrigieren: abwärts fährt das nächste Bild vollständig von unten nach oben, aufwärts exakt reversibel; maskierter Überlauf, unterbrechbare GSAP-Timeline und das verbindliche Zwei-Schriften-System bleiben erhalten.
 - [x] Menübilder auf eine kontinuierlich gescrubbte Ganzstreckenbewegung umstellen: Eintritt hinter dem unteren Sectionrand, zentraler Rastpunkt, vollständiger Austritt über den oberen Sectionrand sowie verzögerter Textwechsel erst am Rastpunkt.
 - [x] Browser-Annotation zur Menüausrichtung übernehmen: ersten und alle folgenden Bildrastpunkte geometrisch auf die Textmitte ausrichten, vor jeder Ausfahrt eine kurze Ruhephase ergänzen und Folgebilder mit responsivem 96–150-px-Abstand vollständig unterhalb der Section starten lassen.
-- [x] Umfassendes Mobile-Lite-Profil umsetzen: Touchgeräte und Viewports unter 768 px von Lenis, Video-Scrub, Pinning, Parallax, Buchstabenwechsel und Dauer-Marquees entlasten; Navigation, Speisekartenvorschau, flexible Section-Höhen, Safe Areas, Touchziele und mobile Typografie neu kalibrieren.
-- [x] Netlify-Konfiguration für den statischen React-Router-Build mit `build/client`, Standardumleitung auf `/de` und ergänzendem SPA-Fallback ergänzen.
+- [x] Das frühere pauschale Mobile-Lite-Profil am 03.11. korrigieren: Touch/kleine Viewports deaktivieren nicht länger den gesamten Motion-Stack; Lenis, Video-Layer und Parallax bleiben mobil ausgespart, sticky Speisekarte, einmalige Reveals, Navigation und Bewertungsband sind wieder aktiv.
+- [x] Netlify-Konfiguration auf den tatsächlichen Vite-Ausgabeordner `dist`, Standardumleitung auf `/de` und SPA-Fallback ausrichten.
 
 ## Phase 6 – Finale Qualitätssicherung
 
@@ -145,6 +146,7 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 10.10.2026 | Gate 2 | Freigegeben | Nutzer: „okay weiter“. Phase 3 autorisiert. |
 | 10.10.2026 | Gate 3 | Freigegeben | Nutzer: „Phase drei ist freigegeben.“ Phase 4 autorisiert. |
 | 30.10.2026 | FS0-Dokumentation | Freigegeben | Nutzer: „go“. Autorisiert wurden Backend-Cockpit und Zwei-Personen-Tagesplan; dies ist ausdrücklich keine Gate-Freigabe für `FS1`. |
+| 02.11.2026 | Gate FS0 / Start FS1 | Freigegeben | Nutzer bestätigt MongoDB Atlas ohne zusätzliche Docker-Datenbank und erteilt ausdrücklich „Go für FS1“. |
 
 ## Aktuelle Blocker
 
@@ -182,21 +184,22 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [x] Zielentscheidung TanStack Router dokumentieren und Migration vom aktuellen React Router einschließlich Prerender-/SEO-Risiko in `FS1` einplanen.
 - [x] `docs/DAILY_PLAN.md` nach Nutzerentscheidung auf 02.11.–13.11.2026 verdichten und zusätzliche Projektthemen separat kennzeichnen.
 - [x] Technische Baseline verifizieren: Typecheck, Lint, 7 Unit-Tests und Production-Build erfolgreich. Ein initial parallel zu Typecheck gestarteter Testlauf kollidierte im gemeinsamen React-Router-Typegen-Ausgabeordner; der anschließende isolierte Testlauf war erfolgreich. CI muss Typegen-verwendende Schritte seriell oder mit getrennten Ausgabeverzeichnissen ausführen.
-- [ ] Fachliche und betriebliche Fragen mit dem Nutzer klären.
-- [ ] **GATE FS0:** Zielarchitektur und Umfang ausdrücklich freigeben; erst danach darf `FS1` beginnen.
+- [-] Fachliche und betriebliche Fragen mit dem Nutzer klären; Atlas-Betriebsform ist bestätigt, Reservierungsregeln bleiben offen.
+- [x] **GATE FS0:** Zielarchitektur und Start von `FS1` am 02.11.2026 ausdrücklich freigegeben.
 
 ### FS1 – Plattformgrundlage und reproduzierbare Datenbank
 
-**Benötigt vor Start:** GO für `FS1`, Bestätigung von MongoDB Atlas, Atlas-Konto/Region sowie Entscheidung, ob lokal ein MongoDB-Replica-Set über Docker bereitgestellt werden soll. Mongoose, Render-Konto und Finalprojekt-Nutzung sind bestätigt.
+**Start bestätigt:** GO für `FS1` sowie MongoDB Atlas ohne zusätzliche lokale Docker-Datenbank wurden am 02.11.2026 bestätigt. Die lokale Verbindung zum eingerichteten Atlas-Cluster wurde am 02.11.2026 mit `npm run db:check` verifiziert. Am 03.11.2026 wurden ausschließlich datenbankspezifische `readWrite`-Rollen für `colosseo` und `colosseo_test` technisch verifiziert; Entwicklungsverbindung, Testverbindung und Test-Migrationslauf sind erfolgreich. Der Nutzer bestätigte MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`) und ein Replica Set mit drei Nodes. Backups sind derzeit inaktiv und bleiben vor einem realen Produktionsbetrieb offen.
 
-- [ ] Lokale Entwicklungs- und Umgebungsvariablenstrategie ohne Secrets im Repository einrichten.
-- [ ] Bestehendes React-Router-Frontend kontrolliert auf TanStack Router migrieren; Sprachrouten, Direktaufruf, Reload, Lazy Loading, SEO-Metadaten, Prerender-/Buildstrategie und Produktionsfallback regressionsprüfen, bevor alte Router-Dateien oder Abhängigkeiten entfernt werden.
+- [x] Lokale Entwicklungs- und Umgebungsvariablenstrategie ohne Secrets im Repository einrichten: `.env` wird ignoriert, `.env.example` enthält ausschließlich Platzhalter und Zod validiert MongoDB-Werte.
+- [-] TanStack Router ist im Quellcode implementiert; Typecheck, OXLint, 24 Unit-Tests und Production-Build laufen. Am 03.11.2026 wurden `/de`, `/en`, `/it`, direkter Reload und die gestaltete 404-Seite im lokalen Produktions-Build verifiziert; Netlify veröffentlicht `dist`. Der Build erzeugt für alle 15 lokalisierten Inhaltsrouten eigenes semantisches HTML mit lokalisierter Description, Open Graph und `Restaurant`-JSON-LD. Die über die verknüpfte Netlify-Site verifizierte Produktionsbasis `https://ristorante-colosseo-winsen.netlify.app` ist als `SITE_URL` gesetzt; Canonical, Hreflang, Sitemap und `robots.txt` wurden damit lokal erfolgreich geprüft. `OFFEN`: Regression nach einem ausdrücklich freigegebenen echten Netlify-Deployment.
 - [ ] Node-/Express-/TypeScript-Serverstruktur und getrennte `app`-/`server`-Startpunkte etablieren.
-- [ ] Mongoose-Verbindung, Schemas/Modelle, Seed nur für klar künstliche Entwicklungsdaten und typisierten Repository-Zugriff etablieren.
+- [-] Mongoose installieren und sichere, wiederverwendbare Verbindungslogik samt Statusprüfung und `db:check` etablieren; Installation, Verbindungslogik und echte Atlas-Verbindung sind verifiziert, Schemas/Modelle, Seed und typisierte Repositories bleiben offen.
 - [ ] Kernschema für Einstellungen, Servicezeiten, Sondertage, Bereiche, Tische, Reservierungen, Zuweisungen, Ereignisse und Outbox umsetzen.
-- [ ] MongoDB-Indizes, gering privilegierten Atlas-Datenbankbenutzer und idempotente Migrationsskripte samt Tests ergänzen.
+- [x] Versionierten, idempotent ausführbaren MongoDB-Migrationsrahmen mit Registry, Historie, Ausführungssperre, Status, Vorwärtslauf, einzelnem Rollback, sicherer Testzielprüfung und Unit-Tests ergänzen.
+- [-] Getrennte Atlas-Testdatenbank `colosseo_test`, datenbankspezifische `readWrite`-Rollen, leerer Test-Migrationslauf sowie AWS Frankfurt (`eu-central-1`) und das dreiknotige Replica Set sind verifiziert beziehungsweise vom Nutzer bestätigt. Offen sind konkrete Indexmigrationen zusammen mit den bestätigten Modellen; Backups sind als späterer Produktionspunkt offen.
 - [ ] Express-Grundgerüst mit Healthcheck, Fehlerformat, Korrelations-ID, sicherer Basiskonfiguration und statischer Produktionsauslieferung aufsetzen.
-- [ ] Bestehenden öffentlichen Build unverändert regressionsprüfen.
+- [-] Bestehenden öffentlichen Build lokal regressionsprüfen; Typecheck, Lint, 24/24 Tests, Build, erzeugte Sprachdateien und interaktive `/de`-Darstellung sind erfolgreich geprüft. Echte Netlify-Regression bleibt offen.
 - [ ] **GATE FS1:** Schema, lokale Einrichtung, Tests und Sicherheitsgrenzen präsentieren; auf GO für `FS2` warten.
 
 ### FS2 – Admin-Authentifizierung und geschütztes Grundlayout

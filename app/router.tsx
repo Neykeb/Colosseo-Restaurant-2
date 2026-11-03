@@ -2,19 +2,27 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  notFound,
   Outlet,
   redirect,
   useParams,
 } from "@tanstack/react-router";
+import { lazy, Suspense, useEffect } from "react";
 import { isLocale, siteContent, getPageKey, type Locale, type PageKey } from "~/content/site-content";
-import { NottePrototype } from "~/prototypes/colosseo/prototype-variants";
+import { applyDocumentSeo, getRouteSeo } from "~/content/seo";
 import { SiteFooter } from "~/components/site-footer";
 import { SiteHeader } from "~/components/site-header";
-import { ColosseoPrototypesPage } from "~/components/colosseo-prototypes-page";
 import { Link } from "@tanstack/react-router";
 import "~/prototypes/colosseo/prototypes.css";
 import "~/i18n/config";
 import "~/styles/app.css";
+
+const NottePrototype = lazy(() => import("~/prototypes/colosseo/prototype-variants").then((module) => ({ default: module.NottePrototype })));
+const ColosseoPrototypesPage = lazy(() => import("~/components/colosseo-prototypes-page").then((module) => ({ default: module.ColosseoPrototypesPage })));
+
+function RoutePending() {
+  return <div aria-busy="true" aria-label="Seite wird geladen" className="route-pending" role="status" />;
+}
 
 function RootLayout() {
   return <Outlet />;
@@ -65,20 +73,27 @@ declare module "@tanstack/react-router" {
 }
 
 function getRouteData(lang: string, page?: string): { locale: Locale; pageKey: PageKey } {
-  if (!isLocale(lang)) throw new Error("Not found");
+  if (!isLocale(lang)) throw notFound();
   const pageKey = getPageKey(lang, page);
-  if (!pageKey) throw new Error("Not found");
+  if (!pageKey) throw notFound();
   return { locale: lang, pageKey };
 }
 
 function SiteRoute() {
   const { lang, page } = useParams({ strict: false });
-  if (!lang) throw new Error("Not found");
+  if (!lang) throw notFound();
   const { locale, pageKey } = getRouteData(lang, page);
   const copy = siteContent[locale];
 
+  useEffect(() => {
+    const previousLanguage = document.documentElement.lang;
+    document.documentElement.lang = locale;
+    applyDocumentSeo(getRouteSeo(locale, pageKey));
+    return () => { document.documentElement.lang = previousLanguage; };
+  }, [locale, pageKey]);
+
   if (pageKey === "home") {
-    return <main className="prototype-stage" id="main-content"><NottePrototype locale={locale} /></main>;
+    return <main className="prototype-stage" id="main-content"><Suspense fallback={<RoutePending />}><NottePrototype locale={locale} /></Suspense></main>;
   }
 
   return (
@@ -102,7 +117,7 @@ function ContentPage({ copy, locale, pageKey, reserveLabel }: { copy: { title: s
 }
 
 function PrototypesRoute() {
-  return <ColosseoPrototypesPage />;
+  return <Suspense fallback={<RoutePending />}><ColosseoPrototypesPage /></Suspense>;
 }
 
 function NotFound() {

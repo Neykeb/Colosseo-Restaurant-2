@@ -1,5 +1,5 @@
 {
-  "include": ["app/**/*", "vite.config.ts"],
+  "include": ["app/**/*", "scripts/**/*", "server/**/*", "tests/**/*", "vite.config.ts"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["node", "vite/client"],
