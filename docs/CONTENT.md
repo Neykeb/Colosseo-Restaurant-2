@@ -1,7 +1,7 @@
 # Inhalt und Lokalisierung
 
 **Status:** Phase 2 freigegeben; Full-Stack-Inhaltsbedarf ergänzt
-**Letzte Aktualisierung:** 30.10.2026
+**Letzte Aktualisierung:** 03.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Inhaltsarchitektur, Seitentexte, CTA-Texte, Lokalisierung, Metadateninhalte und Inhaltsstatus. Funktionale Seitenanforderungen stehen in `SPEC.md`; visuelle Darstellungsregeln stehen in `DESIGN_SYSTEM.md`.
 
@@ -99,7 +99,7 @@ Die Startseite nutzt mindestens vier unterschiedliche Layoutfamilien: Media-Hero
 | Menü | Speisekarte | `FREIGEGEBENE ABSICHT`, Textentwurf |
 | Veranstaltung | Feier anfragen | `FREIGEGEBENE ABSICHT`, Textentwurf |
 
-Übersetzungen werden erst nach Freigabe des deutschen Ausgangstextes final erstellt.
+Die deutsche Notte-Fassung ist die freigegebene redaktionelle Ausgangssprache. Die englische und italienische Notte-Fassung wurde am 03.11.2026 auf ausdrücklichen Nutzerauftrag ergänzt.
 
 ## Vorläufiger deutscher Textansatz
 
@@ -117,7 +117,8 @@ Alle folgenden Texte sind `ENTWURF` und enthalten keine zusätzlichen Geschäfts
 
 - Sprachen: Deutsch (`de`), Englisch (`en`), Italienisch (`it`).
 - Standardsprache: Deutsch. Englisch und Italienisch sind gleichwertig erreichbare lokalisierte Fassungen.
-- Deutsch ist redaktionelle Ausgangssprache. Englisch und Italienisch folgen nach fachlicher Freigabe der deutschen Fassung.
+- Deutsch ist redaktionelle Ausgangssprache. Englisch und Italienisch verwenden seit 03.11.2026 dieselbe Inhaltsstruktur und dasselbe Layout mit natürlich lokalisierten Navigationen, Überschriften, Fließtexten, Aktionen, Öffnungszeiten und zugänglichen Namen.
+- Namen, Beschreibungen und Preise der verifizierten Originalspeisekarte sowie wörtliche Google-Rezensionsauszüge bleiben unverändert in ihrer belegten Ausgangssprache. Nur die umgebende Bedienoberfläche und Zeitangaben werden lokalisiert.
 - Navigation, Metadaten, Alternativtexte, Fehlermeldungen und externe Linkhinweise werden vollständig lokalisiert.
 - Externe Reservierungsziele müssen, sofern möglich, die gewählte Sprache übernehmen.
 - Fehlende Übersetzungen dürfen nicht still auf gemischte Sprachseiten führen. Das technische Fallback wird in Phase 3 spezifiziert.

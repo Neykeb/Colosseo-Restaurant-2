@@ -1,8 +1,12 @@
 node_modules/
 build/
+dist/
 .react-router/
 .DS_Store
 *.log
+.env
+.env.*
+!.env.example
 
 # Local Netlify folder
 .netlify
