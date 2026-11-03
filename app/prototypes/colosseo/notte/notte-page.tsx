@@ -34,18 +34,18 @@ export function NottePage({ locale, rootRef }: { locale: "de" | "en" | "it"; roo
   }, []);
 
   return <div className="variant notte" id="top" ref={rootRef}>
-    <NotteNavigation />
-    <HeroSection />
-    <WelcomeSection />
-    <MenuPreviewSection onOpenMenu={() => setFullMenuOpen(true)} triggerRef={menuTriggerRef} />
+    <NotteNavigation locale={locale} />
+    <HeroSection locale={locale} />
+    <WelcomeSection locale={locale} />
+    <MenuPreviewSection locale={locale} onOpenMenu={() => setFullMenuOpen(true)} triggerRef={menuTriggerRef} />
     <div className="no-family-transition">
-      <FamilyStorySection />
-      <EventsSection />
+      <FamilyStorySection locale={locale} />
+      <EventsSection locale={locale} />
     </div>
-    <ReviewsSection />
-    <ReservationSection />
-    <VisitSection />
+    <ReviewsSection locale={locale} />
+    <ReservationSection locale={locale} />
+    <VisitSection locale={locale} />
     <NotteFooter locale={locale} />
-    <FullMenuOverlay onClose={closeFullMenu} open={fullMenuOpen} />
+    <FullMenuOverlay locale={locale} onClose={closeFullMenu} open={fullMenuOpen} />
   </div>;
 }

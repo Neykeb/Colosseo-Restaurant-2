@@ -105,6 +105,11 @@ a,
   overflow-x: clip;
 }
 
+.route-pending {
+  min-height: 100svh;
+  background: #080a08;
+}
+
 .site-header {
   position: sticky;
   top: 0;
