@@ -1,6 +1,5 @@
 node_modules/
 build/
-dist/
 .react-router/
 .DS_Store
 *.log

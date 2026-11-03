@@ -11,7 +11,7 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 - Die bestehende öffentliche React-/TypeScript-Website bleibt erhalten.
 - Das neue Backend ist geplant, aber noch nicht implementiert.
 - Zielstack: React, TypeScript, Vite und TanStack Router im Frontend; Node.js, Express und TypeScript im Backend; MongoDB mit Mongoose, Clerk für OAuth und Sessions, Resend für E-Mails sowie Render für das Finalprojekt.
-- VERIFIZIERT durch Quelltextprüfung am 02.11.2026: Der Code verwendet bereits TanStack Router. Installation und technische Basisprüfungen sind inzwischen erfolgreich; die vollständige Migrationsabnahme bleibt wegen offener Befunde aus. Architektur/SEO stehen in `docs/SPEC.md`, Abschnitt 21 und SEO-Klärung; tatsächlich ausgeführte Prüfungen und Korrekturaufgaben stehen in `docs/TASKS.md`, „Kleinschrittiger Router-Prüfauftrag“.
+- Der aktuelle Code nutzt noch React Router. Der Wechsel zu TanStack Router ist geplant, aber noch nicht implementiert.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.
 - Aktuelle Phase: `FS0`. Vor `FS1` fehlen die ausdrückliche Gate-Freigabe und die in `docs/TASKS.md` genannten Betriebsentscheidungen.
 - Das `GO` vom 30.10.2026 autorisiert ausschließlich diese Dokumentations- und Planungsübersicht, nicht die Implementierung von `FS1`.
@@ -68,7 +68,18 @@ Die vollständigen Aufgaben und Gates stehen ausschließlich in `docs/TASKS.md`.
 
 ## 5. Vorgesehene Code-Struktur
 
-Die konkrete Struktur wird erst nach Freigabe in `FS1` angelegt. Verbindliche Zuständigkeiten, geplante Dateien und API-Prüfungen stehen ausschließlich in `docs/SPEC.md`, Abschnitt 21 („Prozess- und Verzeichnisstruktur“ und „Server- und API-Grundgerüst für FS1“). Dort ist auch der aktuell geprüfte Routerstand dokumentiert.
+Die konkrete Struktur wird erst in `FS1` angelegt. Maßgeblich ist dann die in `docs/SPEC.md` definierte Architektur. Als Orientierung sind folgende Verantwortungsgrenzen vorgesehen:
+
+- `server/config`: geprüfte Umgebungsvariablen und Infrastrukturkonfiguration
+- `server/http`: Express-App, Middleware, Routen und Fehlerantworten
+- `server/modules`: fachliche Module wie Reservierungen, Speisekarte und Öffnungszeiten
+- `server/models`: Mongoose-Schemas und Modelle
+- `server/repositories`: gekapselter Datenzugriff
+- `server/services`: Geschäftsabläufe und externe Dienste
+- `server/jobs`: Outbox- und Wartungsaufgaben
+- `server/tests`: Unit-, Integrations-, API- und Parallelitätstests
+
+Noch nicht existierende Pfade sind Planung und dürfen nicht als bereits implementiert verstanden werden.
 
 ## 6. Verbindliche Backend-Grundsätze
 

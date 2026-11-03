@@ -2,7 +2,6 @@ import { ArrowUpRight } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 
 import { locales, pathFor, type Locale, type PageKey } from "~/content/site-content";
-import { ActionLabel } from "./ui/atoms/action-label";
 
 type Props = {
   locale: Locale;
@@ -17,10 +16,10 @@ export function SiteFooter({ locale, pageKey, reserveLabel, nav }: Props) {
       <div className="footer-cta">
         <p>Ristorante Colosseo</p>
         <h2>{reserveLabel}</h2>
-        <ActionLabel variant="light">
+        <span className="button button-light button-disabled" aria-disabled="true">
           {reserveLabel}
           <ArrowUpRight aria-hidden="true" size={19} />
-        </ActionLabel>
+        </span>
       </div>
       <div className="footer-grid">
         <div>

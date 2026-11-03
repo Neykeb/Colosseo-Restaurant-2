@@ -1,14 +1,11 @@
 import type { RefObject } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 
-import { notteIntroContent } from "~/content/notte-locales";
-
 import { FullMenuOverlay } from "~/components/full-menu-overlay";
 
 import { EventsSection, FamilyStorySection, HeroSection, MenuPreviewSection, NotteFooter, NotteNavigation, ReservationSection, ReviewsSection, VisitSection, WelcomeSection } from "./organisms";
 
 export function NottePage({ locale, rootRef }: { locale: "de" | "en" | "it"; rootRef: RefObject<HTMLDivElement | null> }) {
-  const content = notteIntroContent[locale];
   const [fullMenuOpen, setFullMenuOpen] = useState(false);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const closeFullMenu = () => {
@@ -37,13 +34,13 @@ export function NottePage({ locale, rootRef }: { locale: "de" | "en" | "it"; roo
   }, []);
 
   return <div className="variant notte" id="top" ref={rootRef}>
-    <NotteNavigation content={content.navigation} />
-    <HeroSection content={content.hero} />
-    <WelcomeSection content={content.welcome} />
+    <NotteNavigation />
+    <HeroSection />
+    <WelcomeSection />
     <MenuPreviewSection onOpenMenu={() => setFullMenuOpen(true)} triggerRef={menuTriggerRef} />
     <div className="no-family-transition">
-      <FamilyStorySection content={content.family} />
-      <EventsSection content={content.events} />
+      <FamilyStorySection />
+      <EventsSection />
     </div>
     <ReviewsSection />
     <ReservationSection />
