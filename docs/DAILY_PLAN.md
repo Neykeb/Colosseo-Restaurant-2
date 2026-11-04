@@ -6,7 +6,7 @@
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 02.11.2026
+**Letzte Aktualisierung:** 03.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -127,3 +127,12 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Nicht begonnen:** Router-Migration, Backend-Code, Datenbank, Clerk-, Resend- und Render-Integration.
 - **Blockaden:** MongoDB-Atlas-/lokale Datenbankentscheidung, Gate `FS0`, `GO FS1`, Clerk-Anbieter/Owner sowie fachliche Reservierungsregeln.
 - **Erster nächster Schritt:** Voraussetzungen für `FS1` beantworten und anschließend Gate `FS0` plus `GO für FS1` ausdrücklich freigeben.
+
+## 10. Korrektur des Dokumentationsstands – 03.11.2026
+
+- **Verifiziert:** Die Kleinaufgaben von Person A vom 02.11. sind als Arbeitszerlegung in `docs/BACKEND.md` dokumentiert.
+- **Verifiziert:** Es wurden keine Frontend- oder Backend-Anwendungsdateien erstellt und keine Laufzeitabhängigkeiten installiert.
+- **Offen:** `GATE FS0`, separates `GO FS1`, MongoDB-Atlas-Konto/Region und die lokale transaktionsfähige MongoDB-Umgebung.
+- **Person A am 03.11.:** Express/TypeScript, App-/Server-Trennung, Healthcheck, Fehlerformat und Konfigurationsvalidierung bleiben bis `GO FS1` blockiert.
+- **Tatsächlich ausgeführte Prüfung:** Repository-Bestand, Git-Status, Scripts und verbindliche FS0-/FS1-Dokumentation wurden lokal geprüft.
+- **Nächster Einstiegspunkt:** Nach den erforderlichen Freigaben die erste FS1-Kleinaufgabe starten; bis dahin keine Implementierung.
