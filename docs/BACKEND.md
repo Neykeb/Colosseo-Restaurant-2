@@ -11,7 +11,7 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 ## 1. Aktueller Stand in 30 Sekunden
 
 - Die bestehende öffentliche React-/TypeScript-Website bleibt erhalten.
-- Die erste Backend-Grundlage ist implementiert: validierte Serverumgebung, Mongoose-Verbindung und erfolgreicher Atlas-Verbindungstest.
+- Die erste Backend-Grundlage ist implementiert: validierte Serverumgebung, getrennte Express-App und Serverstart, Healthcheck, Korrelations-ID, Fehlerformat, Mongoose-Verbindung und erfolgreicher Atlas-Verbindungstest.
 - Der versionierte MongoDB-Migrationsrahmen ist implementiert: geordnete Registry, Historie, Ausführungssperre, Status, Vorwärtslauf, einzelner Rollback und Unit-Tests. Konkrete Schema-/Indexmigrationen folgen mit den bestätigten Modellen.
 - Zielstack: React, TypeScript, Vite und TanStack Router im Frontend; Node.js, Express und TypeScript im Backend; MongoDB mit Mongoose, Clerk für OAuth und Sessions, Resend für E-Mails sowie Render für das Finalprojekt.
 - TanStack Router ist im Quellcode implementiert; Sprachrouten, direkte Reloads, gestalteter 404-Zustand, Lazy Loading, Netlify-Publish-Pfad und Build-Prerendering für 15 lokalisierte Routen sind lokal verifiziert. Die verknüpfte Netlify-Produktionsbasis `https://ristorante-colosseo-winsen.netlify.app` ist als `SITE_URL` gesetzt; Canonical, Hreflang, Sitemap und `robots.txt` wurden damit im lokalen Production-Build erfolgreich geprüft. Die Regression nach einem echten Netlify-Deployment bleibt offen.
@@ -19,6 +19,7 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 - Vom Nutzer bestätigter Atlas-Betriebsstand: MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`), Replica Set mit drei Nodes, Backups derzeit inaktiv, keine verknüpften App Services und ein vorhandener Search-Index. Render soll später möglichst regionsnah betrieben werden; Backups bleiben vor einem realen Produktionsbetrieb zu klären.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.
 - Aktuelle Phase: `FS1`. MongoDB Atlas ohne zusätzliche lokale Docker-Datenbank und `GO für FS1` wurden am 02.11.2026 bestätigt.
+- Person A hat am 03.11.2026 die Express-/TypeScript-Grundlage implementiert. Die statische Produktionsauslieferung über Express und ein echter Listener-Smoke-Test bleiben offen.
 
 ## 2. Wo finde ich was?
 
