@@ -2,7 +2,7 @@
 
 **Status:** Orientierung für Full-Stack-Phase `FS0`; noch kein Backend-Anwendungscode implementiert  
 **Phase:** `FS0` – Analyse, Entscheidungen und Gate-Freigabe  
-**Letzte Aktualisierung:** 02.11.2026
+**Letzte Aktualisierung:** 03.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
@@ -132,3 +132,16 @@ Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 4. Erst dann Plattformgrundlage und Datenbank implementieren.
 
 Der operative Termin- und Personenplan steht in `docs/DAILY_PLAN.md`.
+
+## 9. Kleinaufgaben von Person A für den 02.11.2026
+
+**Status:** `VORSCHLAG` innerhalb `FS0`; keine Implementierung freigegeben.
+
+1. **Bestand prüfen:** Frontend-, Build- und Teststruktur sowie das Fehlen einer Backend-Struktur verifizieren; keine Frontend-Dateien ändern.
+2. **Servergrenzen festlegen:** Zuständigkeiten von Express-App, Prozessstart, HTTP-Schicht, Konfiguration, Modulen, Repositories und Services beschreiben.
+3. **FS1-Plattformplan erstellen:** Healthcheck, Fehlerformat, Korrelations-ID, Konfigurationsvalidierung und spätere Testgrenzen festlegen.
+4. **Datenbankabhängigkeiten abgrenzen:** Atlas-Bestätigung, lokale Replica-Set-Entscheidung, Mongoose, Schemas, Indizes, Migrationen und künstliche Seed-Daten erfassen.
+5. **Reservierungsfragen bündeln:** Kapazität, Zeitmodell, Buchungsregeln, Änderungen, Datenschutz, Kommunikation, Administration und Identität als offene Entscheidungen ordnen.
+6. **FS1-Abnahmevorlage vorbereiten:** erwartete Plattform-, Sicherheits-, Datenbank- und Testnachweise definieren.
+
+Die vollständigen offenen Entscheidungen bleiben in `docs/TASKS.md`. Die Kleinaufgaben sind auf FS0-Planung und Dokumentation begrenzt. Vor Anwendungscode sind `GATE FS0`, ein separates `GO FS1` und die in `docs/TASKS.md` genannten Voraussetzungen erforderlich.
