@@ -5,13 +5,21 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { allergenLegend, menuCategories, menuSource } from "~/content/menu-data";
 
 type FullMenuOverlayProps = {
+  locale: "de" | "en" | "it";
   onClose: () => void;
   open: boolean;
 };
 
+const overlayCopy = {
+  de: { dialog: "Unsere Speisekarte", title: "Unsere Speisekarte", filters: "Speisekarten-Kategorien", close: "Speisekarte schließen", legend: "Übersicht: Allergene und Zusatzstoffe", trace: "In allen Speisen können Spuren von Allergenen enthalten sein!", source: "Stand der geprüften Online-Speisekarte", sourceLink: "Originalquelle öffnen" },
+  en: { dialog: "Our menu", title: "Our menu", filters: "Menu categories", close: "Close menu", legend: "Allergens and additives", trace: "All dishes may contain traces of allergens.", source: "Verified online menu as of", sourceLink: "Open original source" },
+  it: { dialog: "Il nostro menu", title: "Il nostro menu", filters: "Categorie del menu", close: "Chiudi il menu", legend: "Allergeni e additivi", trace: "Tutti i piatti possono contenere tracce di allergeni.", source: "Menu online verificato il", sourceLink: "Apri la fonte originale" },
+} as const;
+
 const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce), (pointer: coarse), (max-width: 767px)").matches;
 
-export function FullMenuOverlay({ onClose, open }: FullMenuOverlayProps) {
+export function FullMenuOverlay({ locale, onClose, open }: FullMenuOverlayProps) {
+  const copy = overlayCopy[locale];
   const dialogRef = useRef<HTMLDialogElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
   const mainCloseRef = useRef<HTMLButtonElement>(null);
@@ -74,7 +82,7 @@ export function FullMenuOverlay({ onClose, open }: FullMenuOverlayProps) {
 
   return (
     <dialog
-      aria-label="Unsere Speisekarte"
+      aria-label={copy.dialog}
       className="full-menu-dialog"
       onCancel={(event) => {
         event.preventDefault();
@@ -84,8 +92,8 @@ export function FullMenuOverlay({ onClose, open }: FullMenuOverlayProps) {
     >
       <div className="full-menu-shell" data-lenis-prevent ref={shellRef}>
         <header className="full-menu-toolbar">
-          <div className="full-menu-title"><small>RISTORANTE COLOSSEO</small><strong>Unsere Speisekarte</strong></div>
-          <div aria-label="Speisekarten-Kategorien" className="full-menu-filters" role="group">
+          <div className="full-menu-title"><small>RISTORANTE COLOSSEO</small><strong>{copy.title}</strong></div>
+          <div aria-label={copy.filters} className="full-menu-filters" role="group">
             {menuCategories.map((category) => (
               <button
                 aria-pressed={activeCategoryId === category.id}
@@ -97,7 +105,7 @@ export function FullMenuOverlay({ onClose, open }: FullMenuOverlayProps) {
               </button>
             ))}
           </div>
-          <button aria-label="Speisekarte schließen" className="full-menu-close" onClick={closeOverlay} ref={mainCloseRef} type="button"><X size={22} /></button>
+          <button aria-label={copy.close} className="full-menu-close" onClick={closeOverlay} ref={mainCloseRef} type="button"><X size={22} /></button>
         </header>
 
         <main className="full-menu-content" key={activeCategory.id}>
@@ -127,14 +135,14 @@ export function FullMenuOverlay({ onClose, open }: FullMenuOverlayProps) {
           ))}
 
           <details className="full-menu-legend">
-            <summary>Übersicht: Allergene und Zusatzstoffe</summary>
-            <p>In allen Speisen können Spuren von Allergenen enthalten sein!</p>
+            <summary>{copy.legend}</summary>
+            <p>{copy.trace}</p>
             <div>{allergenLegend.map((entry) => <span key={entry}>{entry}</span>)}</div>
           </details>
 
           <footer className="full-menu-footer">
-            <p>Stand der geprüften Online-Speisekarte: {menuSource.checkedAt}</p>
-            <a href={menuSource.url} target="_blank" rel="noreferrer">Originalquelle öffnen</a>
+            <p>{copy.source}: {menuSource.checkedAt}</p>
+            <a href={menuSource.url} target="_blank" rel="noreferrer">{copy.sourceLink}</a>
           </footer>
         </main>
       </div>

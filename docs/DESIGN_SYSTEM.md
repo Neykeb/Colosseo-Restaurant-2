@@ -1,7 +1,7 @@
 # Designsystem
 
 **Status:** Phase 2 - freigegeben  
-**Letzte Aktualisierung:** 27.10.2026
+**Letzte Aktualisierung:** 03.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für visuelle Tokens, Typografie, Farben, Abstände, Raster, Breakpoints, Komponentenvarianten, Medienverhältnisse, Zustände und Motion-Regeln. Sämtliche Festlegungen sind bis Gate 2 `VORSCHLAG`.
 
@@ -186,19 +186,19 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 - Inhalte erscheinen sofort und bleiben vollständig zugänglich.
 - Video-Hero wird durch ein optimiertes Poster ersetzt oder pausiert, abhängig von der späteren technischen Spezifikation.
 
-### Verbindliches Mobile-Lite-Profil
+### Verbindliches responsives Motion-Profil
 
-- Auf Geräten mit grobem primärem Zeiger sowie unter `768 px` werden Lenis, GSAP-Scroll-Pinning, Video-Scrubbing, Parallax, buchstabenweise Textwechsel und dauerhafte Marquees nicht initialisiert. Die Inhaltsreihenfolge und alle Aktionen bleiben unverändert verfügbar.
-- Der Hero verwendet ein lokales, leichtes WebP-Poster und native Dokumentbewegung. Die Navigation ist eine kompakte 64-px-Zeile mit zugänglichem Menüschalter, Telefonaktion, Safe-Area-Abständen und mindestens 44 × 44 px großen Touchzielen.
+- Bildschirmbreite, Eingabegerät und Bewegungspräferenz sind getrennte Signale. Ein grober Zeiger darf Desktop-/Tablet-Motion nicht pauschal deaktivieren; nur `prefers-reduced-motion: reduce` schaltet den gesamten dekorativen Motion-Stack ab.
+- Unter `768 px` bleibt die native Dokumentbewegung aktiv; Lenis und das schwere Hero-Video werden nicht geladen beziehungsweise initialisiert. Das lokale WebP-Poster, der zugängliche Menüschalter, Safe-Area-Abstände und mindestens 44 × 44 px große Touchziele bleiben verbindlich.
+- Einmalige transform-/opacity-basierte Section-Reveals, die sticky Speisekartenfolge und das CSS-Bewertungsband bleiben auf kleinen Viewports erhalten. Parallax und der Hero-zu-Intro-Layer-Overlap entfallen dort, weil ohne Video-Pinning keine gemeinsame Scrollstrecke existiert.
 - Inhaltssections verwenden `min-height` beziehungsweise inhaltsabhängige Höhe statt fester `svh`-Höhen, wenn Textvergrößerung oder schmale Viewports sonst Inhalte abschneiden könnten.
-- Die Speisekartenvorschau wird mobil als lineare Liste aus drei Bild-/Textblöcken ausgegeben. Bewertungen verwenden native horizontale Scrollflächen mit Scroll-Snap statt automatischer Bewegung.
-- Einmalige dekorative Section-Reveals entfallen mobil. Zustandsbewegungen wie das Öffnen der Navigation bleiben auf Transform und Opacity, höchstens `180 ms`, begrenzt.
+- Bei Reduced Motion folgen Intro und Speisekarteninhalte dem normalen Dokumentfluss; Dauerbewegungen stoppen und die Original-Bewertungen werden horizontal scrollbar.
 
 ### Deutsche Hauptseite „Notte“: scrollgesteuerter Pizza-Hero
 
 - Der bereitgestellte Pizza-Clip ist ein dekoratives Hero-Medium ohne Autoplay oder Ton.
 - GSAP ScrollTrigger bindet die Videozeit linear an den Scroll-Fortschritt: abwärts zerlegt sich die Pizza, aufwärts läuft derselbe Ablauf reversibel zurück.
-- Der Hero bleibt für die Dauer der Sequenz gepinnt; die Strecke beträgt mobil `240dvh` und ab Tablet `300dvh`. Ein kurzer Scrub-Nachlauf von `0,22 s` glättet die reversible Videozuordnung. Lenis liefert auf Wheel-Geräten die freigegebene Scroll-Trägheit; Touch bleibt nativ. Lenis und ScrollTrigger laufen über denselben GSAP-Ticker.
+- Ab Tablet und bei präzisem Zeiger bleibt der Hero für eine Strecke von `300dvh` gepinnt. Ein kurzer Scrub-Nachlauf von `0,22 s` glättet die reversible Videozuordnung. Lenis liefert auf Wheel-Geräten die freigegebene Scroll-Trägheit und läuft mit ScrollTrigger über denselben GSAP-Ticker. Mobil nutzt der Hero das Poster im normalen Dokumentfluss und native Touch-Bewegung.
 - Video-Seeks werden mit `requestVideoFrameCallback` an die tatsächlich dekodierten Frames gekoppelt. So überholt der Scroll-Thread den Videodecoder nicht mit mehreren ausstehenden Suchpositionen.
 - Im letzten Viewport der gepinnten Hero-Sequenz schiebt sich die Intro-Section als eigenständige Ebene von unten über den Hero. Der Reveal nutzt ausschließlich eine lineare, scrollgebundene Y-Transformation mit `0,32 s` Scrub-Nachlauf; ein statischer, weicher Schatten trennt die Ebenen ohne zusätzlichen Paint pro Frame.
 - Bei Reduced Motion entfällt auch der Layer-Overlap vollständig; die Intro-Section folgt dem Hero im normalen Dokumentfluss.
@@ -213,13 +213,21 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 - Die Signaturfarbe `#D89478` ist ausschließlich „Buon Appetito!“ zugeordnet und wird nicht als allgemeiner CTA- oder UI-Akzent verwendet.
 - Das lokale WebP wird unterhalb der Falz lazy geladen, asynchron dekodiert und über feste Abmessungen sowie `sizes` ohne Layoutsprung reserviert.
 
+### Deutsche Hauptseite „Notte“: Reservierungsabschluss
+
+- Der Reservierungsabschluss verwendet die Farbwelt „Vino Ember“: Grundfläche `#160E0C`, dunkles Weinrot `#4C1515`, Terrakotta `#8F432F`, warmer Lichtakzent `#D89478` und cremefarbener Vordergrund `#F7EFE4`.
+- Ein dekorativer WebGL-Simplex-Noise-Verlauf bewegt die Farbflächen ausschließlich auf Viewports ab `768 px`, solange die Section sichtbar und das Dokument aktiv ist. Die Bewegung ist langsam und unterstützt die CTA-Hierarchie, ohne Scroll oder Bedienung zu beeinflussen.
+- Unter `768 px`, bei `prefers-reduced-motion: reduce` und ohne WebGL bleibt ein statischer CSS-/Canvas-Fallback sichtbar. Die Reservierungsinformationen und Telefonaktion sind niemals von WebGL abhängig.
+- Die Section bleibt ein asymmetrisches 12-Spalten-Editorial-Raster. Auf kleineren Viewports wird sie zu einer inhaltsabhängigen Einzelspalte; feste Viewporthöhen dürfen den Text nicht abschneiden.
+- Canvas und Lichtverlauf sind rein dekorativ und für assistive Technologien verborgen. Eine dunkle Kontrastschicht sichert die Lesbarkeit der cremefarbenen Texte über allen Shaderzuständen.
+
 ### Deutsche Hauptseite „Notte“: Familiengeschichte
 
 - Die kompakte Familiengeschichte folgt erst nach der Speisekarten-Vorschau, damit Begrüßung und Herkunft nicht als zwei aufeinanderfolgende Textkapitel erscheinen.
 - Das reale Eingangsfoto füllt die gesamte, exakt `70svh` hohe Section und wird durch einen zweistufigen dunklen Scrim für ausreichend Textkontrast beruhigt. Die frühere dekorative `30+`-Zahl und der helle Split entfallen.
 - Überschrift und Fließtext liegen als kompakter redaktioneller Block direkt auf dem Motiv. Die maskierten Überschriftwörter erscheinen einmalig im Abstand von 55 ms; der Fließtext folgt mit maximal 24 px Y-Versatz.
 - Das Hintergrundbild bewegt sich scrollgebunden langsam von `yPercent -5` auf `5` und skaliert von `1,10` auf `1,03`. Familiengeschichte und Anlass-Section liegen in einem gemeinsamen, isolierten Übergangscontainer: Die Story bleibt nur innerhalb dieses Containers bei `top: 0` sticky, während der Anlass darüberläuft, und verlässt danach mit dem Container vollständig den Viewport.
-- Reduced Motion und Mobile-Lite entfernen Parallax und Sticky-Overlap. Auf kleinen Viewports wächst die Section mit ihrem Inhalt und besitzt keine feste Maximalhöhe.
+- Reduced Motion und kleine Viewports entfernen den Parallax-Effekt. Der begrenzte Sticky-Overlap der Familiengeschichte bleibt nur erhalten, wenn er Inhalt und Bedienung nicht verdeckt.
 
 ### Deutsche Hauptseite „Notte“: Google-Bewertungen
 
@@ -228,7 +236,7 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 - Hover und Tastaturfokus pausieren beide Reihen. Es gibt kein Pinning und keinen GSAP-Ticker; die kompositorische Bewegung läuft als GPU-freundliche CSS-Transformation.
 - Einzelwertungen erscheinen als `★★★★★` beziehungsweise `★★★★☆` und besitzen einen zugänglichen Namen wie „4 von 5 Sternen“.
 - Reduced Motion stoppt beide Reihen, entfernt die visuellen Duplikate und macht die Originalreihen horizontal scrollbar.
-- Auf kleinen Viewports entfallen beide Dauerläufe und die visuellen Duplikate; die Originalkarten sind nativ horizontal scrollbar und rasten dezent ein.
+- Auf kleinen Viewports laufen beide GPU-freundlichen CSS-Reihen wie auf Desktop weiter. Erst Reduced Motion stoppt die Dauerläufe, entfernt die visuellen Duplikate und macht die Originalkarten nativ horizontal scrollbar.
 
 ### Deutsche Hauptseite „Notte“: Reservierungsabschluss
 
@@ -241,6 +249,7 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 ### Deutsche Hauptseite „Notte“: Feiern und besondere Anlässe
 
 - Die bilddominante Zweiteilung bleibt ein eigenständiges Kapitel: Text und Anfrageaktion links, festlich gedeckter Tisch rechts; mobil werden beide Flächen linear gestapelt.
+- Die gesamte Section ist auf Desktop, Tablet und Mobil exakt `100svh` hoch. Desktop nutzt zwei gleich breite Spalten; unter 900 px teilen feste Text-/Bildzeilen dieselbe Viewporthöhe, ohne eine zweite Scrollstrecke zu erzeugen.
 - Beim erstmaligen Eintritt wächst das Bild von `scale 0,94` auf seine natürliche Größe und blendet von `opacity 0,45` ein. Label, Fließtext und Anfrageaktion folgen mit 70 ms Abstand und maximal 24 px Y-Versatz; die Überschrift behält den bestehenden scrollgebundenen Wort-Reveal.
 - Die Animation verwendet nur Transform und Opacity, läuft einmal ohne Pinning und entfällt bei Reduced Motion vollständig.
 
@@ -270,7 +279,7 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 - Die Bühne verwendet eine durchgehende cremefarbene Fläche `#EEE5D7` ohne visuelle Trennung der beiden Spalten.
 - Desktop bleibt ein ruhiges 50/50-Raster: Ein kleines quadratisches Gerichtsfoto steht mittig in der linken Hälfte, während Kategorie, Originalpreis, Gerichtname und Kurzbeschreibung mittig in der rechten Hälfte erscheinen. Großzügige Negativfläche ist Teil der Komposition.
 - Der Gerichtname wechselt buchstabenweise mit einer vertikalen, unterbrechbaren Motion-Transition. Jedes Foto durchquert scrollgebunden die vollständige Section-Höhe: Es kommt mit einem responsiven Offscreen-Abstand von `96–150 px` vollständig hinter dem unteren Sectionrand hervor, erreicht denselben vertikalen Rastpunkt wie der zugehörige Text und verlässt die Section vollständig über den oberen Rand. Eine kurze scrollgebundene Ruhephase von `0,32` Timeline-Einheiten hält jedes Bild am Rastpunkt; dadurch beginnt das erste Bild beim Section-Eintritt bereits korrekt ausgerichtet. Beim Aufwärtsscrollen läuft dieselbe Strecke exakt rückwärts. Der Textzustand wechselt erst am erreichten Rastpunkt, nicht während der Durchfahrt. Die Section selbst maskiert den Überlauf; Transform bleibt die einzige bewegte Eigenschaft.
-- Mobil und bei Reduced Motion entfallen Pinning, Buchstabenwechsel und Offscreen-Fahrten. Alle drei Gerichte stehen als eigenständige Bild-/Textblöcke vollständig im normalen Dokumentfluss.
+- Mobil bleibt die gepinnte Bild-/Textfolge mit nativer Touch-Scrollbewegung erhalten; Lenis bleibt deaktiviert. Bei Reduced Motion entfallen Pinning, Buchstabenwechsel und Offscreen-Fahrten vollständig.
 
 - Desktop und Tablet verwenden eine zweispaltige Editorial-Komposition mit einem einzigen, unverändert sichtbaren Food-Foto links und einer vertikalen Auswahl verifizierter Gerichte rechts.
 - GSAP ScrollTrigger pinnt die gesamte Section für die Dauer der Sequenz. Ausschließlich die rechte Gerichtsspur bewegt sich scrub-gebunden nach oben; erst nach dem letzten Gericht wird das Pinning freigegeben. Beim Hochscrollen läuft die Sequenz reversibel zurück.

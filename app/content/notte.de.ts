@@ -76,6 +76,70 @@ export const notteContent = {
   },
 } as const;
 
+const notteContentEn = {
+  navigation: { brandEyebrow: "Ristorante", brandName: "Colosseo", menu: "Menu", events: "Celebrations", contact: "Contact", reserve: "Reserve" },
+  hero: { eyebrow: "Una sera al Colosseo", title: "An evening made to linger.", reserve: "Reserve a table", menu: "Explore the menu" },
+  welcome: {
+    title: "Dear guests and amici",
+    body: "Welcome to our Italian restaurant. Here, everything revolves around honest, delicious food without unnecessary fuss – simple, fresh and full of flavour.",
+    signature: "Buon Appetito!",
+    imageAlt: "Dining room of Ristorante Colosseo with laid tables and bar",
+  },
+  menu: { eyebrow: "From our menu", title: "Tre piatti. Una cucina.", open: "View the full menu", imageAlt: "Fresh pasta being prepared by hand" },
+  family: {
+    title: "A family restaurant for over 30 years.",
+    body: "With fresh ingredients and selected recipes, we want to bring the flavours of Italy closer to you. Whether for a relaxed lunch or an unhurried dinner, we look forward to welcoming you.",
+  },
+  events: {
+    eyebrow: "Celebrate at Colosseo",
+    title: "A table for the people who matter to you.",
+    body: "Private events, weddings and catering can be requested personally.",
+    action: "Enquire about an event",
+    imageAlt: "Guests raising their glasses over an Italian dinner",
+  },
+  reviews: { title: "What our guests say.", summary: "from 438 Google reviews", link: "See all reviews on Google", date: "As of 22 October 2026" },
+  reservation: { eyebrow: "Reservation", title: "Your table at Ristorante Colosseo.", body: "Reserve your table by phone. We look forward to your visit.", action: "Call 04171 62952" },
+  visit: {
+    hours: "Opening hours", contact: "Contact & directions", addressLine1: "Bahnhofstraße 42–45", addressLine2: "21423 Winsen (Luhe)", phone: "04171 62952", route: "Open directions", mapTitle: "Location on Google Maps", payment: "Cash and EC card", imageAlt: "Entrance to Ristorante Colosseo on Bahnhofstraße",
+  },
+  footer: { statement: "Italian food, freshly prepared.", menu: "Menu", restaurant: "Restaurant", events: "Celebrations", reviews: "Reviews", languages: "Languages" },
+} as const;
+
+const notteContentIt = {
+  navigation: { brandEyebrow: "Ristorante", brandName: "Colosseo", menu: "Menu", events: "Festeggiamenti", contact: "Contatti", reserve: "Prenota" },
+  hero: { eyebrow: "Una sera al Colosseo", title: "Una serata da vivere senza fretta.", reserve: "Prenota un tavolo", menu: "Scopri il menu" },
+  welcome: {
+    title: "Cari ospiti e amici",
+    body: "Benvenuti nel nostro ristorante italiano. Da noi tutto ruota attorno a una cucina buona e sincera, senza inutili complicazioni: semplice, fresca e deliziosa.",
+    signature: "Buon Appetito!",
+    imageAlt: "Sala del Ristorante Colosseo con tavoli apparecchiati e bar",
+  },
+  menu: { eyebrow: "Dal nostro menu", title: "Tre piatti. Una cucina.", open: "Vedi il menu completo", imageAlt: "Pasta fresca preparata a mano" },
+  family: {
+    title: "A conduzione familiare da oltre 30 anni.",
+    body: "Con ingredienti freschi e ricette selezionate desideriamo farvi conoscere i sapori d’Italia. Per un pranzo tranquillo o una cena rilassata, saremo felici di accogliervi.",
+  },
+  events: {
+    eyebrow: "Festeggiare al Colosseo",
+    title: "Un tavolo per le persone che contano.",
+    body: "Eventi privati, matrimoni e catering possono essere richiesti personalmente.",
+    action: "Richiedi un evento",
+    imageAlt: "Ospiti che brindano durante una cena italiana",
+  },
+  reviews: { title: "Cosa dicono i nostri ospiti.", summary: "su 438 recensioni Google", link: "Vedi tutte le recensioni su Google", date: "Aggiornato al 22 ottobre 2026" },
+  reservation: { eyebrow: "Prenotazione", title: "Il tuo tavolo al Ristorante Colosseo.", body: "Prenota il tuo tavolo per telefono. Ti aspettiamo.", action: "Chiama 04171 62952" },
+  visit: {
+    hours: "Orari di apertura", contact: "Contatti e indicazioni", addressLine1: "Bahnhofstraße 42–45", addressLine2: "21423 Winsen (Luhe)", phone: "04171 62952", route: "Apri le indicazioni", mapTitle: "Posizione su Google Maps", payment: "Contanti e carta EC", imageAlt: "Ingresso del Ristorante Colosseo in Bahnhofstraße",
+  },
+  footer: { statement: "Cucina italiana preparata al momento.", menu: "Menu", restaurant: "Ristorante", events: "Festeggiamenti", reviews: "Recensioni", languages: "Lingue" },
+} as const;
+
+export function getNotteContent(locale: "de" | "en" | "it") {
+  if (locale === "en") return notteContentEn;
+  if (locale === "it") return notteContentIt;
+  return notteContent;
+}
+
 export const menuDishes = [
   { category: "ANTIPASTI FREDDI", name: "MOZZARELLA CAPRESE", description: "Tomaten, Mozzarella und Basilikum", price: "10,50 €", image: "/images/colosseo/caprese.webp" },
   { category: "PASTA / TEIGWAREN", name: "PENNE ALLA SICILIANA", description: "Makkaroni mit Tomatensahnesauce, Paprika und Auberginen", price: "12,50 €", image: "/images/colosseo/pasta-verdure.webp" },
@@ -103,6 +167,15 @@ export const openingHours = [
   ["Samstag", "17–21 Uhr"],
   ["Sonntag", "12–14 · 17–21 Uhr"],
 ] as const;
+
+const openingHoursEn = [["Monday", "Closed"], ["Tuesday–Friday", "12–14 · 17–21"], ["Saturday", "17–21"], ["Sunday", "12–14 · 17–21"]] as const;
+const openingHoursIt = [["Lunedì", "Chiuso"], ["Martedì–Venerdì", "12–14 · 17–21"], ["Sabato", "17–21"], ["Domenica", "12–14 · 17–21"]] as const;
+
+export function getOpeningHours(locale: "de" | "en" | "it") {
+  if (locale === "en") return openingHoursEn;
+  if (locale === "it") return openingHoursIt;
+  return openingHours;
+}
 
 export const notteLinks = {
   phone: "tel:+49417162952",
