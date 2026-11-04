@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://ristorante-colosseo-winsen.netlify.app/sitemap.xml
