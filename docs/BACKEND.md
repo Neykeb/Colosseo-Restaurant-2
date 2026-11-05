@@ -1,24 +1,26 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS1` in Arbeit; Atlas-Verbindung und versionierter Migrationsrahmen verifiziert
+**Status:** Full-Stack-Phase `FS1` technisch abgeschlossen; Gate-Abnahme durch den Nutzer steht aus
 
 **Phase:** `FS1` – Plattformgrundlage und reproduzierbare Datenbank
 
-**Letzte Aktualisierung:** 04.11.2026
+**Letzte Aktualisierung:** 05.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
 ## 1. Aktueller Stand in 30 Sekunden
 
 - Die bestehende öffentliche React-/TypeScript-Website bleibt erhalten.
-- Die erste Backend-Grundlage ist implementiert: validierte Serverumgebung, Mongoose-Verbindung und erfolgreicher Atlas-Verbindungstest.
-- Der versionierte MongoDB-Migrationsrahmen ist implementiert: geordnete Registry, Historie, Ausführungssperre, Status, Vorwärtslauf, einzelner Rollback und Unit-Tests. Konkrete Schema-/Indexmigrationen folgen mit den bestätigten Modellen.
+- Die erste Backend-Grundlage ist implementiert: validierte Serverumgebung, getrennte Express-App und Serverstart, Healthcheck, Korrelations-ID, Fehlerformat, Mongoose-Verbindung und erfolgreicher Atlas-Verbindungstest.
+- Der versionierte MongoDB-Migrationsrahmen ist implementiert: geordnete Registry, Historie, Ausführungssperre, Status, Vorwärtslauf, einzelner Rollback und Unit-Tests. Die erste Core-Indexmigration ist in `colosseo_test` und `colosseo` erfolgreich angewendet.
 - Zielstack: React, TypeScript, Vite und TanStack Router im Frontend; Node.js, Express und TypeScript im Backend; MongoDB mit Mongoose, Clerk für OAuth und Sessions, Resend für E-Mails sowie Render für das Finalprojekt.
 - TanStack Router, Sprachrouten, direkte Reloads, gestalteter 404-Zustand, Lazy Loading, Netlify-Publish-Pfad und Build-Prerendering für 15 lokalisierte Routen sind lokal und auf `https://ristorante-colosseo-winsen.netlify.app` verifiziert. Canonical, Hreflang, Sitemap, `robots.txt` und die öffentlich geladenen JavaScript-Chunks wurden am 04.11.2026 live geprüft; der zuvor aktive Netlify-SSO-Zugriffsschutz ist deaktiviert.
 - Der Atlas-Benutzer besitzt am 03.11.2026 verifiziert ausschließlich datenbankspezifisches `readWrite` für `colosseo` und `colosseo_test`. Entwicklungsverbindung, Testverbindung und Test-Migrationslauf sind damit erfolgreich.
 - Vom Nutzer bestätigter Atlas-Betriebsstand: MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`), Replica Set mit drei Nodes, Backups derzeit inaktiv, keine verknüpften App Services und ein vorhandener Search-Index. Render soll später möglichst regionsnah betrieben werden; Backups bleiben vor einem realen Produktionsbetrieb zu klären.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.
 - Aktuelle Phase: `FS1`. MongoDB Atlas ohne zusätzliche lokale Docker-Datenbank und `GO für FS1` wurden am 02.11.2026 bestätigt.
+- Die Express-/TypeScript-Grundlage einschließlich statischer Produktionsauslieferung ist implementiert. Entwicklungs- und Produktionsprozess, Healthcheck, API-404 sowie die drei vorgerenderten Sprachseiten wurden am 05.11.2026 über echte lokale Listener geprüft.
+- Person A hat am 04.11.2026 vorläufige Kernmodelle, eine typisierte Reservation-Repository-/Service-Grenze, die erste Core-Indexmigration und einen künstlichen Development-Seed ergänzt. Reale Reservierungsregeln und produktive Geschäftsdaten sind nicht festgeschrieben.
 
 ## 2. Wo finde ich was?
 
@@ -123,9 +125,7 @@ Die ausführlichen Regeln stehen in `AGENTS.md` und `docs/SPEC.md`. Für den sch
 
 ### In `FS1` noch offen
 
-- Express-Grundgerüst, Kernmodelle, konkrete Indexmigrationen und typisierte Repositories umsetzen
-- Konkrete Schema-/Indexmigrationen ergänzen, sobald die zugehörigen Modelle in `FS1` festgelegt sind
-- Ein ausdrücklich freigegebenes Netlify-Deployment ausführen und anschließend Canonical, Hreflang, Sitemap, Reloads und Sprachrouten auf der Live-Site regressionsprüfen
+- Technischen Abschluss präsentieren und ausdrückliche Gate-Abnahme für `FS1` einholen
 
 ### Vor späteren Phasen offen
 
@@ -141,8 +141,8 @@ Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 
 ## 8. Nächster zulässiger Schritt
 
-1. Node-/Express-/TypeScript-Grundgerüst mit getrennten `app`-/`server`-Startpunkten aufbauen.
-2. Healthcheck, einheitliches Fehlerformat, Korrelations-ID und sichere Basiskonfiguration ergänzen.
-3. Danach Kernmodelle, konkrete Indexmigrationen und typisierte Repositories innerhalb von `FS1` umsetzen und testen.
+1. `FS1` mit den ausgeführten Tests und verbleibenden späteren Fachentscheidungen präsentieren.
+2. Auf die ausdrückliche Abnahme von Gate `FS1` warten.
+3. Erst nach separatem `GO für FS2` und bestätigten Clerk-Eingangsdaten mit der Admin-Authentifizierung beginnen.
 
 Der operative Termin- und Personenplan steht in `docs/DAILY_PLAN.md`.
