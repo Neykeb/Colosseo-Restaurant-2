@@ -1,15 +1,19 @@
 import { ArrowDownRight, ArrowRight, List, MapPin, Phone, X } from "@phosphor-icons/react";
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 
 import { TextRotate, type TextRotateRef } from "~/components/ui/text-rotate";
-import { googleReviews, menuDishes, notteContent, notteImages, notteLinks, openingHours } from "~/content/notte.de";
+import { Velaris } from "~/components/ui/velaris";
+import { ClerkAuthControls } from "~/components/clerk-auth-controls";
+import { getNotteContent, getOpeningHours, googleReviews, menuDishes, notteImages, notteLinks } from "~/content/notte.de";
 
 import { MaskedWords } from "./atoms";
 import { ReviewCard } from "./molecules";
 
-export function NotteNavigation() {
-  const content = notteContent.navigation;
+type NotteLocale = "de" | "en" | "it";
+
+export function NotteNavigation({ locale }: { locale: NotteLocale }) {
+  const content = getNotteContent(locale).navigation;
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -23,14 +27,17 @@ export function NotteNavigation() {
 
   return <header className="p-nav p-nav-dark no-site-nav">
     <a className="p-logo" href="#top"><small>{content.brandEyebrow}</small>{content.brandName}</a>
-    <nav aria-label="Hauptnavigation" className={open ? "is-open" : undefined}><a href="#menu" onClick={() => setOpen(false)}>{content.menu}</a><a href="#events" onClick={() => setOpen(false)}>{content.events}</a><a href="#contact" onClick={() => setOpen(false)}>{content.contact}</a></nav>
-    <button aria-expanded={open} aria-label={open ? "Navigation schließen" : "Navigation öffnen"} className="no-nav-toggle" onClick={() => setOpen((value) => !value)} type="button">{open ? <X size={22} /> : <List size={22} />}</button>
-    <a className="p-nav-cta" href={notteLinks.phone}><Phone size={17} /> {content.reserve}</a>
+    <nav aria-label={locale === "de" ? "Hauptnavigation" : locale === "en" ? "Main navigation" : "Navigazione principale"} className={open ? "is-open" : undefined}><a href="#menu" onClick={() => setOpen(false)}>{content.menu}</a><a href="#events" onClick={() => setOpen(false)}>{content.events}</a><a href="#contact" onClick={() => setOpen(false)}>{content.contact}</a></nav>
+    <button aria-expanded={open} aria-label={open ? (locale === "de" ? "Navigation schließen" : locale === "en" ? "Close navigation" : "Chiudi navigazione") : (locale === "de" ? "Navigation öffnen" : locale === "en" ? "Open navigation" : "Apri navigazione")} className="no-nav-toggle" onClick={() => setOpen((value) => !value)} type="button">{open ? <X size={22} /> : <List size={22} />}</button>
+    <div className="p-nav-actions">
+      <ClerkAuthControls />
+      <a className="p-nav-cta" href={notteLinks.phone}><Phone size={17} /> {content.reserve}</a>
+    </div>
   </header>;
 }
 
-export function HeroSection() {
-  const content = notteContent.hero;
+export function HeroSection({ locale }: { locale: NotteLocale }) {
+  const content = getNotteContent(locale).hero;
   return <section className="no-hero">
     <video className="no-hero-video" preload="metadata" muted playsInline poster={notteImages.heroPoster} aria-hidden="true" disablePictureInPicture>
       <source media="(hover: hover) and (pointer: fine) and (min-width: 768px)" src="/videos/pizza-scroll.mp4" type="video/mp4" />
@@ -41,16 +48,16 @@ export function HeroSection() {
   </section>;
 }
 
-export function WelcomeSection() {
-  const content = notteContent.welcome;
+export function WelcomeSection({ locale }: { locale: NotteLocale }) {
+  const content = getNotteContent(locale).welcome;
   return <section className="no-intro" id="story">
     <figure className="no-intro-media"><img src={notteImages.interior} alt={content.imageAlt} width="960" height="960" sizes="(max-width: 900px) 88vw, 40vw" loading="lazy" decoding="async" /></figure>
     <div className="no-intro-copy"><h2 data-word-reveal><MaskedWords text={content.title} /></h2><p>{content.body}</p><p className="no-intro-signature">{content.signature}</p></div>
   </section>;
 }
 
-export function MenuPreviewSection({ onOpenMenu, triggerRef }: { onOpenMenu: () => void; triggerRef: RefObject<HTMLButtonElement | null> }) {
-  const content = notteContent.menu;
+export function MenuPreviewSection({ locale, onOpenMenu, triggerRef }: { locale: NotteLocale; onOpenMenu: () => void; triggerRef: RefObject<HTMLButtonElement | null> }) {
+  const content = getNotteContent(locale).menu;
   const [activeSlide, setActiveSlide] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
   const textRotateRef = useRef<TextRotateRef>(null);
@@ -91,48 +98,52 @@ export function MenuPreviewSection({ onOpenMenu, triggerRef }: { onOpenMenu: () 
   </section>;
 }
 
-export function FamilyStorySection() {
-  const content = notteContent.family;
+export function FamilyStorySection({ locale }: { locale: NotteLocale }) {
+  const localizedContent = getNotteContent(locale);
+  const content = localizedContent.family;
   return <section className="no-family" id="family" aria-labelledby="family-title">
-    <img className="no-family-background" src="/images/colosseo/exterior-entrance.png" alt={notteContent.visit.imageAlt} width="1630" height="965" loading="lazy" decoding="async" />
+    <img className="no-family-background" src="/images/colosseo/exterior-entrance.png" alt={localizedContent.visit.imageAlt} width="1630" height="965" loading="lazy" decoding="async" />
     <div className="no-family-wash" aria-hidden="true" />
     <div className="no-family-copy"><h2 id="family-title"><MaskedWords text={content.title} /></h2><p>{content.body}</p></div>
   </section>;
 }
 
-export function EventsSection() {
-  const content = notteContent.events;
+export function EventsSection({ locale }: { locale: NotteLocale }) {
+  const content = getNotteContent(locale).events;
   return <section className="no-events" id="events">
     <div><p className="no-events-support">{content.eyebrow}</p><h2 data-word-reveal><MaskedWords text={content.title} /></h2><p className="no-events-support">{content.body}</p><a className="no-events-support" href={notteLinks.events}>{content.action} <ArrowRight /></a></div>
     <img className="no-events-image" src={notteImages.events} alt={content.imageAlt} width="1122" height="1402" loading="lazy" decoding="async" />
   </section>;
 }
 
-export function ReviewsSection() {
-  const content = notteContent.reviews;
+export function ReviewsSection({ locale }: { locale: NotteLocale }) {
+  const content = getNotteContent(locale).reviews;
   const rows = [googleReviews.slice(0, 6), googleReviews.slice(6)];
   return <section className="no-reviews" id="reviews" aria-labelledby="reviews-title" data-reveal-once>
     <header className="no-reviews-heading" data-reveal-item><div className="no-reviews-score"><span aria-hidden="true">★★★★★</span><strong>4,5</strong><p>{content.summary}</p></div><h2 id="reviews-title">{content.title}</h2></header>
-    <div className="no-review-marquees" aria-label="Ausgewählte Google-Rezensionen" data-reveal-item>
+    <div className="no-review-marquees" aria-label={locale === "de" ? "Ausgewählte Google-Rezensionen" : locale === "en" ? "Selected Google reviews" : "Recensioni Google selezionate"} data-reveal-item>
       {rows.map((row, rowIndex) => <div className={`no-review-rail no-review-rail-${rowIndex + 1}`} key={rowIndex}>
-        {[false, true].map((duplicate) => <div className="no-review-set" aria-hidden={duplicate || undefined} key={duplicate ? "duplicate" : "original"}>{row.map((review) => <ReviewCard duplicate={duplicate} key={review.author} review={review} />)}</div>)}
+        {[false, true].map((duplicate) => <div className="no-review-set" aria-hidden={duplicate || undefined} key={duplicate ? "duplicate" : "original"}>{row.map((review) => <ReviewCard duplicate={duplicate} key={review.author} locale={locale} review={review} />)}</div>)}
       </div>)}
     </div>
     <footer className="no-reviews-footer" data-reveal-item><a href={notteLinks.reviews} rel="noreferrer" target="_blank">{content.link} <ArrowRight /></a><small>{content.date}</small></footer>
   </section>;
 }
 
-export function ReservationSection() {
-  const content = notteContent.reservation;
-  return <section className="no-reservation" id="action" aria-labelledby="reservation-title">
-    <div className="no-reservation-intro"><p>{content.eyebrow}</p><span className="no-reservation-rule" aria-hidden="true" /></div>
-    <h2 id="reservation-title" data-word-reveal><MaskedWords text={content.title} /></h2>
-    <div className="no-reservation-details"><p>{content.body}</p><a href={notteLinks.phone}><Phone size={20} weight="regular" />{content.action}</a></div>
-  </section>;
+export function ReservationSection({ locale }: { locale: NotteLocale }) {
+  const content = getNotteContent(locale).reservation;
+  return <Velaris className="no-reservation-shell">
+    <section className="no-reservation" id="action" aria-labelledby="reservation-title">
+      <div className="no-reservation-intro"><p>{content.eyebrow}</p><span className="no-reservation-rule" aria-hidden="true" /></div>
+      <h2 id="reservation-title" data-word-reveal><MaskedWords text={content.title} /></h2>
+      <div className="no-reservation-details"><p>{content.body}</p><a href={notteLinks.phone}><Phone size={20} weight="regular" />{content.action}</a></div>
+    </section>
+  </Velaris>;
 }
 
-export function VisitSection() {
-  const content = notteContent.visit;
+export function VisitSection({ locale }: { locale: NotteLocale }) {
+  const content = getNotteContent(locale).visit;
+  const openingHours = getOpeningHours(locale);
   return <section className="no-info" id="contact" aria-labelledby="contact-title">
     <div className="no-info-contact"><p>{content.contact}</p><h2 id="contact-title">{content.addressLine1}<br />{content.addressLine2}</h2><div><a href={notteLinks.phone}><Phone /> {content.phone}</a><a href={notteLinks.route}><MapPin /> {content.route}</a></div><small>{content.payment}</small></div>
     <div className="no-info-details"><p>{content.hours}</p><dl>{openingHours.map(([day, hours]) => <div key={day}><dt>{day}</dt><dd>{hours}</dd></div>)}</dl><a className="no-info-map" href={notteLinks.route}><MapPin size={30} weight="fill" /><span><strong>{content.mapTitle}</strong><small>{content.route}</small></span><ArrowRight /></a></div>
@@ -140,12 +151,13 @@ export function VisitSection() {
 }
 
 export function NotteFooter({ locale }: { locale: "de" | "en" | "it" }) {
-  const content = notteContent.footer;
-  const visit = notteContent.visit;
+  const localizedContent = getNotteContent(locale);
+  const content = localizedContent.footer;
+  const visit = localizedContent.visit;
   return <footer className="no-footer" data-reveal-once>
     <div className="no-footer-brand" data-reveal-item><strong>Ristorante Colosseo</strong><p>{content.statement}</p></div>
     <nav aria-label="Footer-Navigation" data-reveal-item><a href="#menu">{content.menu}</a><a href="#story">{content.restaurant}</a><a href="#events">{content.events}</a><a href="#reviews">{content.reviews}</a></nav>
     <div className="no-footer-contact" data-reveal-item><a href={notteLinks.phone}>{visit.phone}</a><p>{visit.addressLine1}<br />{visit.addressLine2}</p></div>
-    <nav className="no-footer-languages" aria-label={content.languages} data-reveal-item>{(["de", "en", "it"] as const).map((language) => <Link aria-current={locale === language ? "page" : undefined} key={language} to={`/${language}`}>{language.toUpperCase()}</Link>)}</nav>
+    <nav className="no-footer-languages" aria-label={content.languages} data-reveal-item>{(["de", "en", "it"] as const).map((language) => <Link aria-current={locale === language ? "page" : undefined} key={language} to="/$lang" params={{ lang: language }} search={{}}>{language.toUpperCase()}</Link>)}</nav>
   </footer>;
 }

@@ -22,29 +22,33 @@ function usePrototypeMotion(kind: "materia" | "notte" | "grafica" | "casa") {
   const root = useRef<HTMLDivElement>(null);
   useGSAP(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const mobileLite = prefersReducedMotion
-      || window.matchMedia("(pointer: coarse)").matches
-      || window.matchMedia("(max-width: 767px)").matches;
-    root.current?.classList.toggle("is-mobile-lite", mobileLite);
-    if (mobileLite) {
-      return () => root.current?.classList.remove("is-mobile-lite");
+    const compactViewport = window.matchMedia("(max-width: 767px)").matches;
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    root.current?.classList.toggle("is-compact-viewport", compactViewport);
+    root.current?.classList.toggle("is-reduced-motion", prefersReducedMotion);
+    if (prefersReducedMotion) {
+      return () => {
+        root.current?.classList.remove("is-compact-viewport", "is-reduced-motion");
+      };
     }
     const ease = "power3.out";
     gsap.from("[data-enter]", { opacity: 0, y: kind === "grafica" ? 24 : 42, duration: 0.85, stagger: 0.09, ease });
     if (kind === "notte") {
       ScrollTrigger.clearScrollMemory("manual");
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      const lenis = new Lenis({
-        duration: 1.05,
-        easing: (value) => Math.min(1, 1.001 - Math.pow(2, -10 * value)),
-        smoothWheel: true,
-        syncTouch: false,
-        wheelMultiplier: 0.9,
-      });
-      const updateLenis = (time: number) => lenis.raf(time * 1000);
-      lenis.on("scroll", ScrollTrigger.update);
-      gsap.ticker.add(updateLenis);
-      gsap.ticker.lagSmoothing(0);
+      const lenis = finePointer && !compactViewport ? new Lenis({
+          duration: 1.05,
+          easing: (value) => Math.min(1, 1.001 - Math.pow(2, -10 * value)),
+          smoothWheel: true,
+          syncTouch: false,
+          wheelMultiplier: 0.9,
+        }) : undefined;
+      const updateLenis = (time: number) => lenis?.raf(time * 1000);
+      if (lenis) {
+        lenis.on("scroll", ScrollTrigger.update);
+        gsap.ticker.add(updateLenis);
+        gsap.ticker.lagSmoothing(0);
+      }
       const hero = root.current?.querySelector<HTMLElement>(".no-hero");
       const video = root.current?.querySelector<HTMLVideoElement>(".no-hero-video");
       const intro = root.current?.querySelector<HTMLElement>(".no-intro");
@@ -127,12 +131,12 @@ function usePrototypeMotion(kind: "materia" | "notte" | "grafica" | "casa") {
           },
         });
         ScrollTrigger.refresh();
-        lenis.scrollTo(0, { immediate: true });
+        if (lenis) lenis.scrollTo(0, { immediate: true });
       };
 
       if (video?.readyState && video.readyState >= HTMLMediaElement.HAVE_METADATA) createVideoScrub();
       else video?.addEventListener("loadedmetadata", createVideoScrub, { once: true });
-      if (intro && root.current) {
+      if (!compactViewport && intro && root.current) {
         root.current.classList.add("has-layer-reveal");
         gsap.fromTo(intro, { yPercent: 16 }, {
           yPercent: 0,
@@ -178,12 +182,14 @@ function usePrototypeMotion(kind: "materia" | "notte" | "grafica" | "casa") {
         familyTimeline
           .from(familyHeadingWords, { yPercent: 115, duration: 0.72, stagger: 0.055 })
           .from(familyBody, { opacity: 0, y: 24, duration: 0.7 }, "<+0.16");
-        gsap.fromTo(familyImage, { yPercent: -5, scale: 1.1 }, {
-          yPercent: 5,
-          scale: 1.03,
-          ease: "none",
-          scrollTrigger: { trigger: family, start: "top bottom", end: "bottom top", scrub: 0.6 },
-        });
+        if (!compactViewport) {
+          gsap.fromTo(familyImage, { yPercent: -5, scale: 1.1 }, {
+            yPercent: 5,
+            scale: 1.03,
+            ease: "none",
+            scrollTrigger: { trigger: family, start: "top bottom", end: "bottom top", scrub: 0.6 },
+          });
+        }
       }
       gsap.utils.toArray<HTMLElement>("[data-reveal-once]").forEach((section) => {
         const items = section.querySelectorAll<HTMLElement>("[data-reveal-item]");
@@ -314,12 +320,14 @@ function usePrototypeMotion(kind: "materia" | "notte" | "grafica" | "casa") {
       }
       return () => {
         removeNavigationListener();
-        gsap.ticker.remove(updateLenis);
-        lenis.destroy();
+        if (lenis) {
+          gsap.ticker.remove(updateLenis);
+          lenis.destroy();
+        }
         video?.removeEventListener("loadedmetadata", createVideoScrub);
         if (videoFrameRequest !== undefined) video?.cancelVideoFrameCallback?.(videoFrameRequest);
         videoTween?.kill();
-        root.current?.classList.remove("has-layer-reveal");
+        root.current?.classList.remove("has-layer-reveal", "is-compact-viewport", "is-reduced-motion");
       };
     } else if (kind === "grafica") {
       gsap.to("[data-marquee]", { xPercent: -50, duration: 18, ease: "none", repeat: -1 });

@@ -1,11 +1,15 @@
 # Funktionale und technische Spezifikation
 
-**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS0` als nicht freigegebener Architekturentwurf
-**Letzte Aktualisierung:** 30.10.2026
+**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS1` freigegeben und in Arbeit
+**Letzte Aktualisierung:** 03.11.2026
 
-Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. Neue Full-Stack-Festlegungen bleiben bis Gate `FS0` `VORSCHLAG`.
+Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. `FS1` wurde am 02.11.2026 ausdrücklich freigegeben; spätere Full-Stack-Phasen bleiben bis zu ihrem jeweiligen Gate gesperrt.
 
-> **Änderungsauftrag 30.10.2026:** Die Abschnitte 20 bis 29 planen ein eigenes Reservierungs-Backend, Administration und Inhaltsverwaltung. Der zuletzt festgelegte Zielstack ist Node.js/Express/TypeScript, MongoDB mit Mongoose, Render, Resend und Clerk OAuth für die Admin-Anmeldung. MongoDB Atlas ist noch als Betriebsform zu bestätigen. Die konkrete Umsetzung bleibt bis Gate `FS0` gesperrt. Bis dahin bleibt die laufende statische Website unverändert maßgeblich.
+> **Änderungsauftrag 30.10.2026, bestätigt 02.11.2026:** Die Abschnitte 20 bis 29 planen ein eigenes Reservierungs-Backend, Administration und Inhaltsverwaltung. Der Zielstack ist Node.js/Express/TypeScript, MongoDB Atlas mit Mongoose, Render, Resend und Clerk OAuth für die Admin-Anmeldung. Eine zusätzliche lokale Docker-Datenbank ist ausgeschlossen. `FS1` ist freigegeben; spätere Phasen benötigen weiterhin jeweils ein eigenes `GO`.
+
+> **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. Der Ist-Zustand bleibt bis zur ausdrücklich freigegebenen Migration React Router Framework Mode. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
+
+> **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. Der Ist-Zustand bleibt bis zur ausdrücklich freigegebenen Migration React Router Framework Mode. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
 
 ## 1. Ziel und Abgrenzung
 
@@ -53,9 +57,9 @@ Technische Referenzen: offizielle Dokumentation zu [React Router Framework Mode]
 
 ## 3. Rendering und Deployment-Modell
 
-- React Router Framework Mode mit `ssr: false`.
-- Alle bekannten Sprach- und Inhaltsrouten werden über `prerender` in `react-router.config.ts` vorab erzeugt.
-- Ausgabe ist statisch hostbar. Netlify ist als erster Hostinganbieter bestätigt; `netlify.toml` baut mit `npm run build`, veröffentlicht `build/client`, leitet `/` auf `/de` und stellt für unbekannte clientseitige Pfade ergänzend den SPA-Fallback bereit.
+- TanStack Router betreibt die interaktive Anwendung als Vite-SPA.
+- Der Production-Build erzeugt anschließend über `scripts/prerender.ts` eigenes, lokalisiertes HTML für alle 15 bekannten Sprach- und Inhaltsrouten. Das HTML enthält sichtbaren semantischen Inhalt, Route-Metadaten und strukturierte Restaurantdaten; React übernimmt danach die Interaktivität.
+- Ausgabe ist statisch hostbar. Netlify baut mit `npm run build`, veröffentlicht `dist`, leitet `/` auf `/de` und stellt für unbekannte clientseitige Pfade ergänzend den SPA-Fallback bereit.
 - Für unbekannte URLs wird eine lokalisierbare 404-Seite vorgerendert oder hostingspezifisch zugeordnet.
 - Eine SPA-Fallback-Datei darf nur ergänzend verwendet werden; kanonische Inhaltsrouten müssen eigenes HTML besitzen.
 - Form- oder Reservierungsdaten werden nicht serverseitig gespeichert.
@@ -318,6 +322,8 @@ Die zufällige Auswahl darf das freigegebene Inhaltsmodell, die Barrierefreiheit
 - `robots.txt` verweist auf die Sitemap und blockiert keine notwendigen Assets.
 - JSON-LD vom Typ `Restaurant` erst mit realen Angaben zu Name, URL, Telefon, Adresse und Öffnungszeiten veröffentlichen.
 - `servesCuisine: "Italian"` ist sachlich bestätigt; Speisekarten-URL und Reservierungs-URL werden erst nach Lieferung ergänzt.
+- Canonical, absolute `hreflang`-Links, `og:url` und XML-Sitemap werden nur erzeugt, wenn beim Build die bestätigte Produktionsbasis als `SITE_URL` gesetzt ist. Ohne bestätigte Domain werden keine URLs erfunden; `robots.txt` erlaubt das Crawling, enthält dann aber noch keinen Sitemap-Verweis.
+- Die am 03.11.2026 über die verknüpfte Netlify-Site verifizierte Produktionsbasis ist `https://ristorante-colosseo-winsen.netlify.app`. Solange keine eigene Domain ausdrücklich bestätigt wird, ist genau diese URL als `SITE_URL` zu verwenden.
 - Semantisch genau eine H1 pro Seite und logisch verschachtelte Folgeüberschriften.
 
 ## 14. Accessibility
@@ -428,7 +434,7 @@ Weiter ausgeschlossen bleiben Online-Essensbestellung, Warenkorb und Zahlungsabw
 
 | Schicht | Vorschlag | Begründung |
 |---|---|---|
-| Öffentliche UI und Admin-UI | bestehendes React Router/Vite/TypeScript-Projekt | Bewahrt Routen, Design, Komponenten und Buildsystem; Admin wird als lazy geladener, geschützter Bereich ergänzt. |
+| Öffentliche UI und Admin-UI | bestehendes React-/Vite-/TypeScript-Projekt, geplant mit TanStack Router | Der aktuelle React Router wird kontrolliert migriert. Öffentliche Sprachrouten, Design und Komponenten bleiben erhalten; der Adminbereich wird lazy geladen und geschützt ergänzt. |
 | Server | eigener Node.js-/Express-/TypeScript-Server | API, Authentifizierung, Validierung und Geschäftslogik bleiben selbst entwickelt und nachvollziehbar. |
 | Produktionsbetrieb | ein Render Web Service für Express, API und statischen React-Build | Gemeinsame Origin vereinfacht sichere Cookie-Sessions, CSRF-Schutz und Deployment. Express bindet an `0.0.0.0` und den von Render gelieferten `PORT`. |
 | Datenbank | MongoDB Atlas; Region möglichst nah am Render Web Service | Verwalteter MongoDB-Betrieb mit Replica Set für Transaktionen; Render und Atlas besitzen eine dokumentierte Integration. |
@@ -466,6 +472,15 @@ tests/
 ```
 
 Im lokalen Betrieb laufen Vite und Express als getrennte Prozesse; Vite leitet `/api` an Express weiter. Im Produktionsbetrieb beantwortet Express zuerst `/api/*`, Healthcheck und Admin-Sicherheitsrouten und liefert danach `build/client` einschließlich kontrolliertem SPA-Fallback aus. So bleibt der React-Build selbst statisch optimierbar, während API und sichere Sessions dieselbe Origin verwenden.
+
+### Frontend-Router-Migration (`VORSCHLAG`)
+
+- TanStack Router übernimmt öffentliche Sprachrouten und den späteren geschützten Adminbereich.
+- Die vorhandenen URLs `/de`, `/en`, `/it` sowie bestehende Hash-/Section-Ziele dürfen sich nicht unbemerkt ändern.
+- Route-Komponenten und Admin-Chunks werden lazy geladen; Backend-Routen unter `/api/*` bleiben ausschließlich Express zugeordnet.
+- Vor Entfernung von React Router müssen äquivalente Tests für Locale-Auflösung, Navigation, Direktaufruf, Reload, unbekannte Routen und Produktionsfallback bestehen.
+- Die bisherige statische Vorabgenerierung aus React Router Framework Mode steht mit dem Routerwechsel nicht automatisch weiter zur Verfügung. Vor Umsetzung wird in `FS1` festgelegt und getestet, ob die öffentliche Website über einen kompatiblen Vite-Prerender-Schritt, statische Snapshots oder eine andere ausdrücklich dokumentierte Lösung ausgeliefert wird.
+- React Router-Abhängigkeiten und `react-router.config.ts` werden erst entfernt, wenn TanStack Router und die neue Build-/Prerender-Strategie vollständig verifiziert sind.
 
 ### Bewusste Nichtentscheidungen
 
