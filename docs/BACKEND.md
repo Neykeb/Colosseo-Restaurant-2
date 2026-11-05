@@ -124,15 +124,18 @@ Die ausführlichen Regeln stehen in `AGENTS.md` und `docs/SPEC.md`. Für den sch
 - E-Mail-Service: Resend
 - Hosting: Render, zunächst für das Finalprojekt
 
-### In `FS1` noch offen
+### Aktueller FS2-Einstieg
 
-- Technischen Abschluss präsentieren und ausdrückliche Gate-Abnahme für `FS1` einholen
+- `FS1` wurde am 05.11.2026 abgenommen und `FS2` ausdrücklich freigegeben.
+- Eine Clerk-Anwendung existiert; Google ist der einzige OAuth-Anbieter.
+- Der erste Restaurantbesitzer wird über seine Clerk User-ID als `owner` mit Vollzugriff zugelassen.
+- Die Clerk-Änderungen von Person A müssen zuerst auf `dev` verfügbar sein; bis dahin wird keine parallele oder doppelte Authentifizierungsimplementierung begonnen.
 
 ### Vor späteren Phasen offen
 
 - Backup-Strategie beziehungsweise passender Atlas-Tarif vor einem realen Produktionsbetrieb
-- Clerk-Anwendung, OAuth-Anbieter und erste Owner-Identität
-- Rollenmatrix für `owner` und `staff`
+- konkrete Clerk User-ID des ersten Owners
+- konkrete Rechte für `staff`; bis zur Freigabe bleibt diese Rolle gesperrt
 - reale Tische, Bereiche, Kombinations- und Reservierungsregeln
 - Datenschutz-, Aufbewahrungs-, Storno- und No-show-Regeln
 - E-Mail-Absenderdomain und Restaurantempfänger
@@ -142,8 +145,8 @@ Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 
 ## 8. Nächster zulässiger Schritt
 
-1. `FS1` mit den ausgeführten Tests und verbleibenden späteren Fachentscheidungen präsentieren.
-2. Auf die ausdrückliche Abnahme von Gate `FS1` warten.
-3. Erst nach separatem `GO für FS2` und bestätigten Clerk-Eingangsdaten mit der Admin-Authentifizierung beginnen.
+1. Auf den Clerk-Push von Person A nach `dev` warten und ihn konfliktfrei integrieren.
+2. Vorhandene Clerk-Umgebungsvariablen, Google-OAuth-Fluss und Secret-Trennung prüfen, ohne Schlüssel auszugeben.
+3. Konkrete Clerk User-ID des ersten Owners erfassen und anschließend nur den noch fehlenden FS2-Umfang implementieren.
 
 Der operative Termin- und Personenplan steht in `docs/DAILY_PLAN.md`.

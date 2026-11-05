@@ -200,11 +200,13 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [x] Getrennte Atlas-Testdatenbank `colosseo_test`, datenbankspezifische `readWrite`-Rollen, AWS Frankfurt (`eu-central-1`) und das dreiknotige Replica Set verifizieren; die erste Core-Indexmigration ist am 05.11.2026 erfolgreich und idempotent in `colosseo_test` sowie `colosseo` angewendet. Backups bleiben als späterer Produktionsbetriebspunkt offen.
 - [x] Express-Grundgerüst mit Healthcheck, Fehlerformat, Korrelations-ID, sicherer Basiskonfiguration und statischer Produktionsauslieferung aufsetzen. Der direkte TypeScript-Prozessstart wurde korrigiert; echte Listener-Smoke-Tests für Development, Production, Healthcheck, API-404 und vorgerenderte Sprachseiten sind erfolgreich.
 - [x] Bestehenden öffentlichen Build lokal und auf Netlify regressionsprüfen; Typecheck, Lint, 24/24 Tests, Build, erzeugte Sprachdateien, lokalisierte Live-Routen, direkte Reloads, clientseitige 404, SEO-Dateien und JavaScript-Chunks sind erfolgreich geprüft.
-- [-] **GATE FS1:** Technische Umsetzung und Prüfungen sind abgeschlossen; Präsentation und ausdrückliche Nutzerabnahme stehen aus. Danach auf ein separates `GO für FS2` warten.
+- [x] **GATE FS1:** Technische Umsetzung und Prüfungen wurden am 05.11.2026 präsentiert und vom Nutzer mit ausdrücklichem `GO` abgenommen. `FS2` ist freigegeben; der Anwendungsstart wartet ausschließlich auf die darunter genannten Clerk-Eingangsdaten.
 
 ### FS2 – Admin-Authentifizierung und geschütztes Grundlayout
 
 **Benötigt vor Start:** Clerk-Konto/Anwendung, gewünschte OAuth-Anbieter, erste Owner-Identität und Rollenmatrix.
+
+**Freigabe:** `GO für FS2` am 05.11.2026 erteilt. Eine Clerk-Anwendung existiert und Google wurde als einziger OAuth-Anbieter bestätigt. `owner` erhält Vollzugriff; `staff` bleibt bis zu einer späteren Rechtefreigabe gesperrt. Die konkrete Clerk User-ID des ersten Owners und die noch nicht gepushten Clerk-Änderungen von Person A stehen aus.
 
 - [-] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren; `@clerk/react`, `@clerk/express`, `ClerkProvider` und bedingte `clerkMiddleware()` sind lokal eingerichtet. Ein echter signierter Backend-Request bleibt offen.
 - [ ] OAuth-Anmeldung, Abmeldung, Sessionablauf, Redirect-Allowlist und Fehlerzustände umsetzen.
@@ -290,5 +292,5 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 10. `OFFEN` Sollen bestehende Reservierungen oder andere Daten importiert werden?
 11. `OFFEN` Soll die lokale MongoDB als Replica Set über Docker laufen oder ist bereits eine transaktionsfähige MongoDB-Entwicklungsumgebung vorhanden?
 12. `OFFEN` Welcher externe Objektspeicher darf später für hochgeladene Speisekartenbilder verwendet werden?
-13. `OFFEN` Welcher Clerk-OAuth-Anbieter soll erlaubt werden: Google, Microsoft oder beide?
-14. `OFFEN` Existiert bereits ein Clerk-Konto beziehungsweise eine Clerk-Anwendung, und welche Identität soll erster Owner werden?
+13. `VERIFIZIERT` Für die bestehende Clerk-Anwendung wird ausschließlich Google OAuth verwendet.
+14. `TEILWEISE OFFEN` Die erste Restaurantbesitzer-Identität erhält `owner` mit Vollzugriff und wird dauerhaft über ihre Clerk User-ID autorisiert. Die konkrete User-ID wird nach dem Push von Person A beziehungsweise dem ersten kontrollierten Clerk-Kontoabgleich eingetragen.
