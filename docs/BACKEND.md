@@ -4,7 +4,7 @@
 
 **Phase:** `FS1` – Plattformgrundlage und reproduzierbare Datenbank
 
-**Letzte Aktualisierung:** 03.11.2026
+**Letzte Aktualisierung:** 04.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
@@ -14,7 +14,7 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 - Die erste Backend-Grundlage ist implementiert: validierte Serverumgebung, Mongoose-Verbindung und erfolgreicher Atlas-Verbindungstest.
 - Der versionierte MongoDB-Migrationsrahmen ist implementiert: geordnete Registry, Historie, Ausführungssperre, Status, Vorwärtslauf, einzelner Rollback und Unit-Tests. Konkrete Schema-/Indexmigrationen folgen mit den bestätigten Modellen.
 - Zielstack: React, TypeScript, Vite und TanStack Router im Frontend; Node.js, Express und TypeScript im Backend; MongoDB mit Mongoose, Clerk für OAuth und Sessions, Resend für E-Mails sowie Render für das Finalprojekt.
-- TanStack Router ist im Quellcode implementiert; Sprachrouten, direkte Reloads, gestalteter 404-Zustand, Lazy Loading, Netlify-Publish-Pfad und Build-Prerendering für 15 lokalisierte Routen sind lokal verifiziert. Die verknüpfte Netlify-Produktionsbasis `https://ristorante-colosseo-winsen.netlify.app` ist als `SITE_URL` gesetzt; Canonical, Hreflang, Sitemap und `robots.txt` wurden damit im lokalen Production-Build erfolgreich geprüft. Die Regression nach einem echten Netlify-Deployment bleibt offen.
+- TanStack Router, Sprachrouten, direkte Reloads, gestalteter 404-Zustand, Lazy Loading, Netlify-Publish-Pfad und Build-Prerendering für 15 lokalisierte Routen sind lokal und auf `https://ristorante-colosseo-winsen.netlify.app` verifiziert. Canonical, Hreflang, Sitemap, `robots.txt` und die öffentlich geladenen JavaScript-Chunks wurden am 04.11.2026 live geprüft; der zuvor aktive Netlify-SSO-Zugriffsschutz ist deaktiviert.
 - Der Atlas-Benutzer besitzt am 03.11.2026 verifiziert ausschließlich datenbankspezifisches `readWrite` für `colosseo` und `colosseo_test`. Entwicklungsverbindung, Testverbindung und Test-Migrationslauf sind damit erfolgreich.
 - Vom Nutzer bestätigter Atlas-Betriebsstand: MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`), Replica Set mit drei Nodes, Backups derzeit inaktiv, keine verknüpften App Services und ein vorhandener Search-Index. Render soll später möglichst regionsnah betrieben werden; Backups bleiben vor einem realen Produktionsbetrieb zu klären.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.

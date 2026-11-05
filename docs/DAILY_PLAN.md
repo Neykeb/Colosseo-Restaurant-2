@@ -6,7 +6,7 @@
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 03.11.2026
+**Letzte Aktualisierung:** 04.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -64,7 +64,7 @@ Diese Liste beschreibt nur zusätzliche Projektthemen. Sie ist keine Dokumentati
 |---|---|---|---|---|
 | Mo, 02.11. | FS1-Server- und API-Struktur vorbereiten; offene Reservierungsfragen bündeln | MongoDB Atlas festlegen, Mongoose-Umgebung und Verbindungstest umsetzen; TanStack-Router-Stand verifizieren | Person B: Atlas-Verbindung und Router-Bestand verifiziert; Person A bleibt separat | `PERSON B ERLEDIGT` |
 | Di, 03.11. | Express/TypeScript, App-/Server-Trennung, Healthcheck, Fehlerformat und Konfigurationsvalidierung | MongoDB/Mongoose-Verbindung, Migrationsrahmen und lokale Testumgebung | Reproduzierbare Plattform, Unit-/Integrationstest und gegenseitiger Review | `BLOCKIERT` bis `GO FS1` |
-| Mi, 04.11. | Kernmodelle, Repository-/Service-Grenzen, Indizes und künstliche Seed-Daten | TanStack Router migrieren; Sprachrouten, Direktaufruf, Reload, Lazy Loading und Buildstrategie absichern | FS1-Datenbasis plus Router-Regression; React Router erst nach erfolgreicher Abnahme entfernen | `BLOCKIERT` bis `GO FS1` |
+| Mi, 04.11. | Kernmodelle, Repository-/Service-Grenzen, Indizes und künstliche Seed-Daten | TanStack Router, Sprachrouten, Direktaufruf, Reload, Lazy Loading, Prerendering und Netlify-Livebetrieb absichern | Person B: vollständige lokale und produktive Router-/SEO-Regression abgeschlossen; Person A bleibt separat | `PERSON B ERLEDIGT` |
 | Do, 05.11. | Clerk-Prüfung, Adminprofile, Rollenmiddleware und Autorisierungstests | Clerk-Client, OAuth-Zustände und geschütztes Admin-Grundlayout | Nur nach `GO FS2`: erlaubter Owner-Zugriff und verständliches `403` für nicht freigeschaltete Konten | `BLOCKIERT` bis `GO FS2` |
 | Fr, 06.11. | Verfügbarkeits-, Zeitfenster- und Statuslogik | reale Tisch-/Bereichsdaten modellieren; Config-/Availability-Integration | Nur nach `GO FS3`: fachliche Regeln und Grenzfälle als Tests nachweisen | `BLOCKIERT` bis `GO FS3` |
 | Mo, 09.11. | atomare Tischzuweisung, Idempotenz, Rate-Limit und parallele Reservierungsversuche | öffentliches Reservierungsformular mit Lade-, Fehler-, Mobil- und Accessibility-Zuständen | Letzte Kapazität kann nicht doppelt bestätigt werden; API- und UI-Integration | `BLOCKIERT` bis passende Gates |
@@ -147,3 +147,13 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Person B – Produktionsregression:** `npm run typecheck`, `npm run lint`, `npm test` mit 24/24 Tests und `npm run build` erfolgreich. `/de`, `/en`, `/it`, direkter Reload und die gestaltete 404-Seite wurden im lokalen Produktions-Build geprüft; `netlify.toml` veröffentlicht `dist`. Die Build-Hinweise zu fremden `use client`-Direktiven sind nicht fehlgeschlagen und stammen aus Abhängigkeiten.
 - **Prerender-Prüfung:** Typecheck, Lint, 24/24 Tests und Build erfolgreich. Die 15 Zieldateien, lokalisierte statische Inhalte, Metadaten, strukturierte Daten sowie die anschließende interaktive React-Darstellung wurden geprüft. Ein zunächst gefundener `%20`-Pfadfehler bei Leerzeichen im Projektordner wurde mit `fileURLToPath` behoben; der ausschließlich dadurch erzeugte Fehlordner wurde in den Papierkorb verschoben.
 - **Nächster Einstieg Person B:** Nach ausdrücklicher Deployment-Freigabe den aktuellen Stand auf Netlify veröffentlichen und Canonical/Hreflang/Sitemap, Sprachrouten, Reload und 404 live regressionsprüfen. Konkrete Indexmigrationen folgen erst zusammen mit den bestätigten Modellen; eine Backup-Strategie folgt vor realem Produktionsbetrieb.
+
+## 11. Tagesabschluss – 04.11.2026
+
+- **Person B erledigt:** TanStack-Router- und SEO-Bestand nach den neuen Teamänderungen erneut geprüft, Production-Build mit bestätigter `SITE_URL` erzeugt und den verifizierten `dist`-Ordner auf die verknüpfte Netlify-Site veröffentlicht.
+- **Livebetrieb korrigiert:** Der zunächst aktive Netlify-SSO-Zugriffsschutz lieferte für alle Seiten und Assets `401 Login Redirect`. Der Site-spezifische Schutz wurde deaktiviert; die Produktionssite ist danach öffentlich erreichbar.
+- **Live geprüft:** `/`, `/de`, `/en`, `/it`, die lokalisierten Speisekartenpfade, direkte Reloads, clientseitige gestaltete 404, lokalisierte Titel und `lang`-Attribute, Canonical, Hreflang, `og:url`, `robots.txt`, Sitemap mit 15 URLs sowie Haupt- und Lazy-Chunks.
+- **Tatsächlich ausgeführte Tests:** `npm run typecheck`, `npm run lint`, `npm test` mit 24/24 Tests und Production-Build erfolgreich. Anschließend HTTP- und reale Browserprüfung auf `https://ristorante-colosseo-winsen.netlify.app` erfolgreich.
+- **Bewahrte Teamänderungen:** Die noch nicht committeten Express-Ergänzungen in `package.json` und `package-lock.json` wurden mitgeprüft, aber nicht verändert oder Person B zugerechnet.
+- **Offen für Person B am 04.11.:** keine weitere Router-/Deployment-Aufgabe. Konkrete Datenbankmodelle und Indexmigrationen folgen erst zusammen mit dem freigegebenen FS1-Modellumfang; Backups bleiben vor realem Produktionsbetrieb offen.
+- **Nächster planmäßiger Einstieg Person B:** Erst nach Abschluss und Abnahme von `FS1` sowie ausdrücklichem `GO für FS2` mit Clerk-Client, OAuth-Zuständen und geschütztem Admin-Grundlayout beginnen.
