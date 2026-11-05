@@ -63,6 +63,16 @@
   font-size: 0.78rem;
   font-weight: 650;
 }
+.p-nav-actions {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.notte .clerk-auth-controls .clerk-sign-in {
+  border-color: currentColor;
+  color: inherit;
+}
 .no-nav-toggle {
   display: none;
 }
@@ -1824,6 +1834,9 @@
   .p-nav-cta {
     padding: 0.65rem;
     font-size: 0;
+  }
+  .p-nav-actions {
+    gap: 0.35rem;
   }
   .notte .p-nav {
     top: 8px;

@@ -1,5 +1,6 @@
 import express, { type ErrorRequestHandler, type RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
+import { clerkMiddleware } from "@clerk/express";
 
 const correlationIdMiddleware: RequestHandler = (request, response, next) => {
   const incomingId = request.header("x-correlation-id")?.trim();
@@ -39,6 +40,7 @@ export function createApp() {
   const app = express();
 
   app.disable("x-powered-by");
+  if (process.env.CLERK_SECRET_KEY) app.use(clerkMiddleware());
   app.use(correlationIdMiddleware);
   app.use(express.json({ limit: "100kb" }));
 
