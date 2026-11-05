@@ -2,7 +2,12 @@ import express, { type ErrorRequestHandler, type RequestHandler } from "express"
 import { randomUUID } from "node:crypto";
 import { clerkMiddleware } from "@clerk/express";
 import { getAuth } from "@clerk/express";
+import { fileURLToPath } from "node:url";
 import { AdminProfileRepository } from "../repositories/admin-profile-repository";
+
+interface CreateAppOptions {
+  staticDirectory?: URL;
+}
 
 const correlationIdMiddleware: RequestHandler = (request, response, next) => {
   const incomingId = request.header("x-correlation-id")?.trim();
@@ -38,12 +43,14 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => 
   }
 };
 
-export function createApp() {
+export function createApp(options: CreateAppOptions = {}) {
   const app = express();
 
   app.disable("x-powered-by");
   if (process.env.CLERK_SECRET_KEY) {
-    const authorizedParties = process.env.CLERK_AUTHORIZED_PARTIES ? JSON.parse(process.env.CLERK_AUTHORIZED_PARTIES) as string[] : undefined;
+    const authorizedParties = process.env.CLERK_AUTHORIZED_PARTIES
+      ? JSON.parse(process.env.CLERK_AUTHORIZED_PARTIES) as string[]
+      : undefined;
     app.use(clerkMiddleware({ authorizedParties }));
   }
   app.use(correlationIdMiddleware);
@@ -74,6 +81,21 @@ export function createApp() {
       next(error);
     }
   });
+
+  if (options.staticDirectory) {
+    const staticDirectory = fileURLToPath(options.staticDirectory);
+    app.use(express.static(staticDirectory, { extensions: ["html"] }));
+    app.get(/^(?!\/api(?:\/|$)).*/, (request, response, next) => {
+      if (!request.accepts("html")) {
+        next();
+        return;
+      }
+
+      response.sendFile("index.html", { root: staticDirectory }, (error) => {
+        if (error) next(error);
+      });
+    });
+  }
 
   app.use(notFoundHandler);
   app.use(errorHandler);

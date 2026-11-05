@@ -1,10 +1,14 @@
 import { createServer } from "node:http";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { createApp } from "./http/app";
 import { getServerEnv } from "./config/env";
 
 export function startServer() {
   const env = getServerEnv();
-  const app = createApp();
+  const app = createApp({
+    staticDirectory: env.NODE_ENV === "production" ? new URL("../../dist", import.meta.url) : undefined,
+  });
   const server = createServer(app);
 
   server.listen(env.PORT, "0.0.0.0", () => {
@@ -27,6 +31,10 @@ export function startServer() {
   return server;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+export function isDirectExecution(moduleUrl: string, entryPath = process.argv[1]): boolean {
+  return Boolean(entryPath) && moduleUrl === pathToFileURL(resolve(entryPath)).href;
+}
+
+if (isDirectExecution(import.meta.url)) {
   startServer();
 }
