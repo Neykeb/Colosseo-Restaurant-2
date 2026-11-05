@@ -183,6 +183,27 @@ a,
   gap: 0.75rem;
 }
 
+.clerk-auth-controls {
+  display: inline-flex;
+  align-items: center;
+}
+
+.clerk-sign-in {
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-radius: 999px;
+  padding: 0.55rem 0.85rem;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.clerk-sign-in:hover,
+.clerk-sign-in:focus-visible {
+  border-color: currentColor;
+}
+
 .button {
   min-height: 48px;
   display: inline-flex;
