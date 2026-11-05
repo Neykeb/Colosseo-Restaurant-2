@@ -1,6 +1,7 @@
 import { List, Phone, X } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { ClerkAuthControls } from "~/components/clerk-auth-controls";
 
 import {
   locales,
@@ -84,6 +85,7 @@ export function SiteHeader({
       </nav>
 
       <div className="header-actions">
+        <ClerkAuthControls />
         <a className="phone-link" href="tel:+4900000000000" aria-label={callLabel}>
           <Phone aria-hidden="true" size={19} weight="regular" />
         </a>
