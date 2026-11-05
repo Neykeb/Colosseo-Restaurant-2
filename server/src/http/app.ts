@@ -1,6 +1,11 @@
 import express, { type ErrorRequestHandler, type RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
 import { clerkMiddleware } from "@clerk/express";
+import { fileURLToPath } from "node:url";
+
+interface CreateAppOptions {
+  staticDirectory?: URL;
+}
 
 const correlationIdMiddleware: RequestHandler = (request, response, next) => {
   const incomingId = request.header("x-correlation-id")?.trim();
@@ -36,7 +41,7 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => 
   }
 };
 
-export function createApp() {
+export function createApp(options: CreateAppOptions = {}) {
   const app = express();
 
   app.disable("x-powered-by");
@@ -47,6 +52,21 @@ export function createApp() {
   app.get("/api/health", (_request, response) => {
     response.status(200).json({ status: "ok", correlationId: response.locals.correlationId });
   });
+
+  if (options.staticDirectory) {
+    const staticDirectory = fileURLToPath(options.staticDirectory);
+    app.use(express.static(staticDirectory, { extensions: ["html"] }));
+    app.get(/^(?!\/api(?:\/|$)).*/, (request, response, next) => {
+      if (!request.accepts("html")) {
+        next();
+        return;
+      }
+
+      response.sendFile("index.html", { root: staticDirectory }, (error) => {
+        if (error) next(error);
+      });
+    });
+  }
 
   app.use(notFoundHandler);
   app.use(errorHandler);
