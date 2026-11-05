@@ -188,6 +188,7 @@ a,
   align-items: center;
 }
 
+
 .clerk-sign-in {
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   border-radius: 999px;

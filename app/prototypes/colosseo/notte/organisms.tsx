@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 
 import { TextRotate, type TextRotateRef } from "~/components/ui/text-rotate";
 import { Velaris } from "~/components/ui/velaris";
+import { ClerkAuthControls } from "~/components/clerk-auth-controls";
 import { getNotteContent, getOpeningHours, googleReviews, menuDishes, notteImages, notteLinks } from "~/content/notte.de";
 
 import { MaskedWords } from "./atoms";
@@ -28,7 +29,10 @@ export function NotteNavigation({ locale }: { locale: NotteLocale }) {
     <a className="p-logo" href="#top"><small>{content.brandEyebrow}</small>{content.brandName}</a>
     <nav aria-label={locale === "de" ? "Hauptnavigation" : locale === "en" ? "Main navigation" : "Navigazione principale"} className={open ? "is-open" : undefined}><a href="#menu" onClick={() => setOpen(false)}>{content.menu}</a><a href="#events" onClick={() => setOpen(false)}>{content.events}</a><a href="#contact" onClick={() => setOpen(false)}>{content.contact}</a></nav>
     <button aria-expanded={open} aria-label={open ? (locale === "de" ? "Navigation schließen" : locale === "en" ? "Close navigation" : "Chiudi navigazione") : (locale === "de" ? "Navigation öffnen" : locale === "en" ? "Open navigation" : "Apri navigazione")} className="no-nav-toggle" onClick={() => setOpen((value) => !value)} type="button">{open ? <X size={22} /> : <List size={22} />}</button>
-    <a className="p-nav-cta" href={notteLinks.phone}><Phone size={17} /> {content.reserve}</a>
+    <div className="p-nav-actions">
+      <ClerkAuthControls />
+      <a className="p-nav-cta" href={notteLinks.phone}><Phone size={17} /> {content.reserve}</a>
+    </div>
   </header>;
 }
 

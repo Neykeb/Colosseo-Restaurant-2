@@ -18,6 +18,7 @@ assignmentSchema.index({ tableKey: 1, date: 1, startTime: 1, endTime: 1 });
 const auditEventSchema = new Schema({ eventId: { type: String, required: true, unique: true }, actorId: String, action: { type: String, required: true }, target: { type: String, required: true }, metadata: { type: Schema.Types.Mixed, required: true } }, { timestamps });
 const outboxEventSchema = new Schema({ eventId: { type: String, required: true, unique: true }, type: { type: String, required: true }, aggregateId: { type: String, required: true }, payload: { type: Schema.Types.Mixed, required: true }, status: { type: String, required: true, enum: ["pending", "processing", "sent", "failed"] }, attempts: { type: Number, required: true, min: 0, default: 0 }, nextAttemptAt: Date }, { timestamps });
 outboxEventSchema.index({ status: 1, nextAttemptAt: 1 });
+const adminProfileSchema = new Schema({ clerkUserId: { type: String, required: true, unique: true }, role: { type: String, required: true, enum: ["owner", "staff"] }, active: { type: Boolean, required: true, default: true }, displayName: { type: String, required: true }, lastAdminAccessAt: Date }, { timestamps });
 
 export type Setting = InferSchemaType<typeof settingSchema>;
 export type ServiceHours = InferSchemaType<typeof serviceHoursSchema>;
@@ -32,3 +33,4 @@ export const ReservationModel = model("Reservation", reservationSchema);
 export const TableAssignmentModel = model("TableAssignment", assignmentSchema);
 export const AuditEventModel = model("AuditEvent", auditEventSchema);
 export const OutboxEventModel = model("OutboxEvent", outboxEventSchema);
+export const AdminProfileModel = model("AdminProfile", adminProfileSchema);
