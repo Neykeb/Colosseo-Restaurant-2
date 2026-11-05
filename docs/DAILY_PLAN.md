@@ -178,3 +178,10 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Bestätigte Entscheidungen:** Eine Clerk-Anwendung existiert; Google ist der einzige OAuth-Anbieter. Der Restaurantbesitzer erhält als `owner` Vollzugriff und wird dauerhaft über seine eindeutige Clerk User-ID autorisiert. `staff` bleibt ohne konkrete Rechtefreigabe gesperrt.
 - **Aktueller Blocker:** Person A muss ihre Clerk-Änderungen noch auf `dev` pushen. Die konkrete Owner-User-ID wird anschließend aus Clerk übernommen und nicht erfunden.
 - **Nächster Einstieg:** Nach dem Push zuerst die vorhandene Implementierung und Secret-Trennung prüfen, dann nur fehlende Sessionprüfung, eigenes Adminprofil, Rollenmiddleware und geschütztes Admin-Grundlayout ergänzen.
+
+## 14. Sicherheitsbereinigung – 05.11.2026
+
+- **Befund:** Der Team-Push hatte `.env` und `.env.test` trotz vorhandener Ignore-Regeln erneut als bereits getrackte Dateien in mehrere Branch-Historien aufgenommen.
+- **Bereinigung:** Beide Dateien wurden aus der gesamten erreichbaren Historie der Branches `dev`, `feature/momo` und `feature/szymon` entfernt; die bereinigten Branches wurden kontrolliert force-gepusht und lokal neu ausgerichtet. `.env.example` bleibt die einzige versionierte Env-Vorlage.
+- **Prävention:** `npm test` führt nun zuerst `check:tracked-env` aus und bricht ab, falls `.env` oder eine private `.env.*`-Datei erneut getrackt wird.
+- **Extern erforderlich:** Das veröffentlichte MongoDB-Passwort wird vom Nutzer rotiert. Da GitHub alte Commit-Ansichten und Pull-Request-Refs zwischenspeichern kann, ist die Rotation unabhängig von der Historienbereinigung zwingend.
