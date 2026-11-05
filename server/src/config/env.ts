@@ -4,6 +4,9 @@ const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().min(1).max(65_535).default(3_000),
   CLERK_SECRET_KEY: z.string().trim().min(1).optional(),
+  CLERK_OWNER_USER_ID: z.string().trim().regex(/^user_[A-Za-z0-9]+$/).optional(),
+  CLERK_OWNER_DISPLAY_NAME: z.string().trim().min(1).optional(),
+  CLERK_AUTHORIZED_PARTIES: z.string().trim().optional(),
   MONGODB_URI: z.preprocess(
     (value) => value ?? "",
     z

@@ -206,13 +206,13 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 **Benötigt vor Start:** Clerk-Konto/Anwendung, gewünschte OAuth-Anbieter, erste Owner-Identität und Rollenmatrix.
 
-- [-] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren; `@clerk/react`, `@clerk/express`, `ClerkProvider` und bedingte `clerkMiddleware()` sind lokal eingerichtet. Ein echter signierter Backend-Request bleibt offen.
-- [ ] OAuth-Anmeldung, Abmeldung, Sessionablauf, Redirect-Allowlist und Fehlerzustände umsetzen.
-- [-] Eigenes `admin_profiles`-Modell und Repository für Clerk-User-IDs implementieren; der Owner-Bootstrap bleibt bis zur bestätigten Owner-Clerk-ID offen.
-- [ ] `/admin` mit Lade-, Zugriff-verweigert- und geschützten Layoutzuständen erstellen.
+- [x] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren; `@clerk/react`, `@clerk/express`, `ClerkProvider`, `clerkMiddleware()` und `authorizedParties` sind lokal eingerichtet.
+- [-] OAuth-Anmeldung, Abmeldung, Sessionablauf, Redirect-Allowlist und Fehlerzustände umsetzen; lokale UI-Steuerung und `/admin`-Zustände sind vorhanden, ein echter signierter Backend-Request bleibt offen.
+- [x] Eigenes `admin_profiles`-Modell, Repository und idempotenter Owner-Bootstrap für Clerk-User-IDs implementieren.
+- [x] `/admin` mit Lade-, Zugriff-verweigert- und geschützten Layoutzuständen erstellen; der Backend-Endpunkt `/api/admin/me` prüft zusätzlich das aktive Adminprofil.
 - [x] Owner-/Staff-Rechte als serverseitige Autorisierungsfunktion und Middleware mit verständlichen `401`-/`403`-Antworten sowie Unit-Tests verankern.
-- [ ] Admin aus Sitemap/Indexierung und öffentlicher Navigation ausschließen.
-- [ ] Accessibility- und Security-Tests durchführen.
+- [x] Admin aus Sitemap/Indexierung und öffentlicher Navigation ausschließen; der Prerenderer erzeugt nur öffentliche lokalisierte Routen.
+- [-] Accessibility- und Security-Tests durchführen; Autorisierungs-Unit-Tests und Buildprüfungen sind vorhanden, vollständige Browser-/signierte-Session-Prüfung bleibt offen.
 - [ ] **GATE FS2:** geschützten Zugang und Rollenprüfung präsentieren; auf GO für `FS3` warten.
 
 ### FS3 – Reservierungs- und Verfügbarkeitskern
