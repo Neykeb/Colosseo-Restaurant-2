@@ -10,6 +10,7 @@ describe("server environment", () => {
 
     expect(env).toEqual({
       NODE_ENV: "development",
+      PORT: 3_000,
       MONGODB_URI: "mongodb+srv://user:password@example.mongodb.net/",
       MONGODB_DB_NAME: "colosseo",
       MONGODB_SERVER_SELECTION_TIMEOUT_MS: 5_000,
