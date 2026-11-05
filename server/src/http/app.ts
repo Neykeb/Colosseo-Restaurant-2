@@ -1,5 +1,6 @@
 import express, { type ErrorRequestHandler, type RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
+import { clerkMiddleware } from "@clerk/express";
 import { fileURLToPath } from "node:url";
 
 interface CreateAppOptions {
@@ -44,6 +45,7 @@ export function createApp(options: CreateAppOptions = {}) {
   const app = express();
 
   app.disable("x-powered-by");
+  if (process.env.CLERK_SECRET_KEY) app.use(clerkMiddleware());
   app.use(correlationIdMiddleware);
   app.use(express.json({ limit: "100kb" }));
 

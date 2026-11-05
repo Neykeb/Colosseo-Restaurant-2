@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
 **Status:** Full-Stack-Phase `FS1` – MongoDB-Atlas-Verbindung verifiziert; übrige Plattformaufgaben offen
-**Letzte Aktualisierung:** 03.11.2026
+**Letzte Aktualisierung:** 05.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -208,11 +208,11 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 **Freigabe:** `GO für FS2` am 05.11.2026 erteilt. Eine Clerk-Anwendung existiert und Google wurde als einziger OAuth-Anbieter bestätigt. `owner` erhält Vollzugriff; `staff` bleibt bis zu einer späteren Rechtefreigabe gesperrt. Die konkrete Clerk User-ID des ersten Owners und die noch nicht gepushten Clerk-Änderungen von Person A stehen aus.
 
-- [ ] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren.
+- [-] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren; `@clerk/react`, `@clerk/express`, `ClerkProvider` und bedingte `clerkMiddleware()` sind lokal eingerichtet. Ein echter signierter Backend-Request bleibt offen.
 - [ ] OAuth-Anmeldung, Abmeldung, Sessionablauf, Redirect-Allowlist und Fehlerzustände umsetzen.
-- [ ] Eigenes `admin_profiles`-Modell und sicheren Owner-Bootstrap für Clerk-User-IDs implementieren.
+- [-] Eigenes `admin_profiles`-Modell und Repository für Clerk-User-IDs implementieren; der Owner-Bootstrap bleibt bis zur bestätigten Owner-Clerk-ID offen.
 - [ ] `/admin` mit Lade-, Zugriff-verweigert- und geschützten Layoutzuständen erstellen.
-- [ ] Owner-/Staff-Rechte als serverseitige Middleware-, Service- und API-Tests verankern.
+- [x] Owner-/Staff-Rechte als serverseitige Autorisierungsfunktion und Middleware mit verständlichen `401`-/`403`-Antworten sowie Unit-Tests verankern.
 - [ ] Admin aus Sitemap/Indexierung und öffentlicher Navigation ausschließen.
 - [ ] Accessibility- und Security-Tests durchführen.
 - [ ] **GATE FS2:** geschützten Zugang und Rollenprüfung präsentieren; auf GO für `FS3` warten.

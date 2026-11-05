@@ -1,6 +1,6 @@
 import type { Migration } from "./types";
 
-const collections = ["settings", "servicehours", "specialdays", "areas", "tables", "reservations", "tableassignments", "auditevents", "outboxevents"] as const;
+const collections = ["settings", "servicehours", "specialdays", "areas", "tables", "reservations", "tableassignments", "auditevents", "outboxevents", "adminprofiles"] as const;
 
 export const coreIndexesMigration: Migration = {
   id: "0001_core-indexes",
@@ -21,6 +21,7 @@ export const coreIndexesMigration: Migration = {
     await connection.collection("auditevents").createIndex({ eventId: 1 }, { unique: true });
     await connection.collection("outboxevents").createIndex({ eventId: 1 }, { unique: true });
     await connection.collection("outboxevents").createIndex({ status: 1, nextAttemptAt: 1 });
+    await connection.collection("adminprofiles").createIndex({ clerkUserId: 1 }, { unique: true });
   },
   async down(connection) {
     for (const name of [...collections].reverse()) await connection.dropCollection(name).catch((error: unknown) => { if ((error as { code?: number }).code !== 26) throw error; });

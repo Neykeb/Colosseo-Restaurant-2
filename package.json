@@ -19,6 +19,8 @@
     "db:migrate:test": "node --env-file=.env --env-file=.env.test --import tsx server/src/scripts/migrate.ts up"
   },
   "dependencies": {
+    "@clerk/express": "^2.1.87",
+    "@clerk/react": "^6.18.5",
     "@fontsource/dm-sans": "^5.3.0",
     "@fontsource/instrument-serif": "^5.3.0",
     "@gsap/react": "latest",
