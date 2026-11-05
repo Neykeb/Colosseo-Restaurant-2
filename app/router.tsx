@@ -13,6 +13,7 @@ import { applyDocumentSeo, getRouteSeo } from "~/content/seo";
 import { SiteFooter } from "~/components/site-footer";
 import { SiteHeader } from "~/components/site-header";
 import { Link } from "@tanstack/react-router";
+import { useAuth } from "@clerk/react";
 import "~/prototypes/colosseo/prototypes.css";
 import "~/i18n/config";
 import "~/styles/app.css";
@@ -45,6 +46,12 @@ const prototypeRoute = createRoute({
   component: PrototypesRoute,
 });
 
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin",
+  component: AdminRoute,
+});
+
 const localizedIndexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/$lang/",
@@ -60,6 +67,7 @@ const localizedPageRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   prototypeRoute,
+  adminRoute,
   localizedIndexRoute,
   localizedPageRoute,
 ]);
@@ -118,6 +126,13 @@ function ContentPage({ copy, locale, pageKey, reserveLabel }: { copy: { title: s
 
 function PrototypesRoute() {
   return <Suspense fallback={<RoutePending />}><ColosseoPrototypesPage /></Suspense>;
+}
+
+function AdminRoute() {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) return <main className="admin-page" aria-busy="true"><p>Adminbereich wird geladen …</p></main>;
+  if (!isSignedIn) return <main className="admin-page"><h1>Anmeldung erforderlich</h1><p>Bitte melde dich über den Admin-Button an.</p></main>;
+  return <main className="admin-page"><p className="eyebrow">Geschützter Bereich</p><h1>Administration</h1><p>Die serverseitige Rollenprüfung entscheidet über den tatsächlichen Zugriff.</p></main>;
 }
 
 function NotFound() {
