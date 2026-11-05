@@ -511,6 +511,8 @@ Im lokalen Betrieb laufen Vite und Express als getrennte Prozesse; Vite leitet `
 
 Clerk bleibt Quelle für Identität und Session. MongoDB bleibt Quelle für die fachliche Adminberechtigung. Rollen werden nicht aus frei änderbaren Benutzer-Metadaten übernommen.
 
+**Freigegebene FS2-Entscheidung vom 05.11.2026:** Google ist der einzige OAuth-Anbieter. Der erste Restaurantbesitzer erhält die interne Rolle `owner` mit Vollzugriff. Die dauerhafte Berechtigung wird an die eindeutige Clerk User-ID gebunden; eine E-Mail-Adresse dient höchstens zur kontrollierten Erstzuordnung und ist keine dauerhafte Autorisierungsquelle. `staff` bleibt ohne freigegebene Rechte zunächst gesperrt.
+
 ## 23. Fachliches Reservierungsmodell (`ENTWURF`)
 
 ### Kernobjekte
