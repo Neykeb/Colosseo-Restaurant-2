@@ -110,6 +110,13 @@ a,
   background: #080a08;
 }
 
+.admin-page {
+  min-height: 100svh;
+  padding: 8rem 1.5rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
 .site-header {
   position: sticky;
   top: 0;

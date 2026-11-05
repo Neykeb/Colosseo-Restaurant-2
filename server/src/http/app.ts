@@ -1,7 +1,9 @@
 import express, { type ErrorRequestHandler, type RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
 import { clerkMiddleware } from "@clerk/express";
+import { getAuth } from "@clerk/express";
 import { fileURLToPath } from "node:url";
+import { AdminProfileRepository } from "../repositories/admin-profile-repository";
 
 interface CreateAppOptions {
   staticDirectory?: URL;
@@ -45,12 +47,39 @@ export function createApp(options: CreateAppOptions = {}) {
   const app = express();
 
   app.disable("x-powered-by");
-  if (process.env.CLERK_SECRET_KEY) app.use(clerkMiddleware());
+  if (process.env.CLERK_SECRET_KEY) {
+    const authorizedParties = process.env.CLERK_AUTHORIZED_PARTIES
+      ? JSON.parse(process.env.CLERK_AUTHORIZED_PARTIES) as string[]
+      : undefined;
+    app.use(clerkMiddleware({ authorizedParties }));
+  }
   app.use(correlationIdMiddleware);
   app.use(express.json({ limit: "100kb" }));
 
   app.get("/api/health", (_request, response) => {
     response.status(200).json({ status: "ok", correlationId: response.locals.correlationId });
+  });
+
+  app.get("/api/admin/me", async (request, response, next) => {
+    try {
+      if (!process.env.CLERK_SECRET_KEY) {
+        response.status(503).json({ error: { code: "CLERK_NOT_CONFIGURED", message: "Admin authentication is not configured." } });
+        return;
+      }
+      const { userId } = getAuth(request as never);
+      if (!userId) {
+        response.status(401).json({ error: { code: "AUTHENTICATION_REQUIRED", message: "Authentication is required." } });
+        return;
+      }
+      const profile = await new AdminProfileRepository().findByClerkUserId(userId);
+      if (!profile || !profile.active) {
+        response.status(403).json({ error: { code: "ADMIN_PROFILE_REQUIRED", message: "An active admin profile is required." } });
+        return;
+      }
+      response.json({ userId, role: profile.role, displayName: profile.displayName });
+    } catch (error) {
+      next(error);
+    }
   });
 
   if (options.staticDirectory) {
