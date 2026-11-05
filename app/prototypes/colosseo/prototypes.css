@@ -63,6 +63,16 @@
   font-size: 0.78rem;
   font-weight: 650;
 }
+.p-nav-actions {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.notte .clerk-auth-controls .clerk-sign-in {
+  border-color: currentColor;
+  color: inherit;
+}
 .no-nav-toggle {
   display: none;
 }
@@ -697,16 +707,47 @@
   from { transform: translate3d(-50%, 0, 0); }
   to { transform: translate3d(0, 0, 0); }
 }
+.velaris {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  isolation: isolate;
+}
+.velaris-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.velaris-content {
+  position: relative;
+  z-index: 1;
+}
+.no-reservation-shell {
+  min-height: clamp(34rem, 64svh, 48rem);
+  background:
+    radial-gradient(circle at 68% 38%, rgba(143, 67, 47, 0.72), transparent 42%),
+    #160e0c;
+}
+.no-reservation-shell::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, rgba(10, 7, 6, 0.52) 0%, rgba(10, 7, 6, 0.13) 52%, rgba(10, 7, 6, 0.38) 100%);
+}
 .no-reservation {
-  min-height: 54svh;
+  min-height: clamp(34rem, 64svh, 48rem);
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   align-items: end;
   gap: clamp(1.75rem, 3vw, 3.5rem) 1rem;
   padding: clamp(4.5rem, 7vw, 7rem) clamp(1.25rem, 5vw, 6rem);
   overflow: hidden;
-  background: #efe5d5;
-  color: #17140f;
+  background: transparent;
+  color: #f7efe4;
 }
 .no-reservation-intro {
   grid-column: 1 / 4;
@@ -716,7 +757,8 @@
 }
 .no-reservation-intro p {
   margin: 0;
-  font-family: "Geist Variable", Arial, sans-serif;
+  color: rgba(247, 239, 228, 0.78);
+  font-family: "DM Sans", Arial, sans-serif;
   font-size: 0.72rem;
   font-weight: 650;
   letter-spacing: 0.16em;
@@ -726,15 +768,15 @@
   width: 100%;
   height: 1px;
   display: block;
-  background: rgba(23, 20, 15, 0.32);
+  background: rgba(247, 239, 228, 0.34);
 }
 .no-reservation h2 {
   grid-column: 1 / 8;
-  max-width: 9.5ch;
+  max-width: 12ch;
   margin: 0;
-  font-size: clamp(3.8rem, 6.5vw, 7.4rem);
+  font-size: clamp(3.5rem, 5.5vw, 6.4rem);
   font-weight: 400;
-  letter-spacing: -0.065em;
+  letter-spacing: -0.04em;
   line-height: 0.86;
 }
 .no-reservation-details {
@@ -747,8 +789,8 @@
 .no-reservation-details p {
   max-width: 32ch;
   margin: 0;
-  color: #585249;
-  font-family: "Geist Variable", Arial, sans-serif;
+  color: rgba(247, 239, 228, 0.78);
+  font-family: "DM Sans", Arial, sans-serif;
   font-size: clamp(1rem, 1.25vw, 1.22rem);
   line-height: 1.55;
 }
@@ -758,22 +800,23 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.9rem 1.15rem;
-  border: 1px solid #17140f;
-  background: #17140f;
-  color: #f7efe4;
-  font-family: "Geist Variable", Arial, sans-serif;
+  border: 1px solid #f7efe4;
+  background: #f7efe4;
+  color: #261411;
+  font-family: "DM Sans", Arial, sans-serif;
   font-size: 0.88rem;
   font-weight: 650;
-  transition: color 180ms cubic-bezier(0.23, 1, 0.32, 1), background-color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition: color 180ms cubic-bezier(0.23, 1, 0.32, 1), background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .no-reservation-details a:focus-visible {
-  outline: 2px solid #17140f;
+  outline: 2px solid #f7efe4;
   outline-offset: 4px;
 }
 @media (hover: hover) and (pointer: fine) {
   .no-reservation-details a:hover {
     background: transparent;
-    color: #17140f;
+    color: #f7efe4;
+    transform: translateY(-2px);
   }
 }
 .no-events > div > p:first-child,
@@ -1153,13 +1196,17 @@
 .no-events {
   position: relative;
   z-index: 2;
-  min-height: 100vh;
+  height: 100svh;
+  min-height: 100svh;
   display: grid;
   grid-template-columns: 1fr 1fr;
   overflow: hidden;
   background: #4c1515;
 }
 .no-events-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transform-origin: center;
   will-change: transform, opacity;
 }
@@ -1788,6 +1835,9 @@
     padding: 0.65rem;
     font-size: 0;
   }
+  .p-nav-actions {
+    gap: 0.35rem;
+  }
   .notte .p-nav {
     top: 8px;
   }
@@ -1861,6 +1911,9 @@
     gap: 3rem;
     padding: 7rem 6vw;
   }
+  .no-reservation-shell {
+    min-height: auto;
+  }
   .no-reservation-intro,
   .no-reservation h2,
   .no-reservation-details {
@@ -1870,7 +1923,7 @@
     width: min(16rem, 100%);
   }
   .no-reservation h2 {
-    max-width: 10ch;
+    max-width: 12ch;
     font-size: clamp(3.8rem, 12vw, 6.8rem);
   }
   .no-reservation-details {
@@ -1884,7 +1937,14 @@
     padding-top: 1rem;
   }
   .no-events > img {
-    min-height: 68vh;
+    min-height: 0;
+    height: 45svh;
+  }
+  .no-events {
+    grid-template-rows: 55svh 45svh;
+  }
+  .no-events > div {
+    min-height: 0;
   }
   .no-menu-journey {
     grid-template-columns: 1fr;
@@ -2118,117 +2178,6 @@
   }
 }
 
-/* Mobile-Lite: native scrolling and content-first rendering on touch devices. */
-.is-mobile-lite .no-hero-video {
-  display: none;
-}
-.is-mobile-lite .no-hero {
-  min-height: 100svh;
-  background: #080a08 url("/images/colosseo/pizza-margherita.webp") center / cover no-repeat;
-}
-.is-mobile-lite .no-intro {
-  min-height: auto;
-  margin-top: 0;
-  box-shadow: none;
-}
-.is-mobile-lite .no-intro-media img,
-.is-mobile-lite .no-family-background,
-.is-mobile-lite .no-events-image,
-.is-mobile-lite .no-word-inner {
-  transform: none !important;
-  will-change: auto;
-}
-.is-mobile-lite .no-family {
-  position: relative;
-  min-height: 32rem;
-  height: auto;
-  max-height: none;
-}
-.is-mobile-lite .no-menu-journey {
-  height: auto;
-  min-height: 0;
-  display: block;
-  overflow: visible;
-}
-.is-mobile-lite .no-menu-sticky,
-.is-mobile-lite .no-menu-display,
-.is-mobile-lite .no-menu-panels {
-  display: none;
-}
-.is-mobile-lite .no-menu-mobile-list {
-  width: min(100% - 2rem, 50rem);
-  display: grid;
-  gap: 3rem;
-  margin-inline: auto;
-  padding: 5rem 0 6rem;
-}
-.is-mobile-lite .no-menu-mobile-eyebrow,
-.is-mobile-lite .no-menu-mobile-card span,
-.is-mobile-lite .no-menu-mobile-card strong {
-  margin: 0;
-  font-family: "DM Sans", Arial, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.is-mobile-lite .no-menu-mobile-card {
-  display: grid;
-  grid-template-columns: minmax(9rem, 0.7fr) minmax(0, 1.3fr);
-  align-items: center;
-  gap: clamp(1.25rem, 5vw, 3rem);
-}
-.is-mobile-lite .no-menu-mobile-card img {
-  aspect-ratio: 1;
-  object-fit: cover;
-}
-.is-mobile-lite .no-menu-mobile-card > div {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 0.5rem 1rem;
-}
-.is-mobile-lite .no-menu-mobile-card strong {
-  color: #8f432f;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.is-mobile-lite .no-menu-mobile-card h3,
-.is-mobile-lite .no-menu-mobile-card p {
-  grid-column: 1 / -1;
-}
-.is-mobile-lite .no-menu-mobile-card h3 {
-  margin: 0.7rem 0 0;
-  font-size: clamp(2.25rem, 8vw, 4rem);
-  line-height: 1;
-  text-wrap: balance;
-}
-.is-mobile-lite .no-menu-mobile-card p {
-  max-width: 38rem;
-  margin: 0;
-  line-height: 1.6;
-  text-wrap: pretty;
-}
-.is-mobile-lite .no-review-marquees {
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-  mask-image: none;
-  scrollbar-width: thin;
-  scroll-snap-type: x proximity;
-}
-.is-mobile-lite .no-review-rail {
-  animation: none;
-  transform: none;
-  will-change: auto;
-}
-.is-mobile-lite .no-review-set[aria-hidden="true"] {
-  display: none;
-}
-.is-mobile-lite .no-review-card {
-  scroll-snap-align: start;
-}
-
 @media (max-width: 767px) {
   .no-hero-video {
     display: none;
@@ -2238,8 +2187,7 @@
     background: #080a08 url("/images/colosseo/pizza-margherita.webp") center / cover no-repeat;
   }
   .notte .p-nav,
-  .notte .p-nav.is-compact,
-  .notte .p-nav.is-hidden {
+  .notte .p-nav.is-compact {
     top: 0;
     right: 0;
     left: 0;
@@ -2255,8 +2203,14 @@
     background: rgba(13, 16, 13, 0.96);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    transform: none;
-    transition: none;
+    transform: translate3d(0, 0, 0);
+    transition:
+      background-color 420ms cubic-bezier(0.23, 1, 0.32, 1),
+      border-color 420ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 560ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .notte .p-nav.is-hidden {
+    transform: translate3d(0, calc(-100% - 8px), 0);
   }
   .notte .p-logo {
     font-size: 1rem;
@@ -2360,21 +2314,6 @@
   .no-intro-signature {
     font-size: 1.75rem;
   }
-  .is-mobile-lite .no-menu-mobile-list {
-    width: calc(100% - 2rem);
-    gap: 3.5rem;
-  }
-  .is-mobile-lite .no-menu-mobile-card {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-  .is-mobile-lite .no-menu-mobile-card img {
-    width: min(72vw, 20rem);
-    justify-self: center;
-  }
-  .is-mobile-lite .no-menu-mobile-card h3 {
-    font-size: clamp(2.3rem, 12vw, 3.5rem);
-  }
   .no-family {
     min-height: 34rem;
     padding: 5rem 1rem;
@@ -2384,11 +2323,13 @@
     line-height: 1;
   }
   .no-events {
-    min-height: 0;
+    height: 100svh;
+    min-height: 100svh;
+    grid-template-rows: minmax(0, 1.15fr) minmax(0, 0.85fr);
   }
   .no-events > div {
-    min-height: auto;
-    padding: 5rem 1rem;
+    min-height: 0;
+    padding: 4.5rem 1rem 2.5rem;
   }
   .no-events h2 {
     font-size: clamp(2.8rem, 13vw, 4.5rem);
@@ -2396,7 +2337,7 @@
   }
   .no-events > img {
     min-height: 0;
-    height: min(115vw, 38rem);
+    height: 100%;
   }
   .no-reviews {
     height: auto;

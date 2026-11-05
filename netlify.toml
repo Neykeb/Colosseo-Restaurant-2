@@ -1,6 +1,9 @@
 [build]
   command = "npm run build"
-  publish = "build/client"
+  publish = "dist"
+
+[build.environment]
+  SITE_URL = "https://ristorante-colosseo-winsen.netlify.app"
 
 [[redirects]]
   from = "/"
