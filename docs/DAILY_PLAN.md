@@ -155,4 +155,4 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Person A – Restpunkte:** fachliche Reservierungsregeln, konkrete produktive Daten und echte Atlas-Ausführung der Core-Indexmigration bleiben offen. Frontend unverändert.
 - **Person A – 05.11.2026 erledigt:** `@clerk/express`-Middleware, `admin_profiles`-Modell, Repository, `owner`-/`staff`-Autorisierung und 401-/403-Verhalten ergänzt. Frontend-Clerk-Provider und Header-Steuerung sind lokal integriert.
 - **Person A – tatsächlich ausgeführte Prüfungen:** `npm run typecheck`, `npm run lint`, `npm test` mit 28/28 Tests und `git diff --check` erfolgreich.
-- **Person A – Restpunkte:** Owner-Clerk-ID, bestätigte Rollenmatrix und ein echter signierter Clerk-Request fehlen noch; keine Test-User wurden angelegt.
+- **Person A – Restpunkte:** Ein echter signierter Clerk-Request, ein realer Owner-Bootstrap gegen Atlas und vollständige Browser-/Security-Prüfungen stehen noch aus. Die vom Nutzer bestätigte Owner-ID und Rollenmatrix sind lokal berücksichtigt; keine Test-User wurden angelegt.
