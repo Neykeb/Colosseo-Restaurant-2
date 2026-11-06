@@ -206,12 +206,12 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 **Benötigt vor Start:** Clerk-Konto/Anwendung, gewünschte OAuth-Anbieter, erste Owner-Identität und Rollenmatrix.
 
-**Freigabe:** `GO für FS2` am 05.11.2026 erteilt. Eine Clerk-Anwendung existiert und Google wurde als einziger OAuth-Anbieter bestätigt. `owner` erhält Vollzugriff; `staff` bleibt bis zu einer späteren Rechtefreigabe gesperrt. Die konkrete Clerk User-ID des ersten Owners und die noch nicht gepushten Clerk-Änderungen von Person A stehen aus.
+**Freigabe:** `GO für FS2` am 05.11.2026 erteilt. Eine Clerk-Anwendung existiert und Google wurde als einziger OAuth-Anbieter bestätigt. `owner` erhält Vollzugriff; `staff` bleibt bis zu einer späteren Rechtefreigabe gesperrt. Die Clerk-Änderungen von Person A wurden laut Nutzer auf `dev` gepusht; die Owner-Clerk-User-ID liegt laut Nutzer bereits vor.
 
-- [-] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren; `@clerk/react`, `@clerk/express`, `ClerkProvider` und bedingte `clerkMiddleware()` sind lokal eingerichtet. Ein echter signierter Backend-Request bleibt offen.
+- [-] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren; `@clerk/react`, `@clerk/express`, `ClerkProvider`, Vite-API-Proxy und bedingte `clerkMiddleware()` sind lokal eingerichtet. Ein echter signierter Backend-Request bleibt offen.
 - [ ] OAuth-Anmeldung, Abmeldung, Sessionablauf, Redirect-Allowlist und Fehlerzustände umsetzen.
 - [-] Eigenes `admin_profiles`-Modell und Repository für Clerk-User-IDs implementieren; der Owner-Bootstrap bleibt bis zur bestätigten Owner-Clerk-ID offen.
-- [ ] `/admin` mit Lade-, Zugriff-verweigert- und geschützten Layoutzuständen erstellen.
+- [-] `/admin` mit Lade-, Zugriff-verweigert-, technischem Fehler- und geschütztem Layoutzustand erstellt; Browserprüfung des echten Google-OAuth-Flows bleibt offen.
 - [x] Owner-/Staff-Rechte als serverseitige Autorisierungsfunktion und Middleware mit verständlichen `401`-/`403`-Antworten sowie Unit-Tests verankern.
 - [ ] Admin aus Sitemap/Indexierung und öffentlicher Navigation ausschließen.
 - [ ] Accessibility- und Security-Tests durchführen.
@@ -221,7 +221,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 **Benötigt vor Start:** reale Tischliste, Bereiche, Kombinationsregeln, Servicezeiten, Dauer/Buffer, Vorlauf, Buchungshorizont, Gruppengrenzen, Sperr- und Bestätigungsregeln.
 
-- [ ] Pure Domainlogik für Zeitfenster und Statusübergänge umsetzen.
+- [-] Pure Domainlogik für `HH:mm`-Zeitfenster, Servicefenster, Überschneidungen und explizite Statusübergänge umgesetzt; vier Unit-Tests erfolgreich. Synthetische `PLATZHALTER`-Tische, Servicezeit und Entwicklungsregeln wurden nach Nutzerfreigabe idempotent in den Development-Seed aufgenommen und ausgeführt.
 - [ ] Atomare Tischzuweisung einschließlich Parallelitätsschutz implementieren.
 - [ ] Öffentliche Config-/Availability-/Reservation-API mit Validierung, Rate-Limit und Idempotenz erstellen.
 - [ ] Admin-API für manuelle Reservierungen und Sperrzeiten ergänzen.
