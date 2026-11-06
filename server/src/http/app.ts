@@ -73,7 +73,14 @@ export function createApp(options: CreateAppOptions = {}) {
       }
       const profile = await new AdminProfileRepository().findByClerkUserId(userId);
       if (!profile || !profile.active) {
-        response.status(403).json({ error: { code: "ADMIN_PROFILE_REQUIRED", message: "An active admin profile is required." } });
+        const configuredOwnerId = process.env.CLERK_OWNER_USER_ID;
+        const configuredOwnerProfile = configuredOwnerId
+          ? await new AdminProfileRepository().findByClerkUserId(configuredOwnerId)
+          : null;
+        const code = userId === configuredOwnerId
+          ? "OWNER_PROFILE_LOOKUP_FAILED"
+          : configuredOwnerProfile ? "OWNER_CLERK_ID_MISMATCH" : "ADMIN_PROFILE_REQUIRED";
+        response.status(403).json({ error: { code, message: "An active admin profile is required." } });
         return;
       }
       response.json({ userId, role: profile.role, displayName: profile.displayName });
