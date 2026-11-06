@@ -2,6 +2,7 @@ export type ReservationStatus = "pending" | "confirmed" | "declined" | "cancelle
 
 export type ServiceWindow = { opens: string; closes: string; enabled?: boolean };
 export type CapacityTable = { seats: number; active: boolean };
+export type AssignableTable = CapacityTable & { key: string };
 
 export function minutesSinceMidnight(value: string): number {
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) throw new Error("Time must use HH:mm format.");
@@ -36,6 +37,13 @@ export function availableTableCapacity(tables: readonly CapacityTable[], occupie
 export function canAccommodateParty(tables: readonly CapacityTable[], occupiedSeats: number, partySize: number): boolean {
   if (!Number.isInteger(partySize) || partySize < 1) throw new Error("Party size must be a positive integer.");
   return availableTableCapacity(tables, occupiedSeats) >= partySize;
+}
+
+export function selectTable(tables: readonly AssignableTable[], partySize: number): AssignableTable | null {
+  if (!Number.isInteger(partySize) || partySize < 1) throw new Error("Party size must be a positive integer.");
+  return tables
+    .filter((table) => table.active && table.seats >= partySize)
+    .sort((first, second) => first.seats - second.seats || first.key.localeCompare(second.key))[0] ?? null;
 }
 
 const allowedTransitions: Record<ReservationStatus, readonly ReservationStatus[]> = {

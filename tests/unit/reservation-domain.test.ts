@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertReservationTransition, canAccommodateParty, canTransitionReservation, isWithinServiceWindow, windowsOverlap } from "../../server/src/domain/reservation-domain";
+import { assertReservationTransition, canAccommodateParty, canTransitionReservation, isWithinServiceWindow, selectTable, windowsOverlap } from "../../server/src/domain/reservation-domain";
 
 describe("reservation domain", () => {
   it("accepts a reservation fully inside an enabled service window", () => {
@@ -26,5 +26,10 @@ describe("reservation domain", () => {
     const tables = [{ seats: 2, active: true }, { seats: 4, active: true }, { seats: 8, active: false }];
     expect(canAccommodateParty(tables, 2, 4)).toBe(true);
     expect(canAccommodateParty(tables, 2, 5)).toBe(false);
+  });
+
+  it("selects the smallest suitable active table deterministically", () => {
+    expect(selectTable([{ key: "large", seats: 4, active: true }, { key: "small", seats: 2, active: true }, { key: "off", seats: 2, active: false }], 2)?.key).toBe("small");
+    expect(selectTable([{ key: "small", seats: 2, active: true }], 3)).toBeNull();
   });
 });
