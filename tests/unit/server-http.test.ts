@@ -6,6 +6,8 @@ import { pathToFileURL } from "node:url";
 import type { Server } from "node:http";
 import { createApp } from "../../server/src/http/app";
 import { isDirectExecution } from "../../server/src/server";
+import { BookingService } from "../../server/src/services/booking-service";
+import type { RequestHandler } from "express";
 
 const servers: Server[] = [];
 
@@ -18,6 +20,68 @@ afterEach(async () => {
         }),
     ),
   );
+});
+
+class FakeBookingService extends BookingService {
+  override async publicConfig() {
+    return { timezone: "Europe/Berlin", bookingHorizonDays: 30, leadTimeMinutes: 120, defaultDurationMinutes: 120, partySize: { min: 1, max: 8 }, locales: ["de", "en", "it"], provisional: true };
+  }
+  override async availability() { return ["17:00", "17:30"]; }
+  override async create(input: Parameters<BookingService["create"]>[0]) {
+    return { publicId: "res_test", date: input.date, startTime: input.startTime, endTime: "19:00", partySize: input.partySize, status: "pending" } as never;
+  }
+  override async listReservations() { return []; }
+  override async updateStatus() { return {} as never; }
+  override async listBlocks() { return []; }
+  override async createBlock() { return {} as never; }
+  override async deactivateBlock() { return {} as never; }
+  override async cancelByGuest() { return { status: "cancelled" } as never; }
+}
+
+const allowAdmin: RequestHandler = (_request, _response, next) => next();
+
+describe("reservation API", () => {
+  it("exposes public config and availability without internal table details", async () => {
+    const baseUrl = await listen(createApp({ bookingService: new FakeBookingService() }));
+    const config = await fetch(`${baseUrl}/api/public/config`);
+    expect(config.status).toBe(200);
+    await expect(config.json()).resolves.toMatchObject({ timezone: "Europe/Berlin", provisional: true });
+
+    const availability = await fetch(`${baseUrl}/api/public/availability?date=2026-11-10&partySize=2`);
+    expect(availability.status).toBe(200);
+    await expect(availability.json()).resolves.toEqual({ date: "2026-11-10", partySize: 2, slots: ["17:00", "17:30"], snapshot: true });
+  });
+
+  it("requires an idempotency key and validates public reservation data", async () => {
+    const baseUrl = await listen(createApp({ bookingService: new FakeBookingService() }));
+    const response = await fetch(`${baseUrl}/api/public/reservations`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({}) });
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toMatchObject({ error: { code: "VALIDATION_FAILED" } });
+  });
+
+  it("rate-limits repeated public reservation submissions", async () => {
+    const baseUrl = await listen(createApp({ bookingService: new FakeBookingService() }));
+    let response: Response | undefined;
+    for (let attempt = 0; attempt < 11; attempt += 1) {
+      response = await fetch(`${baseUrl}/api/public/reservations`, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+    }
+    expect(response?.status).toBe(429);
+    await expect(response?.json()).resolves.toMatchObject({ error: { code: "RATE_LIMIT_EXCEEDED" } });
+  });
+
+  it("keeps reservation administration behind the admin guard", async () => {
+    const baseUrl = await listen(createApp({ bookingService: new FakeBookingService(), adminGuard: allowAdmin }));
+    const reservations = await fetch(`${baseUrl}/api/admin/reservations`);
+    expect(reservations.status).toBe(200);
+    await expect(reservations.json()).resolves.toEqual({ reservations: [] });
+  });
+
+  it("accepts a secure guest cancellation token", async () => {
+    const baseUrl = await listen(createApp({ bookingService: new FakeBookingService() }));
+    const response = await fetch(`${baseUrl}/api/public/reservations/res_test/cancel`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token: "a".repeat(32) }) });
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ reference: "res_test", status: "cancelled" });
+  });
 });
 
 async function listen(app: ReturnType<typeof createApp>): Promise<string> {
@@ -60,98 +124,6 @@ describe("Express platform foundation", () => {
     expect(body.error.correlationId).toBe(response.headers.get("x-correlation-id"));
   });
 
-  it("validates and exposes the public reservation API without leaking table keys", async () => {
-    const reservationService = {
-      getPublicConfiguration: async () => ({ timezone: "Europe/Berlin", bookingHorizonDays: 60, leadTimeMinutes: 120, defaultDurationMinutes: 120, slotIntervalMinutes: 30, partySize: { min: 1, max: 10 }, servicePeriods: [] }),
-      getAvailability: async (date: string, partySize: number) => ({ date, partySize, slots: [{ startTime: "17:00", available: true }] }),
-      createReservation: async () => ({ publicId: "COL-1234567890", status: "confirmed" as const, tableKeys: ["table-01"], reused: false }),
-    };
-    const baseUrl = await listen(createApp({ reservationService }));
-    const availability = await fetch(`${baseUrl}/api/reservations/availability?date=2026-11-10&partySize=2`);
-    expect(availability.status).toBe(200);
-    await expect(availability.json()).resolves.toEqual({ date: "2026-11-10", partySize: 2, slots: [{ startTime: "17:00", available: true }] });
-
-    const invalid = await fetch(`${baseUrl}/api/reservations`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({}) });
-    expect(invalid.status).toBe(400);
-
-    const created = await fetch(`${baseUrl}/api/reservations`, {
-      method: "POST",
-      headers: { "content-type": "application/json", "idempotency-key": "browser-request-42" },
-      body: JSON.stringify({ date: "2026-11-10", startTime: "17:00", partySize: 2, locale: "de", guest: { name: "Giulia Bianchi", email: "giulia@example.com" }, privacyAcknowledged: true }),
-    });
-    expect(created.status).toBe(201);
-    const createdBody = await created.json() as { reservation: { publicId: string; tableKeys?: string[] } };
-    expect(createdBody.reservation.publicId).toBe("COL-1234567890");
-  });
-
-  it("reports unavailable admin authentication when Clerk is not configured", async () => {
-    const baseUrl = await listen(createApp());
-    const response = await fetch(`${baseUrl}/api/admin/session`);
-    const body = (await response.json()) as { error: { code: string } };
-
-    expect(response.status).toBe(503);
-    expect(body.error.code).toBe("ADMIN_AUTH_NOT_CONFIGURED");
-  });
-
-  it("rejects an authenticated Clerk account without an active owner profile", async () => {
-    const baseUrl = await listen(createApp({
-      getAuthenticatedUserId: () => "user_not_allowed",
-      findAdminProfile: async () => null,
-    }));
-    const response = await fetch(`${baseUrl}/api/admin/session`);
-    const body = (await response.json()) as { error: { code: string } };
-
-    expect(response.status).toBe(403);
-    expect(body.error.code).toBe("ADMIN_PROFILE_REQUIRED");
-  });
-
-  it("returns the internal owner profile only after both authentication checks pass", async () => {
-    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
-    const baseUrl = await listen(createApp({
-      getAuthenticatedUserId: () => owner.clerkUserId,
-      findAdminProfile: async () => owner,
-    }));
-    const response = await fetch(`${baseUrl}/api/admin/session`);
-
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ admin: owner });
-  });
-
-  it("protects reservation blocks and allows an owner to manage them", async () => {
-    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
-    const reservationAdminService = {
-      listBlocks: async () => [],
-      createBlock: async (input: { date: string; startTime: string; endTime: string; scope: "restaurant" | "area" | "table" }) => ({ blockId: "BLK-1234567890", date: input.date, startTime: input.startTime, endTime: input.endTime, scope: input.scope, scopeKey: null, tableCount: 8 }),
-      deleteBlock: async () => true,
-    };
-    const baseUrl = await listen(createApp({
-      getAuthenticatedUserId: () => owner.clerkUserId,
-      findAdminProfile: async () => owner,
-      reservationAdminService,
-    }));
-    const created = await fetch(`${baseUrl}/api/admin/reservation-blocks`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ date: "2026-11-10", startTime: "17:00", endTime: "19:00", scope: "restaurant", reason: "Private Veranstaltung" }),
-    });
-    expect(created.status).toBe(201);
-    await expect(created.json()).resolves.toEqual({ block: { blockId: "BLK-1234567890", date: "2026-11-10", startTime: "17:00", endTime: "19:00", scope: "restaurant", scopeKey: null, tableCount: 8 } });
-    const deleted = await fetch(`${baseUrl}/api/admin/reservation-blocks/BLK-1234567890`, { method: "DELETE" });
-    expect(deleted.status).toBe(204);
-  });
-
-  it("rejects a request without an authenticated Clerk user", async () => {
-    const baseUrl = await listen(createApp({
-      getAuthenticatedUserId: () => null,
-      findAdminProfile: async () => null,
-    }));
-    const response = await fetch(`${baseUrl}/api/admin/session`);
-    const body = (await response.json()) as { error: { code: string } };
-
-    expect(response.status).toBe(401);
-    expect(body.error.code).toBe("AUTHENTICATION_REQUIRED");
-  });
-
   it("serves generated assets and the SPA fallback in production mode", async () => {
     const directory = await mkdtemp(join(tmpdir(), "colosseo-static-"));
     await writeFile(join(directory, "index.html"), "<!doctype html><title>Colosseo test shell</title>");
@@ -160,9 +132,5 @@ describe("Express platform foundation", () => {
     const response = await fetch(`${baseUrl}/de/not-found`, { headers: { accept: "text/html" } });
     expect(response.status).toBe(200);
     await expect(response.text()).resolves.toContain("Colosseo test shell");
-
-    const adminResponse = await fetch(`${baseUrl}/admin`, { headers: { accept: "text/html" } });
-    expect(adminResponse.status).toBe(200);
-    expect(adminResponse.headers.get("x-robots-tag")).toBe("noindex, nofollow, noarchive");
   });
 });

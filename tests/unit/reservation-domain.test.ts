@@ -1,44 +1,35 @@
 import { describe, expect, it } from "vitest";
-import { buildTableCandidates, canTransitionReservationStatus, generateStartTimes, instantForLocalDateTime, lockSlotStarts, selectAvailableTables, validateBookingWindow, weekdayForDate } from "../../server/src/domain/reservation-domain";
-import { reservationRules, restaurantTables, servicePeriods } from "../../server/src/data/restaurant-configuration";
+import { assertReservationTransition, canAccommodateParty, canTransitionReservation, isWithinServiceWindow, selectTable, windowsOverlap } from "../../server/src/domain/reservation-domain";
 
 describe("reservation domain", () => {
-  it("validates real calendar dates and weekdays", () => {
-    expect(weekdayForDate("2026-11-10")).toBe(2);
-    expect(weekdayForDate("2026-02-30")).toBeNull();
+  it("accepts a reservation fully inside an enabled service window", () => {
+    expect(isWithinServiceWindow("18:00", "19:30", { opens: "17:00", closes: "21:00" })).toBe(true);
   });
 
-  it("creates only start times that fit the full reservation duration", () => {
-    const tuesday = servicePeriods.filter(({ weekday }) => weekday === 2);
-    expect(generateStartTimes(tuesday, reservationRules)).toEqual(["12:00", "17:00", "17:30", "18:00", "18:30", "19:00"]);
+  it("rejects disabled and out-of-window service periods", () => {
+    expect(isWithinServiceWindow("18:00", "19:30", { opens: "17:00", closes: "21:00", enabled: false })).toBe(false);
+    expect(isWithinServiceWindow("16:00", "17:30", { opens: "17:00", closes: "21:00" })).toBe(false);
   });
 
-  it("locks the duration plus buffer at the configured interval", () => {
-    expect(lockSlotStarts("17:00", reservationRules)).toEqual(["17:00", "17:30", "18:00", "18:30", "19:00"]);
+  it("detects half-open interval overlap without treating touching windows as overlap", () => {
+    expect(windowsOverlap("18:00", "19:00", "18:30", "19:30")).toBe(true);
+    expect(windowsOverlap("18:00", "19:00", "19:00", "20:00")).toBe(false);
   });
 
-  it("chooses the smallest fitting free table and then a permitted pair", () => {
-    const forTwo = buildTableCandidates(restaurantTables, 2);
-    expect(selectAvailableTables(forTwo, new Set())?.capacity).toBe(2);
-    expect(selectAvailableTables(forTwo, new Set(["table-01", "table-02"]))?.capacity).toBe(4);
-    const forEight = buildTableCandidates(restaurantTables, 8);
-    expect(forEight[0]).toEqual({ tableKeys: ["table-07", "table-08"], capacity: 8 });
+  it("allows only explicit reservation status transitions", () => {
+    expect(canTransitionReservation("pending", "confirmed")).toBe(true);
+    expect(canTransitionReservation("confirmed", "pending")).toBe(false);
+    expect(() => assertReservationTransition("completed", "confirmed")).toThrow("Invalid reservation transition");
   });
 
-  it("honours lead time and booking horizon in the restaurant timezone", () => {
-    const now = new Date("2026-11-09T10:00:00.000Z");
-    expect(validateBookingWindow("2026-11-09", "12:00", reservationRules, now)).toBe("lead_time");
-    expect(validateBookingWindow("2026-11-10", "12:00", reservationRules, now)).toBe("ok");
-    expect(validateBookingWindow("2027-02-01", "12:00", reservationRules, now)).toBe("horizon");
+  it("calculates only active table capacity for availability", () => {
+    const tables = [{ seats: 2, active: true }, { seats: 4, active: true }, { seats: 8, active: false }];
+    expect(canAccommodateParty(tables, 2, 4)).toBe(true);
+    expect(canAccommodateParty(tables, 2, 5)).toBe(false);
   });
 
-  it("rejects a local time that does not exist during the DST jump", () => {
-    expect(instantForLocalDateTime("2026-03-29", "02:30", "Europe/Berlin")).toBeNull();
-  });
-
-  it("allows only explicit status transitions", () => {
-    expect(canTransitionReservationStatus("requested", "confirmed")).toBe(true);
-    expect(canTransitionReservationStatus("confirmed", "completed")).toBe(true);
-    expect(canTransitionReservationStatus("completed", "confirmed")).toBe(false);
+  it("selects the smallest suitable active table deterministically", () => {
+    expect(selectTable([{ key: "large", seats: 4, active: true }, { key: "small", seats: 2, active: true }, { key: "off", seats: 2, active: false }], 2)?.key).toBe("small");
+    expect(selectTable([{ key: "small", seats: 2, active: true }], 3)).toBeNull();
   });
 });

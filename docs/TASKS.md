@@ -1,6 +1,6 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Resend-Testversand verifiziert, Produktionskonfiguration, Rechtsprüfung und Gate-Abnahme offen
+**Status:** Full-Stack-Phase `FS4` freigegeben und teilweise umgesetzt; externe Pflichtdaten blockieren den Abschluss
 **Letzte Aktualisierung:** 09.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
@@ -147,6 +147,9 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 10.10.2026 | Gate 3 | Freigegeben | Nutzer: „Phase drei ist freigegeben.“ Phase 4 autorisiert. |
 | 30.10.2026 | FS0-Dokumentation | Freigegeben | Nutzer: „go“. Autorisiert wurden Backend-Cockpit und Zwei-Personen-Tagesplan; dies ist ausdrücklich keine Gate-Freigabe für `FS1`. |
 | 02.11.2026 | Gate FS0 / Start FS1 | Freigegeben | Nutzer bestätigt MongoDB Atlas ohne zusätzliche Docker-Datenbank und erteilt ausdrücklich „Go für FS1“. |
+| 05.11.2026 | Gate FS1 / Start FS2 | Freigegeben | Nutzer nimmt FS1 ab und erteilt ausdrücklich „GO für FS2“. |
+| 06.11.2026 | Start FS3 | Freigegeben | Nutzer erteilt ausdrücklich „GO für FS3“; reale Betriebsdaten dürfen vorläufig durch markierte synthetische Entwicklungsdaten ersetzt werden. |
+| 09.11.2026 | Gate FS3 / Start FS4 | Freigegeben | Nutzer bestätigt den präsentierten FS3-Stand mit „go“. FS4 ist damit freigegeben; Produktionsfreigabe bleibt von echten Datenschutz-, Storno- und E-Mail-Daten abhängig. |
 
 ## Aktuelle Blocker
 
@@ -206,53 +209,37 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 **Benötigt vor Start:** Clerk-Konto/Anwendung, gewünschte OAuth-Anbieter, erste Owner-Identität und Rollenmatrix.
 
-**Freigabe:** `GO für FS2` am 05.11.2026 erteilt. Eine Clerk-Anwendung existiert und Google wurde als einziger OAuth-Anbieter bestätigt. `owner` erhält Vollzugriff; `staff` bleibt bis zu einer späteren Rechtefreigabe gesperrt. Die Clerk-Änderungen von Person A wurden integriert. Schlüssel, Owner User-ID und Google-Verbindung wurden am 05.11.2026 technisch verifiziert.
+**Freigabe:** `GO für FS2` am 05.11.2026 erteilt. Eine Clerk-Anwendung existiert und Google wurde als einziger OAuth-Anbieter bestätigt. `owner` erhält Vollzugriff; `staff` bleibt bis zu einer späteren Rechtefreigabe gesperrt. Die Clerk-Änderungen von Person A wurden laut Nutzer auf `dev` gepusht; die Owner-Clerk-User-ID liegt laut Nutzer bereits vor.
 
-**Erweiterung vom 05.11.2026:** Mehrere ausdrücklich benannte Clerk-Benutzer dürfen `owner` mit Vollzugriff sein. Ein zweiter verifizierter Google-Benutzer wurde über ein idempotentes Grant-Skript als aktiver Owner angelegt; beide Ownerprofile sind in Atlas aktiv.
-
-- [x] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren; Schlüssel, Anwendung, Google-Verbindung, Development-Proxy und echter signierter Owner-Request sind verifiziert.
-- [x] Google-OAuth-Anmeldung, Abmeldung, Sessionablauf, Redirect-Allowlist und Fehlerzustände umsetzen; reale Anmeldung, Abmeldung, erneute Anmeldung, Invite-only und der deutsche Clerk-Dialog wurden geprüft.
-- [x] Eigenes `admin_profiles`-Modell, Repository und idempotenten Owner-Bootstrap für Clerk-User-IDs implementieren; bestätigte Owner-ID wurde erfolgreich in Atlas gebootstrapped.
-- [x] `/admin` als lazy geladenes Grundlayout mit Lade-, fehlender Konfiguration, Anmeldung, Berechtigungsprüfung, Zugriff-verweigert-, Serverfehler- und Owner-Zustand erstellen; öffentlicher Header bleibt frei von Admin-Login.
+- [-] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren; `@clerk/react`, `@clerk/express`, `ClerkProvider`, Vite-API-Proxy und bedingte `clerkMiddleware()` sind lokal eingerichtet. Ein echter signierter Backend-Request bleibt offen.
+- [ ] OAuth-Anmeldung, Abmeldung, Sessionablauf, Redirect-Allowlist und Fehlerzustände umsetzen.
+- [-] Eigenes `admin_profiles`-Modell und Repository für Clerk-User-IDs implementieren; der Owner-Bootstrap bleibt bis zur bestätigten Owner-Clerk-ID offen.
+- [-] `/admin` mit Lade-, Zugriff-verweigert-, technischem Fehler- und geschütztem Layoutzustand erstellt; Browserprüfung des echten Google-OAuth-Flows bleibt offen.
 - [x] Owner-/Staff-Rechte als serverseitige Autorisierungsfunktion und Middleware mit verständlichen `401`-/`403`-Antworten sowie Unit-Tests verankern.
-- [x] Admin aus Sitemap/Indexierung und öffentlicher Navigation ausschließen; dynamisches Robots-Meta, `robots.txt`, Netlify- und Express-`X-Robots-Tag` sind gesetzt.
-- [x] Accessibility- und Security-Tests durchführen; 320-px-Ansicht, fehlende Konfiguration, `401`, `403`, `503`, Owner-Erfolg, Secret-Tracking und Tastaturfluss des Anmeldedialogs sind geprüft.
-- [x] `BREAK-UI`-Befund beheben: `displayName` ist einheitlich auf 120 getrimmte Zeichen begrenzt, bestehende Datensätze werden über Migration `0002_admin-display-name-limit` geprüft und lange Namen dürfen in der Begrüßung sicher umbrechen.
-- [x] Lokalisierten, visuell nachgeordneten „Adminbereich“-Utility-Link im öffentlichen Footer ergänzen; der Link verändert die serverseitige Berechtigungsprüfung nicht.
-- [x] **GATE FS2:** geschützter Zugang und Rollenprüfung wurden präsentiert; der Nutzer hat anschließend FS3 ausdrücklich begonnen.
+- [ ] Admin aus Sitemap/Indexierung und öffentlicher Navigation ausschließen.
+- [ ] Accessibility- und Security-Tests durchführen.
+- [ ] **GATE FS2:** geschützten Zugang und Rollenprüfung präsentieren; auf GO für `FS3` warten.
 
 ### FS3 – Reservierungs- und Verfügbarkeitskern
 
 **Benötigt vor Start:** reale Tischliste, Bereiche, Kombinationsregeln, Servicezeiten, Dauer/Buffer, Vorlauf, Buchungshorizont, Gruppengrenzen, Sperr- und Bestätigungsregeln.
 
-**Freigegebener Teilumfang 06.11.2026:** Der Nutzer hat erfundene, aber wie reguläre Restaurantkonfiguration benannte Daten erlaubt und anschließend die Fortsetzung mit den offenen FS3-Grundlagen angeordnet. Die Werte dürfen neutral gespeichert werden, bleiben bis zur Bestätigung durch das Restaurant jedoch fachlich vorläufig.
-
-- [x] Zwei vorläufige Bereiche und acht Tische mit Mindest-/Maximalkapazität als idempotente Restaurantkonfiguration modellieren.
-- [x] Drei eindeutige Kombinationspaare modellieren und durch Konfigurations-/Schema-Tests absichern.
-- [x] Elf wöchentliche Servicezeiten sowie Dauer, Puffer, Vorlauf, Buchungshorizont, Zeitfenster und Gruppengrenzen zentral konfigurieren und validieren.
-- [x] Versionierte Migrationen `0003_table-capacity-and-combinations` und `0004_initial-restaurant-configuration` in Test- und Entwicklungsdatenbank anwenden; alte `demo-*`-/`development-*`-Datensätze ersetzen beziehungsweise entfernen.
-- [ ] Vorläufige Restaurant- und Reservierungswerte vor Produktion fachlich bestätigen und Abweichungen versioniert anpassen.
-
-- [x] Pure Domainlogik für Kalenderdaten, Servicezeitfenster, Vorlauf, Buchungshorizont, DST-Sonderfall, Tischkandidaten und Statusübergänge umsetzen.
-- [x] Atomare Tischzuweisung einschließlich Transaktion und eindeutigem Tisch-Zeit-Sperrindex über Migration `0005_reservation-locks` implementieren.
-- [x] Öffentliche Config-/Availability-/Reservation-API mit Zod-Validierung, Kontaktgrenzen, Rate-Limit und Idempotency-Key erstellen.
-- [x] Geschützte Admin-API für manuelle Reservierungen und Sperrzeiten ergänzen; Migration `0006_reservation-blocks` in Test- und Entwicklungsdatenbank anwenden.
-- [x] Concurrency-, Grenzzeit-, Zeitzonen-, DST-, geschlossen- und Ausgebucht-Tests ausführen; ein echter paralleler Atlas-Test bestätigt genau einen Gewinner für dieselbe letzte Tischkapazität.
-- [ ] **GATE FS3:** Reservierungskern per API und Tests präsentieren; auf GO für `FS4` warten.
+- [x] Pure Domainlogik für `HH:mm`-Zeitfenster, Servicefenster, Überschneidungen und explizite Statusübergänge umgesetzt. Synthetische `PLATZHALTER`-Tische, Servicezeiten und Entwicklungsregeln wurden nach Nutzerfreigabe idempotent bereitgestellt; reale Betriebswerte bleiben offen.
+- [x] Atomare Tischzuweisung einschließlich eindeutiger Tisch-/Zeitslot-Sperren, MongoDB-Transaktion und deterministischer Einzel-/Kombinationstischauswahl implementieren; echter Parallelitätstest auf `colosseo_test` bestätigt genau einen Gewinner für die letzte Kapazität.
+- [x] Öffentliche Config-/Availability-/Reservation-API mit Zod-Validierung, Rate-Limit, Idempotency-Key, Vorlauf, Buchungshorizont, Serviceperioden, Dauer und Puffer erstellen.
+- [x] Geschützte Admin-API für Reservierungsliste, manuelle Reservierungen, Statusübergänge und administrativ verwaltete Sperrzeiten samt Audit-Ereignissen ergänzen. Die Autorisierung bleibt serverseitig aktiv, obwohl die abschließende FS2-Browserprüfung auf Nutzerwunsch verschoben wurde.
+- [x] Concurrency-, Grenzzeit-, Zeitzonen-, Ausgebucht-, Validierungs-, Rate-Limit- und API-Tests ausführen: Typecheck, Lint, 51/51 Vitest-Tests, Production-Build, Test-/Development-Migration `0008`, read-only Development-Availability-Smoke-Test und echter Atlas-Testdatenbank-Parallelitätstest erfolgreich.
+- [x] **GATE FS3:** technischer Reservierungskern wurde am 09.11.2026 präsentiert und vom Nutzer mit „go“ abgenommen; `FS4` ist freigegeben. Reale Betriebsdaten ersetzen vor einem Livebetrieb weiterhin die markierten `PLATZHALTER`-Regeln.
 
 ### FS4 – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
-**Benötigt vor Start:** freigegebene Formularfelder/-texte in DE/EN/IT, Datenschutzgrundlage, Stornoregeln, Absenderdomain und Restaurantempfänger. Resend ist als E-Mail-Anbieter bestätigt.
+**Benötigt vor Start:** freigegebene Formularfelder/-texte in DE/EN/IT, Datenschutzgrundlage, Stornoregeln, Absenderdomain, Restaurantempfänger und E-Mail-Anbieter.
 
-- [x] Reservierungsoberfläche in das bestehende Design integrieren, ohne Hero oder öffentliche Dramaturgie unnötig zu verändern.
-- [x] Zugängliche Datum-, Uhrzeit-, Personen- und Kontaktdateneingabe mit Lade-, Leer-, Konflikt-, Fehler- und Bestätigungszuständen umsetzen.
-- [x] Outbox-Verarbeitung und idempotente Gast-/Restaurant-E-Mails mit begrenzten Wiederholungen integrieren.
-- [x] Migration `0007_email-outbox` in Test- und Entwicklungsdatenbank anwenden; Zustellindex und Bestandsfelder sind aktiv.
-- [x] Restaurantempfänger vorläufig auf `mohammad.amiri@dci-student.org` festlegen; Secret und Absender bleiben ausschließlich in Umgebungsvariablen.
-- [-] Resend-Integration verifizieren: lokaler API-Key und Testabsender sind konfiguriert; reale Gastzustellung mit Status `Delivered`, gespeicherter Provider-ID und eindeutiger Ereignis-ID ist bestätigt. Eigene Absenderdomain, beliebige Empfänger sowie die Render-Konfiguration bleiben offen; die Restaurantnachricht wurde im Resend-Testmodus erwartungsgemäß blockiert und bleibt nachvollziehbar in der Outbox.
-- [ ] Datenschutztext, Aufbewahrungsfristen und Stornoregel fachlich/rechtlich freigeben; öffentliche Stornofunktion bleibt bis dahin bewusst ausgesetzt.
-- [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
-- [ ] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und E2E-Prüfungen ausführen.
+- [x] Reservierungsoberfläche in den bestehenden Notte-Reservierungsabschnitt integrieren, ohne Hero oder öffentliche Dramaturgie zu verändern; Production-Übermittlung bleibt bei `PLATZHALTER`-Regeln server- und clientseitig gesperrt.
+- [x] Zugängliche Datum-, Uhrzeit-, Personen- und Kontaktdateneingabe in DE/EN/IT mit Lade-, Leer-, Fehler- und Erfolgszustand sowie telefonischer Alternative umsetzen.
+- [x] Outbox-Ereignisse atomar mit der Reservierung anlegen; idempotenten Resend-Worker, lokalisierte Gast-/Stornonachricht, Restaurantnachricht und Wiederholungsplanung implementieren. API-Key, Absender und Empfänger wurden am 09.11.2026 mit genau einer technischen Testmail erfolgreich verifiziert.
+- [x] Sichere Gaststornierung mit zufälligem, nur gehasht gespeichertem Token bis zwei Stunden vor Reservierungsbeginn ergänzen; echter Atlas-Test bestätigt Statuswechsel und Freigabe der Tischsperren.
+- [-] Rate-Limit, Fehlerfälle, drei Locales, responsive Einspaltenansicht und Reduced-Motion-kompatible statische Formularzustände umgesetzt; echter Browser-E2E- und Extremdatenlauf bleibt offen, weil die verpflichtenden Skills `gpt-taste` und `break-ui` in dieser Sitzung nicht verfügbar waren.
 - [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
@@ -303,10 +290,10 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 5. `OFFEN` Soll jede passende Anfrage sofort bestätigt werden oder benötigen bestimmte Zeiten/Gruppen eine manuelle Freigabe?
 6. `OFFEN` Welche Änderungs-, Storno-, No-show- und Verspätungsregeln gelten?
 7. `OFFEN` Welche Pflichtfelder dürfen erhoben werden und wie lange werden Reservierungen, Anfragen und Logs gespeichert?
-8. `TEILWEISE BESTÄTIGT` Resend wird als externer Dienst für Transaktions-E-Mails verwendet; Restaurantempfänger ist vorläufig `mohammad.amiri@dci-student.org`. `OFFEN` bleiben Absenderdomain sowie die verantwortliche Person für Render- und Resend-Konten.
+8. `OFFEN` Wer erhält Restaurant-E-Mails, welche Absenderdomain wird verwendet und wer verwaltet Render und Resend?
 9. `OFFEN` Welche Personen erhalten Adminzugang und welche Rechte benötigen Owner und Mitarbeitende?
 10. `OFFEN` Sollen bestehende Reservierungen oder andere Daten importiert werden?
 11. `OFFEN` Soll die lokale MongoDB als Replica Set über Docker laufen oder ist bereits eine transaktionsfähige MongoDB-Entwicklungsumgebung vorhanden?
 12. `OFFEN` Welcher externe Objektspeicher darf später für hochgeladene Speisekartenbilder verwendet werden?
 13. `VERIFIZIERT` Für die bestehende Clerk-Anwendung wird ausschließlich Google OAuth verwendet.
-14. `VERIFIZIERT` Zwei ausdrücklich freigegebene Personen besitzen `owner` mit Vollzugriff und werden dauerhaft über ihre jeweilige Clerk User-ID autorisiert. Weitere Owner werden ausschließlich über das kontrollierte Grant-Skript aufgenommen.
+14. `TEILWEISE OFFEN` Die erste Restaurantbesitzer-Identität erhält `owner` mit Vollzugriff und wird dauerhaft über ihre Clerk User-ID autorisiert. Die konkrete User-ID wird nach dem Push von Person A beziehungsweise dem ersten kontrollierten Clerk-Kontoabgleich eingetragen.
