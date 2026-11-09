@@ -13,7 +13,7 @@ Diese Datei ist die einzige verbindliche Quelle für Inhaltsarchitektur, Seitent
 - Angebot: Pizza, Pasta und weitere italienische Speisen.
 - Kernbotschaft als sachliche Grundlage: frische Zubereitung in der eigenen Küche mit einfachen Zutaten.
 - Kernzielgruppe: Menschen ab etwa 30 Jahren mit Interesse an italienischem Essen und frischen Zutaten.
-- Primäres Conversion-Ziel: Tisch reservieren. Der ausdrückliche Full-Stack-Auftrag vom 30.10.2026 ersetzt die frühere Festlegung auf einen externen Dienst durch ein eigenes Reservierungssystem; bis zu dessen geprüfter Freigabe bleibt die bestätigte Telefonnummer der einzige aktive Reservierungsweg.
+- Primäres Conversion-Ziel: Tisch reservieren. Die eigene Reservierungsstrecke ist seit der FS4-Freigabe vom 09.11.2026 in Development verfügbar; in Production bleibt sie bis zur Freigabe der realen Regeln und Datenschutzinformation gesperrt. Die bestätigte Telefonnummer bleibt immer als Alternative sichtbar.
 - Sekundäre Ziele: Speisekarte einsehen sowie Feiern und Veranstaltungen anfragen.
 - Eine Online-Bestellfunktion für Essen ist nicht vorgesehen.
 - Verbindliche Sprachen: Deutsch, Englisch und Italienisch. Die Standardsprache ist `OFFEN`.
@@ -59,7 +59,7 @@ Für jede freigegebene Seite werden Zweck, Zielgruppe, Kernbotschaft, Abschnitts
 4. **Feiern**: Möglichkeiten für private Feiern und Veranstaltungen mit externem Anfrageweg.
 5. **Kontakt**: Anfahrt, reale Öffnungszeiten, Telefon und rechtliche Verweise.
 
-Globale Aktionen: **Tisch reservieren**, Telefon, Sprachauswahl. Die Reservierungsaktion führt erst nach freigegebener Full-Stack-Implementierung in den eigenen Buchungsablauf; bis dahin bleibt sie telefonisch. Impressum und Datenschutz stehen ausschließlich im Footer und bleiben inhaltlich `OFFEN`.
+Globale Aktionen: **Tisch reservieren**, Telefon, Sprachauswahl. Die Reservierungsaktion führt in Development in den eigenen Buchungsablauf; Production bleibt bis zur fachlichen und datenschutzrechtlichen Freigabe gesperrt. Impressum und Datenschutz stehen ausschließlich im Footer und bleiben inhaltlich `OFFEN`.
 
 Die Speisekarte erhält eine eigene Seite und darf zusätzlich als kurze Auswahl auf der Startseite erscheinen. Eine Online-Bestellstrecke wird nicht vorgesehen.
 

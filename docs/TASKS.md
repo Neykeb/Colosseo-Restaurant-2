@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS1` – MongoDB-Atlas-Verbindung verifiziert; übrige Plattformaufgaben offen
-**Letzte Aktualisierung:** 05.11.2026
+**Status:** Full-Stack-Phase `FS4` freigegeben und teilweise umgesetzt; externe Pflichtdaten blockieren den Abschluss
+**Letzte Aktualisierung:** 09.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -147,6 +147,9 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 10.10.2026 | Gate 3 | Freigegeben | Nutzer: „Phase drei ist freigegeben.“ Phase 4 autorisiert. |
 | 30.10.2026 | FS0-Dokumentation | Freigegeben | Nutzer: „go“. Autorisiert wurden Backend-Cockpit und Zwei-Personen-Tagesplan; dies ist ausdrücklich keine Gate-Freigabe für `FS1`. |
 | 02.11.2026 | Gate FS0 / Start FS1 | Freigegeben | Nutzer bestätigt MongoDB Atlas ohne zusätzliche Docker-Datenbank und erteilt ausdrücklich „Go für FS1“. |
+| 05.11.2026 | Gate FS1 / Start FS2 | Freigegeben | Nutzer nimmt FS1 ab und erteilt ausdrücklich „GO für FS2“. |
+| 06.11.2026 | Start FS3 | Freigegeben | Nutzer erteilt ausdrücklich „GO für FS3“; reale Betriebsdaten dürfen vorläufig durch markierte synthetische Entwicklungsdaten ersetzt werden. |
+| 09.11.2026 | Gate FS3 / Start FS4 | Freigegeben | Nutzer bestätigt den präsentierten FS3-Stand mit „go“. FS4 ist damit freigegeben; Produktionsfreigabe bleibt von echten Datenschutz-, Storno- und E-Mail-Daten abhängig. |
 
 ## Aktuelle Blocker
 
@@ -221,22 +224,22 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 **Benötigt vor Start:** reale Tischliste, Bereiche, Kombinationsregeln, Servicezeiten, Dauer/Buffer, Vorlauf, Buchungshorizont, Gruppengrenzen, Sperr- und Bestätigungsregeln.
 
-- [-] Pure Domainlogik für `HH:mm`-Zeitfenster, Servicefenster, Überschneidungen und explizite Statusübergänge umgesetzt; vier Unit-Tests erfolgreich. Synthetische `PLATZHALTER`-Tische, Servicezeit und Entwicklungsregeln wurden nach Nutzerfreigabe idempotent in den Development-Seed aufgenommen und ausgeführt.
-- [ ] Atomare Tischzuweisung einschließlich Parallelitätsschutz implementieren.
-- [ ] Öffentliche Config-/Availability-/Reservation-API mit Validierung, Rate-Limit und Idempotenz erstellen.
-- [ ] Admin-API für manuelle Reservierungen und Sperrzeiten ergänzen.
-- [ ] Concurrency-, Grenzzeit-, Zeitzonen- und Ausgebucht-Tests ausführen.
-- [ ] **GATE FS3:** Reservierungskern per API und Tests präsentieren; auf GO für `FS4` warten.
+- [x] Pure Domainlogik für `HH:mm`-Zeitfenster, Servicefenster, Überschneidungen und explizite Statusübergänge umgesetzt. Synthetische `PLATZHALTER`-Tische, Servicezeiten und Entwicklungsregeln wurden nach Nutzerfreigabe idempotent bereitgestellt; reale Betriebswerte bleiben offen.
+- [x] Atomare Tischzuweisung einschließlich eindeutiger Tisch-/Zeitslot-Sperren, MongoDB-Transaktion und deterministischer Einzel-/Kombinationstischauswahl implementieren; echter Parallelitätstest auf `colosseo_test` bestätigt genau einen Gewinner für die letzte Kapazität.
+- [x] Öffentliche Config-/Availability-/Reservation-API mit Zod-Validierung, Rate-Limit, Idempotency-Key, Vorlauf, Buchungshorizont, Serviceperioden, Dauer und Puffer erstellen.
+- [x] Geschützte Admin-API für Reservierungsliste, manuelle Reservierungen, Statusübergänge und administrativ verwaltete Sperrzeiten samt Audit-Ereignissen ergänzen. Die Autorisierung bleibt serverseitig aktiv, obwohl die abschließende FS2-Browserprüfung auf Nutzerwunsch verschoben wurde.
+- [x] Concurrency-, Grenzzeit-, Zeitzonen-, Ausgebucht-, Validierungs-, Rate-Limit- und API-Tests ausführen: Typecheck, Lint, 51/51 Vitest-Tests, Production-Build, Test-/Development-Migration `0008`, read-only Development-Availability-Smoke-Test und echter Atlas-Testdatenbank-Parallelitätstest erfolgreich.
+- [x] **GATE FS3:** technischer Reservierungskern wurde am 09.11.2026 präsentiert und vom Nutzer mit „go“ abgenommen; `FS4` ist freigegeben. Reale Betriebsdaten ersetzen vor einem Livebetrieb weiterhin die markierten `PLATZHALTER`-Regeln.
 
 ### FS4 – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
 **Benötigt vor Start:** freigegebene Formularfelder/-texte in DE/EN/IT, Datenschutzgrundlage, Stornoregeln, Absenderdomain, Restaurantempfänger und E-Mail-Anbieter.
 
-- [ ] Reservierungsoberfläche in das bestehende Design integrieren, ohne Hero oder öffentliche Dramaturgie unnötig zu verändern.
-- [ ] Zugängliche Datum-, Uhrzeit-, Personen- und Kontaktdateneingabe mit vollständigen Zuständen umsetzen.
-- [ ] Outbox-Verarbeitung und idempotente Gast-/Restaurant-E-Mails integrieren.
+- [x] Reservierungsoberfläche in den bestehenden Notte-Reservierungsabschnitt integrieren, ohne Hero oder öffentliche Dramaturgie zu verändern; Production-Übermittlung bleibt bei `PLATZHALTER`-Regeln server- und clientseitig gesperrt.
+- [x] Zugängliche Datum-, Uhrzeit-, Personen- und Kontaktdateneingabe in DE/EN/IT mit Lade-, Leer-, Fehler- und Erfolgszustand sowie telefonischer Alternative umsetzen.
+- [-] Outbox-Ereignisse atomar mit der Reservierung anlegen; idempotenten Resend-Worker, lokalisierte Gastnachricht, Restaurantnachricht und Wiederholungsplanung implementieren. Echter Versand bleibt bis zu Resend-Key, verifizierter Absenderdomain und Restaurantempfänger blockiert.
 - [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
-- [ ] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und E2E-Prüfungen ausführen.
+- [-] Rate-Limit, Fehlerfälle, drei Locales, responsive Einspaltenansicht und Reduced-Motion-kompatible statische Formularzustände umgesetzt; echter Browser-E2E- und Extremdatenlauf bleibt offen, weil die verpflichtenden Skills `gpt-taste` und `break-ui` in dieser Sitzung nicht verfügbar waren.
 - [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung

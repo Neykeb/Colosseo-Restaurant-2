@@ -1,0 +1,232 @@
+import { randomUUID } from "node:crypto";
+import {
+  ReservationBlockModel,
+  AuditEventModel,
+  ReservationModel,
+  ServiceHoursModel,
+  SettingModel,
+  TableAssignmentModel,
+  TableModel,
+  type Reservation,
+} from "../models/core";
+import { assertReservationTransition, isWithinServiceWindow, minutesSinceMidnight, type ReservationStatus } from "../domain/reservation-domain";
+import { ReservationRepository } from "../repositories/reservation-repository";
+
+export type BookingRules = {
+  marker?: string;
+  timezone: string;
+  bookingHorizonDays: number;
+  leadTimeMinutes: number;
+  defaultDurationMinutes: number;
+  partySizeMin: number;
+  partySizeMax: number;
+  confirmationMode: "pending" | "confirmed";
+  slotIntervalMinutes?: number;
+  bufferMinutes?: number;
+};
+
+export type ReservationInput = {
+  date: string;
+  startTime: string;
+  partySize: number;
+  guest: { name: string; email?: string; phone?: string };
+  locale: "de" | "en" | "it";
+  idempotencyKey: string;
+  source: "public" | "admin";
+  internalNote?: string;
+};
+
+export class BookingError extends Error {
+  constructor(public readonly code: string, public readonly statusCode: number, message: string) {
+    super(message);
+  }
+}
+
+export class BookingService {
+  constructor(private readonly reservations = new ReservationRepository()) {}
+
+  async getRules(): Promise<BookingRules> {
+    const setting = await SettingModel.findOne({ key: "reservation.rules" }).lean().exec();
+    if (!setting?.value) throw new BookingError("BOOKING_NOT_CONFIGURED", 503, "Booking is not configured.");
+    return setting.value as BookingRules;
+  }
+
+  async publicConfig() {
+    const rules = await this.getRules();
+    return {
+      timezone: rules.timezone,
+      bookingHorizonDays: rules.bookingHorizonDays,
+      leadTimeMinutes: rules.leadTimeMinutes,
+      defaultDurationMinutes: rules.defaultDurationMinutes,
+      partySize: { min: rules.partySizeMin, max: rules.partySizeMax },
+      locales: ["de", "en", "it"],
+      provisional: rules.marker === "PLATZHALTER",
+    };
+  }
+
+  async availability(date: string, partySize: number, now = new Date()): Promise<string[]> {
+    const rules = await this.getRules();
+    validateBookingDate(date, rules, now);
+    if (partySize < rules.partySizeMin || partySize > rules.partySizeMax) return [];
+    const weekday = new Date(`${date}T12:00:00Z`).getUTCDay();
+    const services = await ServiceHoursModel.find({ weekday, active: true }).sort({ startTime: 1 }).lean().exec();
+    if (services.length === 0) return [];
+    const interval = rules.slotIntervalMinutes ?? 30;
+    const slots: string[] = [];
+    for (const service of services) {
+      for (let start = minutesSinceMidnight(service.startTime); start + rules.defaultDurationMinutes + (rules.bufferMinutes ?? 0) <= minutesSinceMidnight(service.endTime); start += interval) {
+        const startTime = formatMinutes(start);
+        if (!meetsLeadTime(date, startTime, rules, now)) continue;
+        const occupancyEndTime = formatMinutes(start + rules.defaultDurationMinutes + (rules.bufferMinutes ?? 0));
+        if (await this.findAvailableTables(date, startTime, occupancyEndTime, partySize)) slots.push(startTime);
+      }
+    }
+    return slots;
+  }
+
+  async create(input: ReservationInput, now = new Date()) {
+    const existing = await this.reservations.findByIdempotencyKey(input.idempotencyKey);
+    if (existing) return existing;
+    const rules = await this.getRules();
+    if (rules.marker === "PLATZHALTER" && process.env.NODE_ENV === "production") {
+      throw new BookingError("BOOKING_NOT_RELEASED", 503, "Online booking has not been released for production.");
+    }
+    validateBookingDate(input.date, rules, now);
+    if (input.partySize < rules.partySizeMin || input.partySize > rules.partySizeMax) {
+      throw new BookingError("PARTY_SIZE_NOT_ALLOWED", 422, "The party size is not bookable.");
+    }
+    const endTime = formatMinutes(minutesSinceMidnight(input.startTime) + rules.defaultDurationMinutes);
+    const occupancyEndTime = formatMinutes(minutesSinceMidnight(endTime) + (rules.bufferMinutes ?? 0));
+    const weekday = new Date(`${input.date}T12:00:00Z`).getUTCDay();
+    const services = await ServiceHoursModel.find({ weekday, active: true }).lean().exec();
+    if (!services.some((service) => isWithinServiceWindow(input.startTime, occupancyEndTime, { opens: service.startTime, closes: service.endTime }))) {
+      throw new BookingError("OUTSIDE_SERVICE_WINDOW", 422, "The requested time is outside the service window.");
+    }
+    if (!meetsLeadTime(input.date, input.startTime, rules, now)) {
+      throw new BookingError("LEAD_TIME_NOT_MET", 422, "The minimum lead time is not met.");
+    }
+    const tables = await this.findAvailableTables(input.date, input.startTime, occupancyEndTime, input.partySize);
+    if (!tables) throw new BookingError("NO_AVAILABILITY", 409, "No availability remains for the requested time.");
+    const reservation = {
+      publicId: `res_${randomUUID().replaceAll("-", "")}`,
+      date: input.date,
+      startTime: input.startTime,
+      endTime,
+      partySize: input.partySize,
+      status: rules.confirmationMode,
+      source: input.source,
+      locale: input.locale,
+      guest: input.guest,
+      internalNote: input.internalNote,
+      idempotencyKey: input.idempotencyKey,
+    } as Reservation;
+    try {
+      return await this.reservations.createWithTableAssignment(reservation, tables.map((table) => table.key), rules.slotIntervalMinutes ?? 30, occupancyEndTime);
+    } catch (error) {
+      const concurrent = await this.reservations.findByIdempotencyKey(input.idempotencyKey);
+      if (concurrent) return concurrent;
+      if (error instanceof Error && error.message === "TABLE_NOT_AVAILABLE") {
+        throw new BookingError("NO_AVAILABILITY", 409, "No availability remains for the requested time.");
+      }
+      throw error;
+    }
+  }
+
+  async listReservations(filters: { date?: string; status?: string }) {
+    const query: Record<string, string> = {};
+    if (filters.date) query.date = filters.date;
+    if (filters.status) query.status = filters.status;
+    return ReservationModel.find(query).sort({ date: 1, startTime: 1 }).lean().exec();
+  }
+
+  async updateStatus(publicId: string, status: ReservationStatus, actorId = "system") {
+    const reservation = await ReservationModel.findOne({ publicId }).exec();
+    if (!reservation) throw new BookingError("RESERVATION_NOT_FOUND", 404, "Reservation not found.");
+    try {
+      assertReservationTransition(reservation.status as ReservationStatus, status);
+    } catch {
+      throw new BookingError("INVALID_STATUS_TRANSITION", 409, "The requested reservation status transition is not allowed.");
+    }
+    reservation.status = status;
+    await reservation.save();
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation.status_changed", target: publicId, metadata: { status } });
+    return reservation.toObject();
+  }
+
+  async listBlocks(date?: string) {
+    return ReservationBlockModel.find(date ? { date, active: true } : { active: true }).sort({ date: 1, startTime: 1 }).lean().exec();
+  }
+
+  async createBlock(input: { date: string; startTime: string; endTime: string; label: string; createdBy: string }) {
+    if (minutesSinceMidnight(input.endTime) <= minutesSinceMidnight(input.startTime)) throw new BookingError("INVALID_TIME_WINDOW", 422, "The block must end after it starts.");
+    const block = await ReservationBlockModel.create({ ...input, blockId: `blk_${randomUUID().replaceAll("-", "")}`, active: true });
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId: input.createdBy, action: "reservation_block.created", target: block.blockId, metadata: { date: input.date, startTime: input.startTime, endTime: input.endTime } });
+    return block;
+  }
+
+  async deactivateBlock(publicId: string, actorId = "system") {
+    const block = await ReservationBlockModel.findOneAndUpdate({ blockId: publicId, active: true }, { $set: { active: false } }, { new: true }).lean().exec();
+    if (!block) throw new BookingError("BLOCK_NOT_FOUND", 404, "Reservation block not found.");
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation_block.deactivated", target: publicId, metadata: {} });
+    return block;
+  }
+
+  private async findAvailableTables(date: string, startTime: string, endTime: string, partySize: number) {
+    const block = await ReservationBlockModel.exists({ date, active: true, startTime: { $lt: endTime }, endTime: { $gt: startTime } });
+    if (block) return null;
+    const [tables, assignments] = await Promise.all([
+      TableModel.find({ active: true }).select({ key: 1, minPartySize: 1, maxPartySize: 1, combinationGroupKey: 1, active: 1 }).lean().exec(),
+      TableAssignmentModel.find({ date, startTime: { $lt: endTime }, endTime: { $gt: startTime } }).select({ tableKey: 1 }).lean().exec(),
+    ]);
+    const occupied = new Set(assignments.map((assignment) => assignment.tableKey));
+    const available = tables.filter((table) => !occupied.has(table.key));
+    return selectTableAllocation(available, partySize);
+  }
+}
+
+export function selectTableAllocation<T extends { key: string; minPartySize: number; maxPartySize: number; combinationGroupKey?: string | null }>(tables: readonly T[], partySize: number): readonly T[] | null {
+  const single = tables
+    .filter((table) => table.minPartySize <= partySize && table.maxPartySize >= partySize)
+    .sort((first, second) => first.maxPartySize - second.maxPartySize || first.key.localeCompare(second.key))[0];
+  if (single) return [single];
+  const combinations = tables.flatMap((first, index) => tables.slice(index + 1).map((second) => [first, second] as const))
+      .filter(([first, second]) => first.combinationGroupKey && first.combinationGroupKey === second.combinationGroupKey && first.maxPartySize + second.maxPartySize >= partySize)
+      .sort((first, second) => (first[0].maxPartySize + first[1].maxPartySize) - (second[0].maxPartySize + second[1].maxPartySize) || first[0].key.localeCompare(second[0].key));
+  return combinations[0] ?? null;
+}
+
+export function validateBookingDate(date: string, rules: BookingRules, now = new Date()): void {
+  if (!isValidIsoDate(date)) throw new BookingError("INVALID_DATE", 422, "Date must use YYYY-MM-DD format.");
+  const today = localDate(now, rules.timezone);
+  const difference = Math.floor((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
+  if (difference < 0 || difference > rules.bookingHorizonDays) throw new BookingError("DATE_OUTSIDE_BOOKING_HORIZON", 422, "The date is outside the booking horizon.");
+}
+
+function isValidIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
+}
+
+function meetsLeadTime(date: string, time: string, rules: BookingRules, now: Date): boolean {
+  const today = localDate(now, rules.timezone);
+  if (date > today) return true;
+  if (date < today) return false;
+  return minutesSinceMidnight(time) >= localMinutes(now, rules.timezone) + rules.leadTimeMinutes;
+}
+
+function localDate(date: Date, timezone: string): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+}
+
+function localMinutes(date: Date, timezone: string): number {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return Number(values.hour) * 60 + Number(values.minute);
+}
+
+function formatMinutes(total: number): string {
+  if (total < 0 || total >= 24 * 60) throw new BookingError("INVALID_TIME_WINDOW", 422, "The time window must stay within one calendar day.");
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}

@@ -7,6 +7,9 @@ const serverEnvSchema = z.object({
   CLERK_OWNER_USER_ID: z.string().trim().regex(/^user_[A-Za-z0-9]+$/).optional(),
   CLERK_OWNER_DISPLAY_NAME: z.string().trim().min(1).optional(),
   CLERK_AUTHORIZED_PARTIES: z.string().trim().optional(),
+  RESEND_API_KEY: z.string().trim().min(1).optional(),
+  RESERVATION_EMAIL_FROM: z.string().trim().email().optional(),
+  RESTAURANT_NOTIFICATION_EMAIL: z.string().trim().email().optional(),
   MONGODB_URI: z.preprocess(
     (value) => value ?? "",
     z

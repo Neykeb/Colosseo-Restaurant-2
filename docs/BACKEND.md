@@ -1,10 +1,10 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS1` technisch abgeschlossen; Gate-Abnahme durch den Nutzer steht aus
+**Status:** Full-Stack-Phase `FS4` freigegeben und teilweise umgesetzt; externe Pflichtdaten stehen aus
 
-**Phase:** `FS1` – Plattformgrundlage und reproduzierbare Datenbank
+**Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
-**Letzte Aktualisierung:** 05.11.2026
+**Letzte Aktualisierung:** 09.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
