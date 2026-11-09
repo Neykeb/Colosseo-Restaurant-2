@@ -7,7 +7,7 @@ import {
   redirect,
   useParams,
 } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { isLocale, siteContent, getPageKey, type Locale, type PageKey } from "~/content/site-content";
 import { applyDocumentSeo, getRouteSeo } from "~/content/seo";
 import { SiteFooter } from "~/components/site-footer";
@@ -129,10 +129,38 @@ function PrototypesRoute() {
 }
 
 function AdminRoute() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { getToken, isLoaded, isSignedIn, userId } = useAuth();
+  const [status, setStatus] = useState<"idle" | "loading" | "allowed" | "forbidden" | "error">("idle");
+  const [profile, setProfile] = useState<{ displayName: string; role: string } | null>(null);
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) { setStatus("idle"); setProfile(null); return; }
+    let cancelled = false;
+    setStatus("loading");
+    void (async () => {
+      try {
+        const token = await getToken();
+        const response = await fetch("/api/admin/me", { headers: token ? { Authorization: `Bearer ${token}` } : undefined });
+        if (cancelled) return;
+        if (response.status === 401 || response.status === 403) {
+          const body = await response.json().catch(() => null) as { error?: { code?: string } } | null;
+          if (body?.error?.code === "OWNER_CLERK_ID_MISMATCH" || body?.error?.code === "OWNER_PROFILE_LOOKUP_FAILED") setStatus("error");
+          else setStatus("forbidden");
+          return;
+        }
+        if (!response.ok) throw new Error("Adminprüfung fehlgeschlagen.");
+        setProfile(await response.json() as { displayName: string; role: string });
+        setStatus("allowed");
+      } catch { if (!cancelled) setStatus("error"); }
+    })();
+    return () => { cancelled = true; };
+  }, [getToken, isLoaded, isSignedIn]);
   if (!isLoaded) return <main className="admin-page" aria-busy="true"><p>Adminbereich wird geladen …</p></main>;
   if (!isSignedIn) return <main className="admin-page"><h1>Anmeldung erforderlich</h1><p>Bitte melde dich über den Admin-Button an.</p></main>;
-  return <main className="admin-page"><p className="eyebrow">Geschützter Bereich</p><h1>Administration</h1><p>Die serverseitige Rollenprüfung entscheidet über den tatsächlichen Zugriff.</p></main>;
+  if (status === "loading") return <main className="admin-page" aria-busy="true"><p>Adminzugriff wird geprüft …</p></main>;
+  if (status === "forbidden") return <main className="admin-page"><p className="eyebrow">Zugriff verweigert</p><h1>Kein Adminzugriff</h1><p>Dein Clerk-Konto ist nicht als aktives Adminprofil freigeschaltet.</p></main>;
+  if (status === "error") return <main className="admin-page"><p className="eyebrow">Konfigurationsfehler</p><h1>Ownerzugriff konnte nicht bestätigt werden</h1><p>Die Clerk-ID stimmt mit der lokalen Konfiguration überein, aber der laufende Server findet kein aktives passendes Owner-Profil.</p>{import.meta.env.DEV && userId ? <p><small>Angemeldete Entwicklungs-ID: <code>{userId}</code></small></p> : null}</main>;
+  if (status !== "allowed" || !profile) return <main className="admin-page" aria-busy="true"><p>Adminbereich wird vorbereitet …</p></main>;
+  return <main className="admin-page"><p className="eyebrow">Geschützter Bereich</p><h1>Administration</h1><p>Willkommen, {profile.displayName}. Rolle: {profile.role}.</p></main>;
 }
 
 function NotFound() {

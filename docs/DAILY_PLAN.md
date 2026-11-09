@@ -176,8 +176,8 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 - **Gate:** Der Nutzer hat `FS1` abgenommen und `FS2` mit ausdrücklichem `GO` freigegeben.
 - **Bestätigte Entscheidungen:** Eine Clerk-Anwendung existiert; Google ist der einzige OAuth-Anbieter. Der Restaurantbesitzer erhält als `owner` Vollzugriff und wird dauerhaft über seine eindeutige Clerk User-ID autorisiert. `staff` bleibt ohne konkrete Rechtefreigabe gesperrt.
-- **Aktueller Blocker:** Person A muss ihre Clerk-Änderungen noch auf `dev` pushen. Die konkrete Owner-User-ID wird anschließend aus Clerk übernommen und nicht erfunden.
-- **Nächster Einstieg:** Nach dem Push zuerst die vorhandene Implementierung und Secret-Trennung prüfen, dann nur fehlende Sessionprüfung, eigenes Adminprofil, Rollenmiddleware und geschütztes Admin-Grundlayout ergänzen.
+- **Aktueller Stand:** Person A hat bestätigt, dass die Clerk-Änderungen auf `dev` gepusht wurden. Der Nutzer bestätigt außerdem, dass die Owner-Clerk-User-ID bereits vorliegt.
+- **Nächster Einstieg:** Clerk-Änderungen, Secret-Trennung und vorhandene Owner-ID prüfen; anschließend nur fehlende Sessionprüfung, eigenes Adminprofil und geschütztes Admin-Grundlayout ergänzen.
 
 ## 14. Sicherheitsbereinigung – 05.11.2026
 
@@ -185,3 +185,19 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Bereinigung:** Beide Dateien wurden aus der gesamten erreichbaren Historie der Branches `dev`, `feature/momo` und `feature/szymon` entfernt; die bereinigten Branches wurden kontrolliert force-gepusht und lokal neu ausgerichtet. `.env.example` bleibt die einzige versionierte Env-Vorlage.
 - **Prävention:** `npm test` führt nun zuerst `check:tracked-env` aus und bricht ab, falls `.env` oder eine private `.env.*`-Datei erneut getrackt wird.
 - **Extern erforderlich:** Das veröffentlichte MongoDB-Passwort wird vom Nutzer rotiert. Da GitHub alte Commit-Ansichten und Pull-Request-Refs zwischenspeichern kann, ist die Rotation unabhängig von der Historienbereinigung zwingend.
+
+## 15. FS2-Arbeit – 06.11.2026
+
+- **Umgesetzt:** `/admin` ruft nach erfolgreicher Clerk-Anmeldung `/api/admin/me` mit dem Clerk-Sessiontoken auf und unterscheidet Lade-, verweigerten, technischen und erfolgreichen Zustand.
+- **Umgesetzt:** Vite-Development-Proxy für `/api` auf den lokalen Express-Port ergänzt; `.env.example` dokumentiert die benötigten Clerk-Variablen ohne echte Werte.
+- **Prüfungen:** Typecheck und Lint erfolgreich; Production-Build erfolgreich. Vitest: 29/32 Tests bestanden; drei Listener-Integrationstests wurden durch die Sandbox-Beschränkung `listen EPERM` blockiert.
+- **Offen:** echter signierter Clerk-Request mit laufendem Backend, Browserprüfung des Google-OAuth-Flows, Owner-Profil-Bootstrap gegen die Testdatenbank sowie Accessibility-/Security-Abnahme.
+- **Nachprüfung:** Google-OAuth und ein signierter Request wurden im Browser erreicht; der Ownerzugriff war zunächst wegen einer nicht passenden `CLERK_AUTHORIZED_PARTIES`-Origin blockiert. Die lokalen Origins für Ports 5173/5174 mit `localhost` und `127.0.0.1` sind jetzt ergänzt und der Express-Server neu gestartet. Die abschließende Owner-Ansicht muss nach einem Browser-Reload erneut bestätigt werden.
+
+## 16. FS3-Start – 06.11.2026
+
+- **Freigabe:** `GO für FS3` wurde vom Nutzer erteilt.
+- **Umgesetzt:** Pure Domainlogik für `HH:mm`-Zeitfenster, gültige Servicefenster, Überschneidungen und explizite Reservierungs-Statusübergänge ergänzt.
+- **Tests:** Typecheck, Lint und vier neue Domain-Unit-Tests erfolgreich.
+- **Offen:** reale Tisch-/Bereichsdaten, Servicezeiten, Dauer/Buffer, Vorlauf, Buchungshorizont, Gruppengrenzen, Sperr- und Bestätigungsregeln müssen vor API- und Concurrency-Implementierung fachlich bestätigt werden.
+- **Freigegebene Entwicklungsannahme:** Der Nutzer hat synthetische FS3-Daten erlaubt. Der Development-Seed wurde gegen die Entwicklungsdatenbank ausgeführt und enthält ausschließlich markierte `PLATZHALTER`-Daten; reale Produktionsregeln bleiben offen.
