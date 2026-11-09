@@ -557,7 +557,7 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 - `GET /api/public/config` – veröffentlichte Buchungsregeln und notwendige Formularoptionen.
 - `GET /api/public/availability?date=…&partySize=…` – verfügbare Startzeiten ohne interne Tischdetails.
 - `POST /api/public/reservations` – atomare Reservierungsanfrage; wiederholte Übermittlung über Idempotency-Key absichern.
-- `POST /api/public/reservations/:reference/cancel` – nur mit sicherem, zeitlich begrenztem Gast-Token; genaue Stornoregel `OFFEN`.
+- `POST /api/public/reservations/:reference/cancel` – nur mit zufälligem, serverseitig ausschließlich als SHA-256-Hash gespeichertem Gast-Token. Kostenfreie Online-Stornierung ist bis zwei Stunden vor Reservierungsbeginn möglich; danach erfolgt die Klärung telefonisch.
 - `GET /api/public/menu` und `GET /api/public/opening-hours` – ausschließlich veröffentlichte Inhalte.
 - `POST /api/public/inquiries` – Veranstaltung anfragen; Felder und Empfänger `OFFEN`.
 
@@ -583,7 +583,7 @@ Fehler verwenden stabile maschinenlesbare Codes, eine sichere Nutzermeldung und 
 - Destruktive Aktionen benötigen Bestätigung; fachlich relevante Datensätze werden bevorzugt deaktiviert oder storniert statt hart gelöscht.
 - Das öffentliche Notte-Design bleibt erhalten. Das Dashboard verwendet dieselben Grundtokens, aber eine nüchterne, dichte Arbeitsoberfläche ohne Marketing-Motion.
 
-## 26. Datenschutz und Aufbewahrung (`OFFEN`)
+## 26. Datenschutz und Aufbewahrung (`TEILWEISE BESTÄTIGT`)
 
 Vor `FS4` müssen mindestens festgelegt und rechtlich geprüft sein:
 
@@ -594,6 +594,8 @@ Vor `FS4` müssen mindestens festgelegt und rechtlich geprüft sein:
 - Inhalt und Zeitpunkt der Einwilligung, falls Daten über die reine Reservierungsabwicklung hinaus verwendet werden.
 
 Marketing-Einwilligung wird nicht mit der Reservierung gebündelt. Zahlungsdaten und besondere Kategorien personenbezogener Daten werden nicht erhoben.
+
+**Projektentscheidung vom 09.11.2026:** Abgelehnte und stornierte Reservierungen werden nach 90 Tagen anonymisiert, abgeschlossene Reservierungen und No-shows nach 180 Tagen. Erfolgreich versendete Outbox-Ereignisse werden nach 30 Tagen gelöscht, Audit-Ereignisse nach 365 Tagen. Bei der Anonymisierung werden Name, E-Mail, Telefon, interne Notiz und Stornotoken entfernt; fachliche Referenz, Zeitpunkt, Gruppengröße und Status bleiben für anonymisierte Betriebsstatistik erhalten. Die rechtliche Prüfung und finale Datenschutzerklärung bleiben vor Production verpflichtend.
 
 ## 27. Teststrategie der Full-Stack-Erweiterung (`VORSCHLAG`)
 

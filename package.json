@@ -20,7 +20,9 @@
     "db:migrate:down": "node --env-file=.env --import tsx server/src/scripts/migrate.ts down",
     "db:migrate:test": "node --env-file=.env --env-file=.env.test --import tsx server/src/scripts/migrate.ts up",
     "test:reservation-concurrency": "node --env-file=.env --env-file=.env.test --import tsx server/src/scripts/verify-reservation-concurrency.ts",
-    "email:process-outbox": "node --env-file=.env --import tsx server/src/scripts/process-email-outbox.ts"
+    "email:process-outbox": "node --env-file=.env --import tsx server/src/scripts/process-email-outbox.ts",
+    "data:apply-retention": "node --env-file=.env --import tsx server/src/scripts/apply-retention.ts",
+    "data:apply-retention:test": "node --env-file=.env --env-file=.env.test --import tsx server/src/scripts/apply-retention.ts"
   },
   "dependencies": {
     "@clerk/express": "^2.1.87",

@@ -7,6 +7,7 @@ import { reservationLocksMigration } from "./0005_reservation_locks";
 import { reservationBlocksMigration } from "./0006_reservation_blocks";
 import { emailOutboxMigration } from "./0007_email_outbox";
 import { reservationApiAlignmentMigration } from "./0008_reservation_api_alignment";
+import { cancellationAndRetentionMigration } from "./0009_cancellation_and_retention";
 
 // Add every new migration here in ascending ID order. Migration files are immutable once applied.
-export const migrations: readonly Migration[] = [coreIndexesMigration, adminDisplayNameLimitMigration, tableCapacityAndCombinationsMigration, initialRestaurantConfigurationMigration, reservationLocksMigration, reservationBlocksMigration, emailOutboxMigration, reservationApiAlignmentMigration];
+export const migrations: readonly Migration[] = [coreIndexesMigration, adminDisplayNameLimitMigration, tableCapacityAndCombinationsMigration, initialRestaurantConfigurationMigration, reservationLocksMigration, reservationBlocksMigration, emailOutboxMigration, reservationApiAlignmentMigration, cancellationAndRetentionMigration];

@@ -29,12 +29,19 @@ try {
     service.create({ ...common, idempotencyKey: `concurrency-a-${suffix}` }, now),
     service.create({ ...common, idempotencyKey: `concurrency-b-${suffix}` }, now),
   ]);
+  const winner = results.find((result): result is PromiseFulfilledResult<{ publicId: string; cancellationToken: string }> => result.status === "fulfilled");
   for (const result of results) if (result.status === "fulfilled") reservationIds.push(String((result.value as { publicId: string }).publicId));
   const rejected = results.filter((result): result is PromiseRejectedResult => result.status === "rejected");
   if (reservationIds.length !== 1 || rejected.length !== 1 || !(rejected[0].reason instanceof BookingError) || rejected[0].reason.code !== "NO_AVAILABILITY") {
     throw new Error(`Expected one confirmed reservation and one NO_AVAILABILITY result, received ${JSON.stringify(results.map((result) => result.status))}`);
   }
   console.log("Concurrency verification passed: one reservation won the final table and one was rejected.");
+  if (!winner?.value.cancellationToken) throw new Error("Winning public reservation did not return a cancellation token");
+  const cancelled = await service.cancelByGuest(winner.value.publicId, winner.value.cancellationToken, now) as { status?: string };
+  if (cancelled.status !== "cancelled") throw new Error("Guest cancellation did not set the cancelled status");
+  const remainingLocks = await ReservationLockModel.countDocuments({ reservationPublicId: winner.value.publicId });
+  if (remainingLocks !== 0) throw new Error("Guest cancellation did not release reservation locks");
+  console.log("Guest cancellation verification passed: token accepted and table locks released.");
 } finally {
   await ReservationLockModel.deleteMany({ tableKey });
   await TableAssignmentModel.deleteMany({ tableKey });

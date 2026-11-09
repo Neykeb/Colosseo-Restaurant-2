@@ -35,6 +35,7 @@ class FakeBookingService extends BookingService {
   override async listBlocks() { return []; }
   override async createBlock() { return {} as never; }
   override async deactivateBlock() { return {} as never; }
+  override async cancelByGuest() { return { status: "cancelled" } as never; }
 }
 
 const allowAdmin: RequestHandler = (_request, _response, next) => next();
@@ -73,6 +74,13 @@ describe("reservation API", () => {
     const reservations = await fetch(`${baseUrl}/api/admin/reservations`);
     expect(reservations.status).toBe(200);
     await expect(reservations.json()).resolves.toEqual({ reservations: [] });
+  });
+
+  it("accepts a secure guest cancellation token", async () => {
+    const baseUrl = await listen(createApp({ bookingService: new FakeBookingService() }));
+    const response = await fetch(`${baseUrl}/api/public/reservations/res_test/cancel`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token: "a".repeat(32) }) });
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ reference: "res_test", status: "cancelled" });
   });
 });
 

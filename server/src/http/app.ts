@@ -103,6 +103,15 @@ export function createApp(options: CreateAppOptions = {}) {
     } catch (error) { next(error); }
   });
 
+  app.post("/api/public/reservations/:reference/cancel", createRateLimit({ windowMs: 15 * 60_000, limit: 10 }), async (request, response, next) => {
+    try {
+      const reference = z.string().regex(/^res_[A-Za-z0-9]+$/).parse(request.params.reference);
+      const token = z.string().min(32).max(128).parse(request.body?.token);
+      const reservation = await booking.cancelByGuest(reference, token);
+      response.json({ reference, status: (reservation as { status?: string })?.status ?? "cancelled" });
+    } catch (error) { next(error); }
+  });
+
   app.get("/api/admin/me", async (request, response, next) => {
     try {
       if (!process.env.CLERK_SECRET_KEY) {
@@ -212,7 +221,7 @@ function toPublicReservation(reservation: unknown) {
   const value = typeof (reservation as { toObject?: unknown })?.toObject === "function"
     ? (reservation as { toObject(): Record<string, unknown> }).toObject()
     : reservation as Record<string, unknown>;
-  return { reference: value.publicId, date: value.date, startTime: value.startTime, endTime: value.endTime, partySize: value.partySize, status: value.status };
+  return { reference: value.publicId, date: value.date, startTime: value.startTime, endTime: value.endTime, partySize: value.partySize, status: value.status, ...(value.cancellationToken ? { cancellationToken: value.cancellationToken } : {}) };
 }
 
 function adminUserId(request: express.Request): string {

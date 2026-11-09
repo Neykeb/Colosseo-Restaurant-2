@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+const emailAddress = z.string().trim().refine(
+  (value) => /^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(value) || /^[^<>]{1,100}\s<[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+>$/.test(value),
+  "Invalid email address",
+);
+
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().min(1).max(65_535).default(3_000),
@@ -8,7 +13,8 @@ const serverEnvSchema = z.object({
   CLERK_OWNER_DISPLAY_NAME: z.string().trim().min(1).optional(),
   CLERK_AUTHORIZED_PARTIES: z.string().trim().optional(),
   RESEND_API_KEY: z.string().trim().min(1).optional(),
-  RESERVATION_EMAIL_FROM: z.string().trim().email().optional(),
+  RESERVATION_EMAIL_FROM: emailAddress.optional(),
+  RESEND_FROM_EMAIL: emailAddress.optional(),
   RESTAURANT_NOTIFICATION_EMAIL: z.string().trim().email().optional(),
   MONGODB_URI: z.preprocess(
     (value) => value ?? "",
