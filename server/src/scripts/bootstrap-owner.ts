@@ -1,17 +1,22 @@
 import { connectToDatabase, disconnectFromDatabase } from "../config/database";
 import { getServerEnv } from "../config/env";
-import { AdminProfileModel } from "../models/core";
+import { AdminProfileRepository } from "../repositories/admin-profile-repository";
 
-const env = getServerEnv();
-if (!env.CLERK_OWNER_USER_ID || !env.CLERK_OWNER_DISPLAY_NAME) {
-  throw new Error("CLERK_OWNER_USER_ID and CLERK_OWNER_DISPLAY_NAME are required for owner bootstrap");
+async function bootstrapOwner() {
+  const env = getServerEnv();
+  if (!env.CLERK_OWNER_USER_ID) throw new Error("CLERK_OWNER_USER_ID is required.");
+  if (!env.CLERK_OWNER_DISPLAY_NAME) throw new Error("CLERK_OWNER_DISPLAY_NAME is required.");
+
+  await connectToDatabase(env);
+  try {
+    const owner = await new AdminProfileRepository().createOwner(env.CLERK_OWNER_USER_ID, env.CLERK_OWNER_DISPLAY_NAME);
+    console.log(`Owner profile ready for Clerk user ${owner.clerkUserId}.`);
+  } finally {
+    await disconnectFromDatabase();
+  }
 }
 
-await connectToDatabase(env);
-await AdminProfileModel.updateOne(
-  { clerkUserId: env.CLERK_OWNER_USER_ID },
-  { $set: { clerkUserId: env.CLERK_OWNER_USER_ID, displayName: env.CLERK_OWNER_DISPLAY_NAME, role: "owner", active: true } },
-  { upsert: true },
-);
-await disconnectFromDatabase();
-console.log("Owner admin profile bootstrapped.");
+bootstrapOwner().catch((error: unknown) => {
+  console.error("Owner bootstrap failed:", error instanceof Error ? error.message : "Unknown error");
+  process.exitCode = 1;
+});
