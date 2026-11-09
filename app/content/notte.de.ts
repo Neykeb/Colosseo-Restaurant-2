@@ -52,7 +52,7 @@ export const notteContent = {
   reservation: {
     eyebrow: "Reservierung",
     title: "Ihr Tisch im Ristorante Colosseo.",
-    body: "Reservieren Sie Ihren Tisch telefonisch. Wir freuen uns auf Ihren Besuch.",
+    body: "Wählen Sie Ihren Termin online oder rufen Sie uns persönlich an. Wir freuen uns auf Ihren Besuch.",
     action: "04171 62952 anrufen",
   },
   visit: {
@@ -73,6 +73,7 @@ export const notteContent = {
     events: "Feiern",
     reviews: "Bewertungen",
     languages: "Sprachen",
+    admin: "Adminbereich",
   },
 } as const;
 
@@ -98,11 +99,11 @@ const notteContentEn = {
     imageAlt: "Guests raising their glasses over an Italian dinner",
   },
   reviews: { title: "What our guests say.", summary: "from 438 Google reviews", link: "See all reviews on Google", date: "As of 22 October 2026" },
-  reservation: { eyebrow: "Reservation", title: "Your table at Ristorante Colosseo.", body: "Reserve your table by phone. We look forward to your visit.", action: "Call 04171 62952" },
+  reservation: { eyebrow: "Reservation", title: "Your table at Ristorante Colosseo.", body: "Choose your time online or call us personally. We look forward to your visit.", action: "Call 04171 62952" },
   visit: {
     hours: "Opening hours", contact: "Contact & directions", addressLine1: "Bahnhofstraße 42–45", addressLine2: "21423 Winsen (Luhe)", phone: "04171 62952", route: "Open directions", mapTitle: "Location on Google Maps", payment: "Cash and EC card", imageAlt: "Entrance to Ristorante Colosseo on Bahnhofstraße",
   },
-  footer: { statement: "Italian food, freshly prepared.", menu: "Menu", restaurant: "Restaurant", events: "Celebrations", reviews: "Reviews", languages: "Languages" },
+  footer: { statement: "Italian food, freshly prepared.", menu: "Menu", restaurant: "Restaurant", events: "Celebrations", reviews: "Reviews", languages: "Languages", admin: "Admin area" },
 } as const;
 
 const notteContentIt = {
@@ -127,11 +128,11 @@ const notteContentIt = {
     imageAlt: "Ospiti che brindano durante una cena italiana",
   },
   reviews: { title: "Cosa dicono i nostri ospiti.", summary: "su 438 recensioni Google", link: "Vedi tutte le recensioni su Google", date: "Aggiornato al 22 ottobre 2026" },
-  reservation: { eyebrow: "Prenotazione", title: "Il tuo tavolo al Ristorante Colosseo.", body: "Prenota il tuo tavolo per telefono. Ti aspettiamo.", action: "Chiama 04171 62952" },
+  reservation: { eyebrow: "Prenotazione", title: "Il tuo tavolo al Ristorante Colosseo.", body: "Scegli il tuo orario online oppure chiamaci. Ti aspettiamo.", action: "Chiama 04171 62952" },
   visit: {
     hours: "Orari di apertura", contact: "Contatti e indicazioni", addressLine1: "Bahnhofstraße 42–45", addressLine2: "21423 Winsen (Luhe)", phone: "04171 62952", route: "Apri le indicazioni", mapTitle: "Posizione su Google Maps", payment: "Contanti e carta EC", imageAlt: "Ingresso del Ristorante Colosseo in Bahnhofstraße",
   },
-  footer: { statement: "Cucina italiana preparata al momento.", menu: "Menu", restaurant: "Ristorante", events: "Festeggiamenti", reviews: "Recensioni", languages: "Lingue" },
+  footer: { statement: "Cucina italiana preparata al momento.", menu: "Menu", restaurant: "Ristorante", events: "Festeggiamenti", reviews: "Recensioni", languages: "Lingue", admin: "Area amministrativa" },
 } as const;
 
 export function getNotteContent(locale: "de" | "en" | "it") {

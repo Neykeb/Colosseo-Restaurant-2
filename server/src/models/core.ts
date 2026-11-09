@@ -1,6 +1,7 @@
 import { model, Schema, type InferSchemaType } from "mongoose";
 
 const timestamps = true;
+export const ADMIN_DISPLAY_NAME_MAX_LENGTH = 120;
 
 const settingSchema = new Schema({ key: { type: String, required: true, unique: true }, value: { type: Schema.Types.Mixed, required: true } }, { timestamps });
 const serviceHoursSchema = new Schema({ key: { type: String, required: true, unique: true }, weekday: { type: Number, required: true, min: 0, max: 6 }, startTime: { type: String, required: true }, endTime: { type: String, required: true }, active: { type: Boolean, required: true, default: true } }, { timestamps });
@@ -20,7 +21,7 @@ assignmentSchema.index({ tableKey: 1, date: 1, startTime: 1, endTime: 1 });
 const auditEventSchema = new Schema({ eventId: { type: String, required: true, unique: true }, actorId: String, action: { type: String, required: true }, target: { type: String, required: true }, metadata: { type: Schema.Types.Mixed, required: true } }, { timestamps });
 const outboxEventSchema = new Schema({ eventId: { type: String, required: true, unique: true }, type: { type: String, required: true }, aggregateId: { type: String, required: true }, payload: { type: Schema.Types.Mixed, required: true }, status: { type: String, required: true, enum: ["pending", "processing", "sent", "failed"] }, attempts: { type: Number, required: true, min: 0, default: 0 }, nextAttemptAt: Date }, { timestamps });
 outboxEventSchema.index({ status: 1, nextAttemptAt: 1 });
-const adminProfileSchema = new Schema({ clerkUserId: { type: String, required: true, unique: true }, role: { type: String, required: true, enum: ["owner", "staff"] }, active: { type: Boolean, required: true, default: true }, displayName: { type: String, required: true }, lastAdminAccessAt: Date }, { timestamps });
+const adminProfileSchema = new Schema({ clerkUserId: { type: String, required: true, unique: true }, role: { type: String, required: true, enum: ["owner", "staff"] }, active: { type: Boolean, required: true, default: true }, displayName: { type: String, required: true, trim: true, maxlength: ADMIN_DISPLAY_NAME_MAX_LENGTH }, lastAdminAccessAt: Date }, { timestamps });
 const reservationLockSchema = new Schema({ reservationPublicId: { type: String, required: true }, date: { type: String, required: true }, tableKey: { type: String, required: true }, slotStart: { type: String, required: true } }, { timestamps });
 reservationLockSchema.index({ date: 1, tableKey: 1, slotStart: 1 }, { unique: true, name: "unique_table_slot" });
 reservationLockSchema.index({ reservationPublicId: 1 });
