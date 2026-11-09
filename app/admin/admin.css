@@ -1,0 +1,148 @@
+.admin-shell,
+.admin-configuration {
+  min-height: 100svh;
+  font-family: "Geist Variable", "DM Sans", sans-serif;
+  background: #eee7da;
+  color: #211d18;
+}
+
+.admin-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(28rem, 0.95fr);
+}
+
+.admin-visual {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #2c211b;
+}
+
+.admin-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.72) contrast(1.04);
+}
+
+.admin-visual-wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(20 15 12 / 8%), rgb(20 15 12 / 66%));
+}
+
+.admin-visual > p {
+  position: absolute;
+  bottom: clamp(2rem, 5vw, 4.5rem);
+  left: clamp(2rem, 5vw, 4.5rem);
+  z-index: 1;
+  margin: 0;
+  color: #fff8ee;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(2.6rem, 5vw, 5.7rem);
+}
+
+.admin-access {
+  display: flex;
+  min-height: 100svh;
+  flex-direction: column;
+  padding: clamp(1.5rem, 4vw, 4rem);
+}
+
+.admin-access-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-access-topline a,
+.admin-configuration a {
+  color: inherit;
+  text-underline-offset: 0.3em;
+}
+
+.admin-copy {
+  width: min(100%, 39rem);
+  margin: auto 0;
+  animation: admin-enter 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.admin-kicker {
+  margin: 0 0 1rem;
+  font-size: 0.76rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-copy h1,
+.admin-configuration h1 {
+  max-width: 18ch;
+  margin: 0;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(3rem, 6vw, 6.5rem);
+  font-weight: 400;
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+
+.admin-copy > p:not(.admin-kicker),
+.admin-configuration > p {
+  max-width: 42rem;
+  margin: 1.5rem 0 0;
+  color: #5d554c;
+  font-size: clamp(1rem, 1.5vw, 1.18rem);
+  line-height: 1.65;
+}
+
+.admin-primary {
+  min-height: 3.25rem;
+  margin-top: 2rem;
+  border: 1px solid #211d18;
+  padding: 0.9rem 1.35rem;
+  color: #fffaf2;
+  background: #211d18;
+  font: 650 0.9rem/1 "Geist Variable", sans-serif;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.admin-primary:hover { transform: translateY(-2px); background: #6f2e27; }
+.admin-primary:focus-visible { outline: 3px solid #a94b3f; outline-offset: 4px; }
+
+.admin-module-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 2rem;
+}
+
+.admin-module-list span {
+  border: 1px solid rgb(33 29 24 / 28%);
+  padding: 0.7rem 0.9rem;
+}
+
+.admin-configuration {
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+  padding: clamp(2rem, 8vw, 8rem);
+}
+
+@keyframes admin-enter {
+  from { opacity: 0; transform: translateY(1rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 800px) {
+  .admin-shell { grid-template-columns: 1fr; }
+  .admin-visual { min-height: 34svh; }
+  .admin-access { min-height: 66svh; }
+  .admin-copy h1 { font-size: clamp(3rem, 15vw, 5.5rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-copy { animation: none; }
+  .admin-primary { transition: none; }
+}

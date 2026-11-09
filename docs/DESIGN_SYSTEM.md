@@ -1,7 +1,7 @@
 # Designsystem
 
 **Status:** Phase 2 - freigegeben  
-**Letzte Aktualisierung:** 03.11.2026
+**Letzte Aktualisierung:** 09.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für visuelle Tokens, Typografie, Farben, Abstände, Raster, Breakpoints, Komponentenvarianten, Medienverhältnisse, Zustände und Motion-Regeln. Sämtliche Festlegungen sind bis Gate 2 `VORSCHLAG`.
 
@@ -245,6 +245,8 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 - Die bestätigte Telefonnummer ist die einzige aktive Reservierungsaktion, solange der externe Dienst `OFFEN` ist. Der CTA besitzt mindestens 52 px Höhe, sichtbaren Tastaturfokus und einen nur für präzise Zeiger aktivierten Farbwechsel.
 - Beim erstmaligen Eintritt zeichnet sich die horizontale Regel per `scaleX` auf; anschließend erscheinen Begleittext und CTA mit maximal 24 px Y-Versatz. Die maskierten Überschriftwörter nutzen den bestehenden scrollgebundenen Reveal. Alle Bewegungen verwenden ausschließlich Transform und Opacity, erzeugen keine zusätzliche Scrollstrecke und entfallen bei Reduced Motion.
 - Die Section ist auf mindestens `54svh` verdichtet. Zusätzliche Dekoration oder nicht belegte Reservierungsversprechen entfallen; die typografische Hierarchie, der kurze Erklärungstext und die bestätigte Telefonaktion füllen die zwölf Spalten ohne künstlichen Leerraum.
+- Das eigene Reservierungsformular liegt als kontrastreiche, halbtransparente Aktionsfläche im bestehenden 12-Spalten-Raster. Eingaben und Zeitfenster besitzen mindestens 44 px Bedienhöhe, sichtbare Fokuszustände und verständliche Lade-, Leer-, Fehler- sowie Bestätigungszustände.
+- Unter 900 px wird das Formular einspaltig und wächst inhaltsabhängig; Animation ist für die Buchung nicht erforderlich. Mobile und Reduced Motion zeigen alle Bedienzustände ohne WebGL- oder GSAP-Abhängigkeit.
 
 ### Deutsche Hauptseite „Notte“: Feiern und besondere Anlässe
 
@@ -312,6 +314,14 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 - `OFFEN` deterministische Font-Auswahl im verpflichtenden `gpt-taste`-Designplan sowie Lizenz- und Zeichensatzprüfung.
 - `OFFEN` reales oder generiertes Bildmaterial und Produktionsbudget.
 - `OFFEN` genaue Icon-Familie; Entscheidung erst bei technischer Spezifikation.
+
+### Admin-Grundlayout
+
+- `/admin` ist ein eigenständiger, lazy geladener Sicherheitsbereich und verändert weder öffentliche Navigation noch Marketingsections.
+- Der öffentliche Footer enthält einen zurückhaltenden, lokalisierten Utility-Link zum Adminbereich. Er steht nicht in der Hauptnavigation, nutzt kleinere UI-Typografie und bleibt gegenüber gastbezogenen Aktionen visuell nachgeordnet.
+- Desktop verwendet ein vollständig belegtes `2 × 1`-Raster aus ruhigem Restaurantbild und Zugangsfläche; unter 800 px wird daraus eine lineare `1 × 2`-Komposition.
+- Instrument Serif bleibt auf Überschriften und Wortmarke beschränkt. Geist Variable dient ausschließlich der funktionalen Admin-Oberfläche und wird nur mit dem Admin-Chunk geladen.
+- Creme `#EEE7DA`, dunkles Braun `#211D18` und der bestehende warme Rotton bilden die reduzierte Admin-Palette. Zustandswechsel verwenden maximal 16 px Y-Versatz und entfallen bei Reduced Motion.
 
 ## Gate
 

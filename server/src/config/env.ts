@@ -9,9 +9,10 @@ const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().min(1).max(65_535).default(3_000),
   CLERK_SECRET_KEY: z.string().trim().min(1).optional(),
-  CLERK_OWNER_USER_ID: z.string().trim().regex(/^user_[A-Za-z0-9]+$/).optional(),
-  CLERK_OWNER_DISPLAY_NAME: z.string().trim().min(1).optional(),
-  CLERK_AUTHORIZED_PARTIES: z.string().trim().optional(),
+  CLERK_OWNER_USER_ID: z.string().trim().regex(/^user_[A-Za-z0-9]+$/, "CLERK_OWNER_USER_ID must be a Clerk user ID").optional(),
+  CLERK_OWNER_DISPLAY_NAME: z.string().trim().min(1).max(120).optional(),
+  CLERK_AUTHORIZED_PARTIES: z.string().trim().optional()
+    .transform((value) => value?.split(",").map((party) => party.trim()).filter(Boolean) ?? []),
   RESEND_API_KEY: z.string().trim().min(1).optional(),
   RESERVATION_EMAIL_FROM: emailAddress.optional(),
   RESEND_FROM_EMAIL: emailAddress.optional(),
@@ -41,6 +42,16 @@ const serverEnvSchema = z.object({
     .regex(/^[A-Za-z0-9_-]+$/, "MONGODB_DB_NAME contains unsupported characters")
     .default("colosseo"),
   MONGODB_SERVER_SELECTION_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(30_000).default(5_000),
+}).superRefine((env, context) => {
+  const resendValues = [env.RESEND_API_KEY, env.RESERVATION_EMAIL_FROM ?? env.RESEND_FROM_EMAIL, env.RESTAURANT_NOTIFICATION_EMAIL];
+  const configuredValues = resendValues.filter(Boolean).length;
+  if (configuredValues > 0 && configuredValues < resendValues.length) {
+    context.addIssue({
+      code: "custom",
+      path: ["RESEND_API_KEY"],
+      message: "Resend configuration requires API key, from address and restaurant recipient together",
+    });
+  }
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
