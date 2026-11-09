@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import {
   ReservationBlockModel,
   AuditEventModel,
@@ -107,6 +107,7 @@ export class BookingService {
     }
     const tables = await this.findAvailableTables(input.date, input.startTime, occupancyEndTime, input.partySize);
     if (!tables) throw new BookingError("NO_AVAILABILITY", 409, "No availability remains for the requested time.");
+    const cancellationToken = input.source === "public" ? randomBytes(32).toString("base64url") : undefined;
     const reservation = {
       publicId: `res_${randomUUID().replaceAll("-", "")}`,
       date: input.date,
@@ -118,16 +119,33 @@ export class BookingService {
       locale: input.locale,
       guest: input.guest,
       internalNote: input.internalNote,
+      cancellationTokenHash: cancellationToken ? hashCancellationToken(cancellationToken) : undefined,
       idempotencyKey: input.idempotencyKey,
     } as Reservation;
     try {
-      return await this.reservations.createWithTableAssignment(reservation, tables.map((table) => table.key), rules.slotIntervalMinutes ?? 30, occupancyEndTime);
+      const created = await this.reservations.createWithTableAssignment(reservation, tables.map((table) => table.key), rules.slotIntervalMinutes ?? 30, occupancyEndTime);
+      return cancellationToken ? { ...documentObject(created), cancellationToken } : created;
     } catch (error) {
       const concurrent = await this.reservations.findByIdempotencyKey(input.idempotencyKey);
       if (concurrent) return concurrent;
       if (error instanceof Error && error.message === "TABLE_NOT_AVAILABLE") {
         throw new BookingError("NO_AVAILABILITY", 409, "No availability remains for the requested time.");
       }
+      throw error;
+    }
+  }
+
+  async cancelByGuest(publicId: string, token: string, now = new Date()) {
+    const tokenHash = hashCancellationToken(token);
+    const reservation = await this.reservations.findByCancellationToken(publicId, tokenHash) as Reservation | null;
+    if (!reservation) throw new BookingError("INVALID_CANCELLATION_TOKEN", 404, "The reservation could not be found.");
+    if (!canCancelUntil(reservation.date, reservation.startTime, now, "Europe/Berlin", 120)) {
+      throw new BookingError("CANCELLATION_DEADLINE_PASSED", 409, "Online cancellation closes two hours before the reservation.");
+    }
+    try {
+      return await this.reservations.cancelByGuest(publicId, tokenHash);
+    } catch (error) {
+      if (error instanceof Error && error.message === "RESERVATION_NOT_CANCELLABLE") throw new BookingError("RESERVATION_NOT_CANCELLABLE", 409, "The reservation can no longer be cancelled.");
       throw error;
     }
   }
@@ -165,7 +183,7 @@ export class BookingService {
   }
 
   async deactivateBlock(publicId: string, actorId = "system") {
-    const block = await ReservationBlockModel.findOneAndUpdate({ blockId: publicId, active: true }, { $set: { active: false } }, { new: true }).lean().exec();
+    const block = await ReservationBlockModel.findOneAndUpdate({ blockId: publicId, active: true }, { $set: { active: false } }, { returnDocument: "after" }).lean().exec();
     if (!block) throw new BookingError("BLOCK_NOT_FOUND", 404, "Reservation block not found.");
     await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation_block.deactivated", target: publicId, metadata: {} });
     return block;
@@ -229,4 +247,33 @@ function localMinutes(date: Date, timezone: string): number {
 function formatMinutes(total: number): string {
   if (total < 0 || total >= 24 * 60) throw new BookingError("INVALID_TIME_WINDOW", 422, "The time window must stay within one calendar day.");
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
+function hashCancellationToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function documentObject(value: unknown): Record<string, unknown> {
+  return typeof (value as { toObject?: unknown })?.toObject === "function"
+    ? (value as { toObject(): Record<string, unknown> }).toObject()
+    : value as Record<string, unknown>;
+}
+
+export function canCancelUntil(date: string, time: string, now: Date, timezone: string, deadlineMinutes: number): boolean {
+  const instant = zonedDateTimeToUtc(date, time, timezone);
+  return instant.getTime() - now.getTime() >= deadlineMinutes * 60_000;
+}
+
+function zonedDateTimeToUtc(date: string, time: string, timezone: string): Date {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  const assumedUtc = Date.UTC(year, month - 1, day, hour, minute);
+  const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  const offsetAt = (instant: number) => {
+    const parts = Object.fromEntries(formatter.formatToParts(new Date(instant)).map((part) => [part.type, part.value]));
+    return Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), Number(parts.hour), Number(parts.minute)) - instant;
+  };
+  let result = assumedUtc - offsetAt(assumedUtc);
+  result = assumedUtc - offsetAt(result);
+  return new Date(result);
 }

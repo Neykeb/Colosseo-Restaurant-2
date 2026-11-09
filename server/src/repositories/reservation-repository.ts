@@ -15,6 +15,35 @@ export class ReservationRepository {
     return ReservationModel.create(input);
   }
 
+  findByCancellationToken(publicId: string, cancellationTokenHash: string) {
+    return ReservationModel.findOne({ publicId, cancellationTokenHash }).lean().exec();
+  }
+
+  async cancelByGuest(publicId: string, cancellationTokenHash: string) {
+    const session = await mongoose.startSession();
+    try {
+      let cancelled: unknown;
+      await session.withTransaction(async () => {
+        const reservation = await ReservationModel.findOneAndUpdate(
+          { publicId, cancellationTokenHash, status: { $in: ["pending", "confirmed"] } },
+          { $set: { status: "cancelled" } },
+          { returnDocument: "after", session },
+        );
+        if (!reservation) throw new Error("RESERVATION_NOT_CANCELLABLE");
+        await ReservationLockModel.deleteMany({ reservationPublicId: publicId }, { session });
+        await TableAssignmentModel.deleteMany({ reservationPublicId: publicId }, { session });
+        await OutboxEventModel.insertMany([
+          { eventId: `reservation-cancelled-guest-${publicId}`, type: "reservation.cancelled.guest", aggregateId: publicId, payload: { version: 1, locale: reservation.locale }, status: "pending", attempts: 0, nextAttemptAt: new Date() },
+          { eventId: `reservation-cancelled-restaurant-${publicId}`, type: "reservation.cancelled.restaurant", aggregateId: publicId, payload: { version: 1, locale: reservation.locale }, status: "pending", attempts: 0, nextAttemptAt: new Date() },
+        ], { session });
+        cancelled = reservation;
+      });
+      return cancelled;
+    } finally {
+      await session.endSession();
+    }
+  }
+
   async createWithTableAssignment(input: Reservation, tableKeys: readonly string[], slotIntervalMinutes = 30, occupancyEndTime = input.endTime) {
     const session = await mongoose.startSession();
     try {

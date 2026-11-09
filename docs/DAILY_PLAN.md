@@ -216,4 +216,12 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Umgesetzt:** dreisprachiges, responsives Reservierungsformular mit Datum, Gruppengröße, Live-Slots, Name, E-Mail, optionalem Telefon, vollständigen Zuständen und Telefonalternative. Provisorische Regeln sperren Production-Buchungen.
 - **Benachrichtigungen:** Zwei Outbox-Ereignisse entstehen atomar mit jeder Reservierung. Ein Resend-Worker verarbeitet Gast- und Restaurantnachricht seriell, mit Idempotency-Key und exponentiellem Retry.
 - **Prüfungen:** Typecheck, Lint, 53/53 Tests und Production-Build erfolgreich. Build-Warnungen betreffen unverändert Modul-Direktiven und Chunkgröße.
-- **Blockiert:** echter E-Mail-Versand, finale Datenschutzinformation, Aufbewahrungsregel, Gaststornierung und vollständiger Browser-E2E benötigen bestätigte Datenschutz-/Stornoregeln, Resend-Key, verifizierte Absenderdomain und Restaurantempfänger. `gpt-taste` und `break-ui` waren in dieser Sitzung nicht verfügbar.
+- **Damals blockiert:** E-Mail-Konfiguration, Aufbewahrungsregel und Gaststornierung wurden anschließend im Person-A-Abschluss geklärt. Offen bleiben finale rechtliche Datenschutztexte und der vollständige Browser-E2E; `gpt-taste` und `break-ui` waren in dieser Sitzung nicht verfügbar.
+
+## 19. Person-A-Abschluss – 09.11.2026
+
+- **E-Mail-Konfiguration:** Vorhandene Variablen `RESEND_API_KEY`, `RESEND_FROM_EMAIL` und `RESTAURANT_NOTIFICATION_EMAIL` ohne Ausgabe ihrer Werte erkannt. Genau eine technische Testmail wurde von Resend zur Zustellung angenommen.
+- **Stornoregel:** Kostenfreie Online-Stornierung bis zwei Stunden vor Beginn; danach telefonische Klärung. Der Gast erhält einmalig ein zufälliges Token, serverseitig wird nur dessen SHA-256-Hash gespeichert. Storno setzt den Status atomar, gibt Tisch-/Zeitslot-Sperren frei und erzeugt idempotente Gast-/Restaurant-Outbox-Ereignisse.
+- **Aufbewahrung:** stornierte/abgelehnte Reservierungen 90 Tage, abgeschlossene/No-show 180 Tage, gesendete Outbox-Ereignisse 30 Tage, Auditdaten 365 Tage. Reservierungen werden fristgerecht anonymisiert; fachliche Statistik bleibt ohne direkte Kontaktdaten erhalten.
+- **Prüfungen:** Migration `0009_cancellation-and-retention` in `colosseo_test` und `colosseo` erfolgreich. Echter Atlas-Test bestätigt Konkurrenzschutz und anschließende Token-Stornierung; Test-Aufbewahrungsjob erfolgreich ohne betroffene Datensätze.
+- **Für Person A noch offen:** keine weitere heute ausführbare FS4-Backendaufgabe. Rechtliche Prüfung der Datenschutztexte ist eine gemeinsame externe Voraussetzung; Clerk-Browserprüfung bleibt entsprechend der Nutzerpriorität verschoben.

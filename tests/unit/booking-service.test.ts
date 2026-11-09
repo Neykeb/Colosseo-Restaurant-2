@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BookingError, selectTableAllocation, validateBookingDate, type BookingRules } from "../../server/src/services/booking-service";
+import { BookingError, canCancelUntil, selectTableAllocation, validateBookingDate, type BookingRules } from "../../server/src/services/booking-service";
 
 const rules: BookingRules = {
   timezone: "Europe/Berlin",
@@ -24,6 +24,13 @@ describe("booking rules", () => {
   it("rejects invalid calendar date input", () => {
     expect(() => validateBookingDate("09.11.2026", rules)).toThrowError(/YYYY-MM-DD/);
     expect(() => validateBookingDate("2026-02-31", rules)).toThrowError(/YYYY-MM-DD/);
+  });
+});
+
+describe("guest cancellation deadline", () => {
+  it("allows cancellation until two hours before the Berlin reservation time", () => {
+    expect(canCancelUntil("2026-11-10", "18:00", new Date("2026-11-10T14:59:00Z"), "Europe/Berlin", 120)).toBe(true);
+    expect(canCancelUntil("2026-11-10", "18:00", new Date("2026-11-10T15:01:00Z"), "Europe/Berlin", 120)).toBe(false);
   });
 });
 

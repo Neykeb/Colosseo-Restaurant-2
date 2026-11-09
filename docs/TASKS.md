@@ -237,8 +237,8 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 - [x] Reservierungsoberfläche in den bestehenden Notte-Reservierungsabschnitt integrieren, ohne Hero oder öffentliche Dramaturgie zu verändern; Production-Übermittlung bleibt bei `PLATZHALTER`-Regeln server- und clientseitig gesperrt.
 - [x] Zugängliche Datum-, Uhrzeit-, Personen- und Kontaktdateneingabe in DE/EN/IT mit Lade-, Leer-, Fehler- und Erfolgszustand sowie telefonischer Alternative umsetzen.
-- [-] Outbox-Ereignisse atomar mit der Reservierung anlegen; idempotenten Resend-Worker, lokalisierte Gastnachricht, Restaurantnachricht und Wiederholungsplanung implementieren. Echter Versand bleibt bis zu Resend-Key, verifizierter Absenderdomain und Restaurantempfänger blockiert.
-- [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
+- [x] Outbox-Ereignisse atomar mit der Reservierung anlegen; idempotenten Resend-Worker, lokalisierte Gast-/Stornonachricht, Restaurantnachricht und Wiederholungsplanung implementieren. API-Key, Absender und Empfänger wurden am 09.11.2026 mit genau einer technischen Testmail erfolgreich verifiziert.
+- [x] Sichere Gaststornierung mit zufälligem, nur gehasht gespeichertem Token bis zwei Stunden vor Reservierungsbeginn ergänzen; echter Atlas-Test bestätigt Statuswechsel und Freigabe der Tischsperren.
 - [-] Rate-Limit, Fehlerfälle, drei Locales, responsive Einspaltenansicht und Reduced-Motion-kompatible statische Formularzustände umgesetzt; echter Browser-E2E- und Extremdatenlauf bleibt offen, weil die verpflichtenden Skills `gpt-taste` und `break-ui` in dieser Sitzung nicht verfügbar waren.
 - [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
 

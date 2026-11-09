@@ -11,4 +11,9 @@ describe("reservation email localization", () => {
   it("creates a separate restaurant notification", () => {
     expect(mailCopy("de", false, "res_123", "2026-11-10", "18:00", 2).subject).toContain("Neue Reservierung");
   });
+
+  it("creates localized cancellation notifications", () => {
+    expect(mailCopy("de", true, "res_123", "2026-11-10", "18:00", 2, true).subject).toContain("storniert");
+    expect(mailCopy("en", false, "res_123", "2026-11-10", "18:00", 2, true).subject).toContain("Reservierung storniert");
+  });
 });
