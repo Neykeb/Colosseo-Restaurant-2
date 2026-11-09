@@ -1,7 +1,7 @@
 # Inhalt und Lokalisierung
 
-**Status:** Phase 2 freigegeben; Full-Stack-Inhaltsbedarf ergänzt
-**Letzte Aktualisierung:** 03.11.2026
+**Status:** Phase 2 freigegeben; Full-Stack-Reservierungstexte als technisch geprüfter Entwurf ergänzt
+**Letzte Aktualisierung:** 09.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Inhaltsarchitektur, Seitentexte, CTA-Texte, Lokalisierung, Metadateninhalte und Inhaltsstatus. Funktionale Seitenanforderungen stehen in `SPEC.md`; visuelle Darstellungsregeln stehen in `DESIGN_SYSTEM.md`.
 
@@ -59,7 +59,7 @@ Für jede freigegebene Seite werden Zweck, Zielgruppe, Kernbotschaft, Abschnitts
 4. **Feiern**: Möglichkeiten für private Feiern und Veranstaltungen mit externem Anfrageweg.
 5. **Kontakt**: Anfahrt, reale Öffnungszeiten, Telefon und rechtliche Verweise.
 
-Globale Aktionen: **Tisch reservieren**, Telefon, Sprachauswahl. Die Reservierungsaktion führt erst nach freigegebener Full-Stack-Implementierung in den eigenen Buchungsablauf; bis dahin bleibt sie telefonisch. Impressum und Datenschutz stehen ausschließlich im Footer und bleiben inhaltlich `OFFEN`.
+Globale Aktionen: **Tisch reservieren**, Telefon, Sprachauswahl. Die Reservierungsaktion führt erst nach freigegebener Full-Stack-Implementierung in den eigenen Buchungsablauf; bis dahin bleibt sie telefonisch. Ein zurückhaltender, lokalisierter Footer-Link führt zum geschützten Adminbereich; seine Sichtbarkeit gewährt keine Berechtigung. Impressum und Datenschutz stehen ausschließlich im Footer und bleiben inhaltlich `OFFEN`.
 
 Die Speisekarte erhält eine eigene Seite und darf zusätzlich als kurze Auswahl auf der Startseite erscheinen. Eine Online-Bestellstrecke wird nicht vorgesehen.
 
@@ -75,7 +75,7 @@ Die am 22.10.2026 freigegebene Reihenfolge der deutschen Notte-Startseite lautet
 6. **Google-Bewertungen** als Vertrauensbeleg.
 7. **Reservierungsabschluss** mit bestätigter telefonischer Alternative; externer Anbieter bleibt `OFFEN`.
 8. **Besuch planen** mit Öffnungszeiten, Adresse, Telefon und Anfahrt.
-9. **Footer** mit Navigation, Sprachen sowie später Impressum und Datenschutz.
+9. **Footer** mit Navigation, Sprachen, dezentem Zugang zum geschützten Adminbereich sowie später Impressum und Datenschutz.
 
 Die frühere Mittag-/Abend-Doppelfläche und der Services-Slider sind nicht mehr Teil der freigegebenen Inhaltsarchitektur.
 
@@ -184,9 +184,10 @@ Die Vollbild-Speisekarte wurde am 12.10.2026 gegen sämtliche auf der offizielle
 
 - Platzierung: direkt nach den Google-Bewertungen.
 - Überschrift: **Ihr Tisch im Ristorante Colosseo.**
-- Fließtext: **Reservieren Sie Ihren Tisch telefonisch. Wir freuen uns auf Ihren Besuch.**
-- Primäre Aktion: **04171 62952 anrufen** mit `tel:+49417162952`.
-- Der externe Reservierungsdienst und seine Ziel-URL bleiben `OFFEN` und werden bis zur Lieferung nicht dargestellt oder ersetzt.
+- Fließtext: **Reservieren Sie Ihren Tisch direkt online oder rufen Sie uns an. Wir freuen uns auf Ihren Besuch.**
+- Primäre Aktion: eigenes Reservierungsformular mit Datum, Personenanzahl, verfügbarer Uhrzeit, Name und mindestens E-Mail oder Telefon.
+- Telefonische Alternative: **04171 62952 anrufen** mit `tel:+49417162952`.
+- Bestätigungs-, Fehler- und Formularkopien sind in Deutsch, Englisch und Italienisch technisch integriert. Der Datenschutzhinweis ist `ENTWURF` und muss vor Veröffentlichung rechtlich freigegeben werden.
 
 ### Konzeptprompt für nicht-reale Moodbilder
 
@@ -201,6 +202,13 @@ Der Prompt ist nur eine Art-Direction-Grundlage. Für jedes spätere Bild sind M
 - Keine generierten Innenräume, Mitarbeitenden oder Einrichtungen als reale Dokumentation ausgeben.
 - Sichtbare UI-Texte werden später zentral lokalisiert; hardcodierte Kopien sind unzulässig.
 - Metadaten und Alternativtexte müssen je Sprache inhaltlich passen, nicht nur wörtlich übersetzt sein.
+
+### Admin-Zugang (`ENTWURF`, intern)
+
+- Der nicht konfigurierte Zustand erklärt ausschließlich, dass der lokale Clerk Publishable Key fehlt; Schlüsselwerte werden niemals angezeigt.
+- Die Anmeldung wird als „Mit Google anmelden“ bezeichnet. Erfolgreiche Clerk-Anmeldung und fachliche Owner-Berechtigung werden sprachlich klar getrennt.
+- Nicht freigeschaltete Konten erhalten „Kein Adminzugriff“, ohne interne Profilinformationen offenzulegen. Der bestätigte Owner-Zustand nennt nur Anzeigename und die später freizugebenden Verwaltungsbereiche.
+- Die Admin-Texte liegen zentral in `app/content/admin.de.ts`. Weitere Sprachen sind für den internen Bereich derzeit `OFFEN` und werden nicht automatisch erfunden.
 
 ## Gate
 

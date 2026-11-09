@@ -19,6 +19,7 @@ import "~/styles/app.css";
 
 const NottePrototype = lazy(() => import("~/prototypes/colosseo/prototype-variants").then((module) => ({ default: module.NottePrototype })));
 const ColosseoPrototypesPage = lazy(() => import("~/components/colosseo-prototypes-page").then((module) => ({ default: module.ColosseoPrototypesPage })));
+const AdminEntry = lazy(() => import("~/admin/admin-page").then((module) => ({ default: module.AdminEntry })));
 
 function RoutePending() {
   return <div aria-busy="true" aria-label="Seite wird geladen" className="route-pending" role="status" />;
@@ -45,6 +46,12 @@ const prototypeRoute = createRoute({
   component: PrototypesRoute,
 });
 
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin",
+  component: AdminRoute,
+});
+
 const localizedIndexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/$lang/",
@@ -60,6 +67,7 @@ const localizedPageRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   prototypeRoute,
+  adminRoute,
   localizedIndexRoute,
   localizedPageRoute,
 ]);
@@ -118,6 +126,10 @@ function ContentPage({ copy, locale, pageKey, reserveLabel }: { copy: { title: s
 
 function PrototypesRoute() {
   return <Suspense fallback={<RoutePending />}><ColosseoPrototypesPage /></Suspense>;
+}
+
+function AdminRoute() {
+  return <Suspense fallback={<RoutePending />}><AdminEntry /></Suspense>;
 }
 
 function NotFound() {
