@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 
 import { TextRotate, type TextRotateRef } from "~/components/ui/text-rotate";
 import { Velaris } from "~/components/ui/velaris";
+import { ReservationForm } from "~/components/reservation-form";
 import { ClerkAuthControls } from "~/components/clerk-auth-controls";
 import { getNotteContent, getOpeningHours, googleReviews, menuDishes, notteImages, notteLinks } from "~/content/notte.de";
 
@@ -137,6 +138,7 @@ export function ReservationSection({ locale }: { locale: NotteLocale }) {
       <div className="no-reservation-intro"><p>{content.eyebrow}</p><span className="no-reservation-rule" aria-hidden="true" /></div>
       <h2 id="reservation-title" data-word-reveal><MaskedWords text={content.title} /></h2>
       <div className="no-reservation-details"><p>{content.body}</p><a href={notteLinks.phone}><Phone size={20} weight="regular" />{content.action}</a></div>
+      <ReservationForm locale={locale} />
     </section>
   </Velaris>;
 }

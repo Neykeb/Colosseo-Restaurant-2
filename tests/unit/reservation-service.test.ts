@@ -15,4 +15,24 @@ describe("reservation idempotency", () => {
     const repository = { findByIdempotencyKey: async () => (++reads === 1 ? null : reservation), create: async () => { throw Object.assign(new Error("duplicate"), { code: 11000 }); }, findByPublicId: async () => reservation };
     await expect(new ReservationService(repository).createIdempotent(reservation)).resolves.toEqual(reservation);
   });
+
+  it("returns one result for two simultaneous requests with the same idempotency key", async () => {
+    let stored: Reservation | null = null;
+    let creates = 0;
+    const repository = {
+      findByIdempotencyKey: async () => stored,
+      create: async () => {
+        creates += 1;
+        await Promise.resolve();
+        if (stored) throw Object.assign(new Error("duplicate"), { code: 11000 });
+        stored = reservation;
+        return reservation;
+      },
+      findByPublicId: async () => stored,
+    };
+    const service = new ReservationService(repository);
+    const results = await Promise.all([service.createIdempotent(reservation), service.createIdempotent(reservation)]);
+    expect(results).toEqual([reservation, reservation]);
+    expect(creates).toBe(2);
+  });
 });

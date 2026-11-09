@@ -1,8 +1,8 @@
 # Tagesplan Full-Stack-Finalprojekt
 
-**Status:** Verdichteter Arbeitsentwurf für zwei Personen; Gates und fachliche Eingangsdaten bleiben verbindliche Voraussetzungen
+**Status:** FS4 freigegeben und teilweise umgesetzt; Produktionsdaten und externe E-Mail-Konfiguration offen
 
-**Phase:** `FS1` freigegeben und in Arbeit
+**Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
@@ -201,3 +201,19 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Tests:** Typecheck, Lint und vier neue Domain-Unit-Tests erfolgreich.
 - **Offen:** reale Tisch-/Bereichsdaten, Servicezeiten, Dauer/Buffer, Vorlauf, Buchungshorizont, Gruppengrenzen, Sperr- und Bestätigungsregeln müssen vor API- und Concurrency-Implementierung fachlich bestätigt werden.
 - **Freigegebene Entwicklungsannahme:** Der Nutzer hat synthetische FS3-Daten erlaubt. Der Development-Seed wurde gegen die Entwicklungsdatenbank ausgeführt und enthält ausschließlich markierte `PLATZHALTER`-Daten; reale Produktionsregeln bleiben offen.
+
+## 17. FS3-Umsetzung und Prüfung – 09.11.2026
+
+- **Nutzerpriorität:** Die abschließende Browserprüfung des Adminzugangs wurde auf Nutzerwunsch verschoben; Admin-API-Endpunkte bleiben dennoch serverseitig geschützt.
+- **Umgesetzt:** Öffentliche Config-, Availability- und Reservation-Endpunkte mit Zod-Validierung, Rate-Limit und Idempotenz; geschützte Admin-Endpunkte für Reservierungen, Statuswechsel und Sperrzeiten; Audit-Ereignisse; Einzel- und Kombinationstische; Dauer/Puffer; atomare Tisch-/Zeitslot-Sperren.
+- **Migrationsbereinigung:** Die nach dem Branch-Abgleich fehlenden, in Atlas bereits angewendeten Migrationen `0002` bis `0007` anhand der unveränderten Historie und des nicht personenbezogenen Schemas wiederhergestellt. `0008_reservation-api-alignment` wurde in Test- und Entwicklungsdatenbank erfolgreich angewendet.
+- **Tatsächlich ausgeführte Prüfungen:** Typecheck, Lint, Env-Tracking-Prüfung, 51/51 Vitest-Tests und Production-Build erfolgreich. Read-only Development-Smoke-Test liefert Config und vier Slots. Echter Parallelitätstest in `colosseo_test` bestätigt: eine von zwei konkurrierenden Anfragen erhält den letzten Tisch, die andere `NO_AVAILABILITY`; Testdaten wurden anschließend entfernt.
+- **Abnahme:** Der Nutzer hat den präsentierten FS3-Stand am 09.11.2026 mit „go“ abgenommen; reale Betriebsregeln müssen die sichtbaren `PLATZHALTER` weiterhin vor einem Livebetrieb ersetzen.
+
+## 18. FS4-Freigabe und erster Umsetzungsstand – 09.11.2026
+
+- **Gate:** Nutzer hat den FS3-Stand mit „go“ abgenommen und damit FS4 freigegeben.
+- **Umgesetzt:** dreisprachiges, responsives Reservierungsformular mit Datum, Gruppengröße, Live-Slots, Name, E-Mail, optionalem Telefon, vollständigen Zuständen und Telefonalternative. Provisorische Regeln sperren Production-Buchungen.
+- **Benachrichtigungen:** Zwei Outbox-Ereignisse entstehen atomar mit jeder Reservierung. Ein Resend-Worker verarbeitet Gast- und Restaurantnachricht seriell, mit Idempotency-Key und exponentiellem Retry.
+- **Prüfungen:** Typecheck, Lint, 53/53 Tests und Production-Build erfolgreich. Build-Warnungen betreffen unverändert Modul-Direktiven und Chunkgröße.
+- **Blockiert:** echter E-Mail-Versand, finale Datenschutzinformation, Aufbewahrungsregel, Gaststornierung und vollständiger Browser-E2E benötigen bestätigte Datenschutz-/Stornoregeln, Resend-Key, verifizierte Absenderdomain und Restaurantempfänger. `gpt-taste` und `break-ui` waren in dieser Sitzung nicht verfügbar.

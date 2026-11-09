@@ -255,17 +255,17 @@ type ImageAsset = {
 
 ### Reservierung
 
-- Primärer CTA öffnet die noch zu liefernde externe Reservierungs-URL.
+- Diese frühere Festlegung auf eine externe Reservierungs-URL ist durch den bestätigten Full-Stack-Auftrag und das am 09.11.2026 freigegebene `FS4` ersetzt; der CTA führt nach Produktionsfreigabe in die eigene Reservierungsstrecke.
 - Externer Link wird als solcher zugänglich kenntlich gemacht.
 - Falls der Dienst Sprachparameter unterstützt, wird die aktive Locale übergeben.
 - Telefonische Alternative nutzt einen validierten `tel:`-Link.
-- Kein eigenes Formular und keine lokale Speicherung von Reservierungsdaten.
+- Diese frühere Abgrenzung ist durch die Abschnitte 20 bis 29 ersetzt. Das eigene Formular und die serverseitige Speicherung sind Bestandteil von `FS4`; Production bleibt bis zur Freigabe von Datenschutz, realen Regeln und E-Mail-Konfiguration gesperrt.
 
 ### Feiern und Veranstaltungen
 
 - Der Zielweg ist `OFFEN`.
 - Zulässige spätere Varianten: externe Anfrage-URL, `mailto:` oder Telefonnummer.
-- Ein eigenes Formular wird erst spezifiziert, wenn Empfänger, Datenschutz, Spam-Schutz und Backend geklärt sind.
+- Das Formular ist seit `FS4` technisch spezifiziert und in Development umgesetzt. Echte Empfänger-, Datenschutz- und Absenderdaten bleiben zwingende Voraussetzungen für die Produktionsfreigabe.
 
 ### Karten und Medien
 

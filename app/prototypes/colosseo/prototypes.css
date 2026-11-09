@@ -812,6 +812,35 @@
   outline: 2px solid #f7efe4;
   outline-offset: 4px;
 }
+.no-reservation-form {
+  grid-column: 1 / 13;
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  border: 1px solid rgba(247, 239, 228, 0.24);
+  background: rgba(18, 10, 8, 0.72);
+  color: #f7efe4;
+  font-family: "DM Sans", Arial, sans-serif;
+}
+.no-reservation-fields, .no-reservation-contact { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; align-items: end; }
+.no-reservation-form label { display: grid; gap: 0.45rem; font-size: 0.82rem; font-weight: 650; }
+.no-reservation-form input, .no-reservation-form select { min-height: 48px; width: 100%; padding: 0.7rem 0.8rem; border: 1px solid rgba(247, 239, 228, 0.42); border-radius: 0; background: #fffaf3; color: #261411; font: inherit; }
+.no-reservation-form button { min-height: 48px; padding: 0.75rem 1rem; border: 1px solid #f7efe4; background: #f7efe4; color: #261411; font: inherit; font-weight: 700; cursor: pointer; }
+.no-reservation-form button:disabled { cursor: not-allowed; opacity: 0.5; }
+.no-reservation-form input:focus-visible, .no-reservation-form select:focus-visible, .no-reservation-form button:focus-visible { outline: 3px solid #f0b28e; outline-offset: 3px; }
+.no-reservation-form fieldset { margin: 0; padding: 0; border: 0; }
+.no-reservation-form legend { margin-bottom: 0.65rem; font-weight: 700; }
+.no-reservation-slots { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.no-reservation-slots label { display: block; }
+.no-reservation-slots input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.no-reservation-slots span { display: block; padding: 0.65rem 0.85rem; border: 1px solid rgba(247, 239, 228, 0.45); }
+.no-reservation-slots input:checked + span { background: #f7efe4; color: #261411; }
+.no-reservation-contact p { grid-column: 1 / 3; margin: 0; color: rgba(247, 239, 228, 0.72); font-size: 0.78rem; line-height: 1.5; }
+.no-reservation-notice, .no-reservation-status { margin: 0; color: #f6c3a4; font-size: 0.85rem; }
+@media (max-width: 760px) {
+  .no-reservation-fields, .no-reservation-contact { grid-template-columns: 1fr; }
+  .no-reservation-contact p { grid-column: auto; }
+}
 @media (hover: hover) and (pointer: fine) {
   .no-reservation-details a:hover {
     background: transparent;
