@@ -1,15 +1,28 @@
 import { connectToDatabase, disconnectFromDatabase } from "../config/database";
-import { AreaModel, ServiceHoursModel, SettingModel, TableModel } from "../models/core";
+import { getServerEnv } from "../config/env";
+import { reservationRules, restaurantAreas, restaurantTables, servicePeriods } from "../data/restaurant-configuration";
+import { AreaModel, ServicePeriodModel, SettingModel, TableModel } from "../models/core";
 
-await connectToDatabase();
-await AreaModel.updateOne({ key: "development-area" }, { $set: { key: "development-area", name: "Development only", active: true } }, { upsert: true });
-await TableModel.updateOne({ key: "development-table-1" }, { $set: { key: "development-table-1", areaKey: "development-area", seats: 2, combinable: false, active: true } }, { upsert: true });
-await TableModel.updateOne({ key: "development-table-2" }, { $set: { key: "development-table-2", areaKey: "development-area", seats: 4, combinable: false, active: true } }, { upsert: true });
-await ServiceHoursModel.bulkWrite(
-  [2, 3, 4, 5, 6].map((weekday) => ({ updateOne: { filter: { weekday }, update: { $set: { weekday, opens: "17:00", closes: "21:00", enabled: true } }, upsert: true } })),
-);
-await SettingModel.bulkWrite([
-  { updateOne: { filter: { key: "development-only.rules" }, update: { $set: { key: "development-only.rules", value: { marker: "PLATZHALTER", timezone: "Europe/Berlin", bookingHorizonDays: 30, leadTimeMinutes: 120, defaultDurationMinutes: 120, partySizeMin: 1, partySizeMax: 8, confirmationMode: "pending" } } }, upsert: true } },
-]);
-await disconnectFromDatabase();
-console.log("Artificial development seed applied (PLATZHALTER only; not production data).");
+const env = getServerEnv();
+if (env.NODE_ENV === "production") throw new Error("Development fixtures must never be written to a production environment.");
+
+await connectToDatabase(env);
+try {
+  for (const area of restaurantAreas) {
+    await AreaModel.updateOne({ key: area.key }, { $set: area }, { upsert: true, runValidators: true });
+  }
+  for (const table of restaurantTables) {
+    await TableModel.updateOne({ key: table.key }, { $set: table }, { upsert: true, runValidators: true });
+  }
+  for (const period of servicePeriods) {
+    await ServicePeriodModel.updateOne({ key: period.key }, { $set: period }, { upsert: true, runValidators: true });
+  }
+  await SettingModel.updateOne(
+    { key: "reservation.rules" },
+    { $set: { key: "reservation.rules", value: reservationRules } },
+    { upsert: true, runValidators: true },
+  );
+} finally {
+  await disconnectFromDatabase();
+}
+console.log(`Restaurant configuration applied: ${restaurantAreas.length} areas, ${restaurantTables.length} tables and ${servicePeriods.length} service periods.`);
