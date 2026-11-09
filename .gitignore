@@ -5,6 +5,9 @@ dist/
 .DS_Store
 *.log
 .env
+.env.*
+!.env.example
+!.env.test.example
 
 
 # Local Netlify folder

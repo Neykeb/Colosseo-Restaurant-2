@@ -179,7 +179,14 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Aktueller Stand:** Person A hat bestätigt, dass die Clerk-Änderungen auf `dev` gepusht wurden. Der Nutzer bestätigt außerdem, dass die Owner-Clerk-User-ID bereits vorliegt.
 - **Nächster Einstieg:** Clerk-Änderungen, Secret-Trennung und vorhandene Owner-ID prüfen; anschließend nur fehlende Sessionprüfung, eigenes Adminprofil und geschütztes Admin-Grundlayout ergänzen.
 
-## 14. FS2-Arbeit – 06.11.2026
+## 14. Sicherheitsbereinigung – 05.11.2026
+
+- **Befund:** Der Team-Push hatte `.env` und `.env.test` trotz vorhandener Ignore-Regeln erneut als bereits getrackte Dateien in mehrere Branch-Historien aufgenommen.
+- **Bereinigung:** Beide Dateien wurden aus der gesamten erreichbaren Historie der Branches `dev`, `feature/momo` und `feature/szymon` entfernt; die bereinigten Branches wurden kontrolliert force-gepusht und lokal neu ausgerichtet. `.env.example` bleibt die einzige versionierte Env-Vorlage.
+- **Prävention:** `npm test` führt nun zuerst `check:tracked-env` aus und bricht ab, falls `.env` oder eine private `.env.*`-Datei erneut getrackt wird.
+- **Extern erforderlich:** Das veröffentlichte MongoDB-Passwort wird vom Nutzer rotiert. Da GitHub alte Commit-Ansichten und Pull-Request-Refs zwischenspeichern kann, ist die Rotation unabhängig von der Historienbereinigung zwingend.
+
+## 15. FS2-Arbeit – 06.11.2026
 
 - **Umgesetzt:** `/admin` ruft nach erfolgreicher Clerk-Anmeldung `/api/admin/me` mit dem Clerk-Sessiontoken auf und unterscheidet Lade-, verweigerten, technischen und erfolgreichen Zustand.
 - **Umgesetzt:** Vite-Development-Proxy für `/api` auf den lokalen Express-Port ergänzt; `.env.example` dokumentiert die benötigten Clerk-Variablen ohne echte Werte.
@@ -187,7 +194,7 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Offen:** echter signierter Clerk-Request mit laufendem Backend, Browserprüfung des Google-OAuth-Flows, Owner-Profil-Bootstrap gegen die Testdatenbank sowie Accessibility-/Security-Abnahme.
 - **Nachprüfung:** Google-OAuth und ein signierter Request wurden im Browser erreicht; der Ownerzugriff war zunächst wegen einer nicht passenden `CLERK_AUTHORIZED_PARTIES`-Origin blockiert. Die lokalen Origins für Ports 5173/5174 mit `localhost` und `127.0.0.1` sind jetzt ergänzt und der Express-Server neu gestartet. Die abschließende Owner-Ansicht muss nach einem Browser-Reload erneut bestätigt werden.
 
-## 15. FS3-Start – 06.11.2026
+## 16. FS3-Start – 06.11.2026
 
 - **Freigabe:** `GO für FS3` wurde vom Nutzer erteilt.
 - **Umgesetzt:** Pure Domainlogik für `HH:mm`-Zeitfenster, gültige Servicefenster, Überschneidungen und explizite Reservierungs-Statusübergänge ergänzt.
