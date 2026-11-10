@@ -1,21 +1,19 @@
 import { z } from "zod";
 
-const emailAddress = z.string().trim().refine(
-  (value) => /^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(value) || /^[^<>]{1,100}\s<[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+>$/.test(value),
-  "Invalid email address",
-);
-
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().min(1).max(65_535).default(3_000),
   CLERK_SECRET_KEY: z.string().trim().min(1).optional(),
+  CLERK_PUBLISHABLE_KEY: z.string().trim().min(1).optional(),
   CLERK_OWNER_USER_ID: z.string().trim().regex(/^user_[A-Za-z0-9]+$/, "CLERK_OWNER_USER_ID must be a Clerk user ID").optional(),
   CLERK_OWNER_DISPLAY_NAME: z.string().trim().min(1).max(120).optional(),
-  CLERK_AUTHORIZED_PARTIES: z.string().trim().optional()
+  CLERK_AUTHORIZED_PARTIES: z
+    .string()
+    .trim()
+    .optional()
     .transform((value) => value?.split(",").map((party) => party.trim()).filter(Boolean) ?? []),
-  RESEND_API_KEY: z.string().trim().min(1).optional(),
-  RESERVATION_EMAIL_FROM: emailAddress.optional(),
-  RESEND_FROM_EMAIL: emailAddress.optional(),
+  RESEND_API_KEY: z.string().trim().regex(/^re_[A-Za-z0-9_]+$/, "RESEND_API_KEY must be a Resend API key").optional(),
+  RESEND_FROM_EMAIL: z.string().trim().min(3).max(320).optional(),
   RESTAURANT_NOTIFICATION_EMAIL: z.string().trim().email().optional(),
   MONGODB_URI: z.preprocess(
     (value) => value ?? "",
@@ -42,15 +40,10 @@ const serverEnvSchema = z.object({
     .regex(/^[A-Za-z0-9_-]+$/, "MONGODB_DB_NAME contains unsupported characters")
     .default("colosseo"),
   MONGODB_SERVER_SELECTION_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(30_000).default(5_000),
-}).superRefine((env, context) => {
-  const resendValues = [env.RESEND_API_KEY, env.RESERVATION_EMAIL_FROM ?? env.RESEND_FROM_EMAIL, env.RESTAURANT_NOTIFICATION_EMAIL];
-  const configuredValues = resendValues.filter(Boolean).length;
-  if (configuredValues > 0 && configuredValues < resendValues.length) {
-    context.addIssue({
-      code: "custom",
-      path: ["RESEND_API_KEY"],
-      message: "Resend configuration requires API key, from address and restaurant recipient together",
-    });
+}).superRefine((value, context) => {
+  const mailValues = [value.RESEND_API_KEY, value.RESEND_FROM_EMAIL, value.RESTAURANT_NOTIFICATION_EMAIL];
+  if (mailValues.some(Boolean) && !mailValues.every(Boolean)) {
+    context.addIssue({ code: "custom", path: ["RESEND_API_KEY"], message: "Resend configuration requires API key, from address and restaurant recipient together" });
   }
 });
 

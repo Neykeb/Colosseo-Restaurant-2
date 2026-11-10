@@ -60,7 +60,10 @@ function usePrototypeMotion(kind: "materia" | "notte" | "grafica" | "casa") {
       let removeNavigationListener = () => undefined;
 
       if (siteNav) {
-        gsap.from(siteNav.children, { opacity: 0, y: -10, duration: 0.55, stagger: 0.06, ease: "power3.out" });
+        const navigationEntranceTargets = compactViewport
+          ? siteNav.querySelectorAll(":scope > .p-logo, :scope > .no-nav-toggle")
+          : siteNav.children;
+        gsap.from(navigationEntranceTargets, { opacity: 0, y: -10, duration: 0.55, stagger: 0.06, ease: "power3.out" });
         const setNavigationState = (scrollTop: number, direction: number) => {
           siteNav.classList.toggle("is-compact", scrollTop > 72);
           if (scrollTop <= 72) siteNav.classList.remove("is-hidden");

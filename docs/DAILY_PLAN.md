@@ -1,12 +1,12 @@
 # Tagesplan Full-Stack-Finalprojekt
 
-**Status:** FS4 freigegeben und teilweise umgesetzt; Produktionsdaten und externe E-Mail-Konfiguration offen
+**Status:** FS4 technisch umgesetzt; Resend-Testversand verifiziert, Produktionsabsender, Rechtsprüfung und Gate-Abnahme offen
 
 **Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 05.11.2026
+**Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -65,9 +65,9 @@ Diese Liste beschreibt nur zusätzliche Projektthemen. Sie ist keine Dokumentati
 | Mo, 02.11. | FS1-Server- und API-Struktur vorbereiten; offene Reservierungsfragen bündeln | MongoDB Atlas festlegen, Mongoose-Umgebung und Verbindungstest umsetzen; TanStack-Router-Stand verifizieren | Person B: Atlas-Verbindung und Router-Bestand verifiziert; Person A bleibt separat | `PERSON B ERLEDIGT` |
 | Di, 03.11. | Express/TypeScript, App-/Server-Trennung, Healthcheck, Fehlerformat und Konfigurationsvalidierung | MongoDB/Mongoose-Verbindung, Migrationsrahmen und lokale Testumgebung | Reproduzierbare Plattform, Unit-/Integrationstest und gegenseitiger Review | `PERSON A ERLEDIGT; PERSON B ERLEDIGT` |
 | Mi, 04.11. | Kernmodelle, Repository-/Service-Grenzen, Indizes und künstliche Seed-Daten | TanStack Router, Sprachrouten, Direktaufruf, Reload, Lazy Loading, Prerendering und Netlify-Livebetrieb absichern | FS1-Datenbasis und vollständige lokale sowie produktive Router-/SEO-Regression | `PERSON A ERLEDIGT; PERSON B ERLEDIGT` |
-| Do, 05.11. | Clerk-Prüfung, Adminprofile, Rollenmiddleware und Autorisierungstests | Clerk-Client, OAuth-Zustände und geschütztes Admin-Grundlayout | Nur nach `GO FS2`: erlaubter Owner-Zugriff und verständliches `403` für nicht freigeschaltete Konten | `BLOCKIERT` bis `GO FS2` |
+| Do, 05.11. | Clerk-Prüfung, Adminprofile, Rollenmiddleware und Autorisierungstests | Clerk-Client, OAuth-Zustände und geschütztes Admin-Grundlayout | Erlaubter Owner-Zugriff und verständliches `403` für nicht freigeschaltete Konten | `ERLEDIGT; GATE-ABNAHME OFFEN` |
 | Fr, 06.11. | Verfügbarkeits-, Zeitfenster- und Statuslogik | reale Tisch-/Bereichsdaten modellieren; Config-/Availability-Integration | Nur nach `GO FS3`: fachliche Regeln und Grenzfälle als Tests nachweisen | `BLOCKIERT` bis `GO FS3` |
-| Mo, 09.11. | atomare Tischzuweisung, Idempotenz, Rate-Limit und parallele Reservierungsversuche | öffentliches Reservierungsformular mit Lade-, Fehler-, Mobil- und Accessibility-Zuständen | Letzte Kapazität kann nicht doppelt bestätigt werden; API- und UI-Integration | `BLOCKIERT` bis passende Gates |
+| Mo, 09.11. | atomare Tischzuweisung, Idempotenz, Rate-Limit und parallele Reservierungsversuche | öffentliches Reservierungsformular mit Lade-, Fehler-, Mobil- und Accessibility-Zuständen | Letzte Kapazität kann nicht doppelt bestätigt werden; API- und UI-Integration | `PERSON A ERLEDIGT; PERSON B REVIEW` |
 | Di, 10.11. | Resend-Service, Outbox, Wiederholungen und sichere E-Mail-Ereignisse | Bestätigungs-/Fehleransichten sowie Reservierungsverwaltung im Adminbereich | Nur nach `GO FS4/FS5`: Gaststrecke und operative Bearbeitung ohne doppelte E-Mails | `BLOCKIERT` bis passende Gates |
 | Mi, 11.11. | Menü-, Öffnungszeiten- und Veröffentlichungs-APIs | Adminmasken für Reservierungen, Kategorien, Gerichte und Öffnungszeiten | Nur nach `GO FS5/FS6`: Verwaltung mit öffentlichem Fallback und Berechtigungstests | `BLOCKIERT` bis passende Gates |
 | Do, 12.11. | Security-, Datenschutz-, Concurrency- und API-Prüfungen | E2E-, Accessibility-, Mobile-, Performance- und `break-ui`-Prüfungen | Nur nach `GO FS7`: gemeinsame priorisierte Fehlerliste beheben; keine offenen kritischen Befunde | `BLOCKIERT` bis `GO FS7` |
@@ -119,7 +119,7 @@ Vor der ersten Änderung wird geprüft: Ist das benötigte Gate freigegeben? Sin
 
 Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebnisse werden konkret genannt. Offene Arbeit erhält Verantwortlichen und neuen Termin. Der nächste Schritt wird so formuliert, dass beide Personen ohne erneute Suche weiterarbeiten können.
 
-## 9. Aktueller Tagesstand – 02.11.2026
+## 9. Tagesabschluss – 02.11.2026
 
 - **Aktuelle Phase:** `FS1` ist ausdrücklich freigegeben und in Arbeit.
 - **Person B heute erledigt:** MongoDB Atlas ohne Docker bestätigt; Mongoose, Zod und TypeScript-Laufzeit installiert; `.env` abgesichert; validierte Konfiguration, Verbindungsmodul, `db:check` und neun neue Datenbank-/Konfigurationstests ergänzt; echte Verbindung zum Atlas-Cluster hergestellt; vorhandenen TanStack-Router-Stand technisch und sichtbar geprüft.
@@ -128,7 +128,7 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Für Person B am 02.11. offen:** Keine weitere lokale Implementierungsaufgabe. Nur Atlas-Region und geringstmögliche Benutzerrechte müssen im Atlas-Konto noch geprüft beziehungsweise mitgeteilt werden; dafür lässt sich aus dem Repository kein Nachweis ableiten.
 - **Nächster planmäßiger Einstieg Person B:** Am 03.11. Migrationsrahmen und lokale Datenbank-Testumgebung bearbeiten; keine Arbeit aus späteren Phasen vorziehen.
 
-## 10. Aktueller Tagesstand – 03.11.2026
+## 10. Tagesabschluss – 03.11.2026
 
 - **Zusätzlicher freigegebener Reparaturumfang:** Frontend-Regressionskorrektur der bestehenden Marketing-Website; keine Änderung an den laufenden Backend-Arbeitsbereichen von Person A/B.
 - **Erledigt:** Ursache der verschwundenen Desktop-/Touch-Animationen getrennt; pauschales Mobile-Lite-Early-Return entfernt; native Touch-Scrollbewegung beibehalten; Navigation, sticky Speisekarte, Section-Reveals und Bewertungsband reaktiviert; Mobile-Layer-Overlap ohne Video-Pinning entfernt; Mobile-Parallax aus Performancegründen deaktiviert.
@@ -176,8 +176,8 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 - **Gate:** Der Nutzer hat `FS1` abgenommen und `FS2` mit ausdrücklichem `GO` freigegeben.
 - **Bestätigte Entscheidungen:** Eine Clerk-Anwendung existiert; Google ist der einzige OAuth-Anbieter. Der Restaurantbesitzer erhält als `owner` Vollzugriff und wird dauerhaft über seine eindeutige Clerk User-ID autorisiert. `staff` bleibt ohne konkrete Rechtefreigabe gesperrt.
-- **Aktueller Stand:** Person A hat bestätigt, dass die Clerk-Änderungen auf `dev` gepusht wurden. Der Nutzer bestätigt außerdem, dass die Owner-Clerk-User-ID bereits vorliegt.
-- **Nächster Einstieg:** Clerk-Änderungen, Secret-Trennung und vorhandene Owner-ID prüfen; anschließend nur fehlende Sessionprüfung, eigenes Adminprofil und geschütztes Admin-Grundlayout ergänzen.
+- **Aktueller Blocker:** Person A muss ihre Clerk-Änderungen noch auf `dev` pushen. Die konkrete Owner-User-ID wird anschließend aus Clerk übernommen und nicht erfunden.
+- **Nächster Einstieg:** Nach dem Push zuerst die vorhandene Implementierung und Secret-Trennung prüfen, dann nur fehlende Sessionprüfung, eigenes Adminprofil, Rollenmiddleware und geschütztes Admin-Grundlayout ergänzen.
 
 ## 14. Sicherheitsbereinigung – 05.11.2026
 
@@ -186,42 +186,74 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Prävention:** `npm test` führt nun zuerst `check:tracked-env` aus und bricht ab, falls `.env` oder eine private `.env.*`-Datei erneut getrackt wird.
 - **Extern erforderlich:** Das veröffentlichte MongoDB-Passwort wird vom Nutzer rotiert. Da GitHub alte Commit-Ansichten und Pull-Request-Refs zwischenspeichern kann, ist die Rotation unabhängig von der Historienbereinigung zwingend.
 
-## 15. FS2-Arbeit – 06.11.2026
+## 15. FS2-Implementierungsstand – 05.11.2026
 
-- **Umgesetzt:** `/admin` ruft nach erfolgreicher Clerk-Anmeldung `/api/admin/me` mit dem Clerk-Sessiontoken auf und unterscheidet Lade-, verweigerten, technischen und erfolgreichen Zustand.
-- **Umgesetzt:** Vite-Development-Proxy für `/api` auf den lokalen Express-Port ergänzt; `.env.example` dokumentiert die benötigten Clerk-Variablen ohne echte Werte.
-- **Prüfungen:** Typecheck und Lint erfolgreich; Production-Build erfolgreich. Vitest: 29/32 Tests bestanden; drei Listener-Integrationstests wurden durch die Sandbox-Beschränkung `listen EPERM` blockiert.
-- **Offen:** echter signierter Clerk-Request mit laufendem Backend, Browserprüfung des Google-OAuth-Flows, Owner-Profil-Bootstrap gegen die Testdatenbank sowie Accessibility-/Security-Abnahme.
-- **Nachprüfung:** Google-OAuth und ein signierter Request wurden im Browser erreicht; der Ownerzugriff war zunächst wegen einer nicht passenden `CLERK_AUTHORIZED_PARTIES`-Origin blockiert. Die lokalen Origins für Ports 5173/5174 mit `localhost` und `127.0.0.1` sind jetzt ergänzt und der Express-Server neu gestartet. Die abschließende Owner-Ansicht muss nach einem Browser-Reload erneut bestätigt werden.
+- **Integriert:** Person-As Clerk-Abhängigkeiten, Adminprofil und Rollenansatz geprüft. Falschen öffentlichen Login entfernt, öffentliche Website ohne Clerk-Key lauffähig gehalten und `/admin` als eigenen lazy geladenen Bereich ergänzt.
+- **Backend:** Offizielle `getAuth()`-Schnittstelle, aktive Owner-Prüfung, `/api/admin/session`, sichere Fehlerzustände, kontrollierter Owner-Bootstrap und Datenbankverbindung vor Serverstart umgesetzt. `staff` erhält weiterhin keinen Zugriff.
+- **Sicherheit/SEO:** Adminroute aus Navigation, Sitemap und Indexierung ausgeschlossen; Robots-Meta, `robots.txt`, Netlify- und Express-Header ergänzt. Private Env-Dateien werden weiterhin automatisiert abgewiesen.
+- **Prüfungen:** Typecheck, Lint, 38/38 Tests und Production-Build erfolgreich. Öffentliche deutsche Seite sowie `/admin` ohne Clerk-Key auf Desktop und bei 320 px visuell geprüft.
+- **Verifiziert am 05.11.2026:** Atlas-Testverbindung, vollständige Clerk-Schlüssel, übereinstimmende Publishable Keys, konkrete Owner User-ID und Google-Verbindung (`oauth_google`) wurden ohne Ausgabe sensibler Werte geprüft. Der idempotente Owner-Bootstrap läuft erfolgreich; Health antwortet mit `200`, der geschützte Admin-Endpunkt ohne Sitzung erwartungsgemäß mit `401`.
+- **Noch offen:** Der Restaurantbesitzer muss den Google-Login einmal im Browser abschließen. Danach werden der signierte `/api/admin/session`-Request, die Owner-Ansicht, Tastaturbedienung und Abmeldung real geprüft.
+- **Owner-Erweiterung:** Die freigegebene zweite Clerk User-ID wurde gegen Clerk geprüft und als zweites aktives Ownerprofil in Atlas angelegt. `npm run admin:grant-owner -- user_...` erlaubt weitere kontrollierte, idempotente Freischaltungen, ohne User-IDs im Code oder in Git zu speichern. Beide Ownerprofile sind aktiv; Typecheck, Lint und 38/38 Tests bleiben erfolgreich.
+- **Break-UI-Befund:** Der Owner-Anzeigename war im Datenmodell unbeschränkt, obwohl der Bootstrap maximal 120 Zeichen akzeptiert. Der Befund wurde am 06.11. durch eine einheitliche Modellgrenze, eine Bestandsmigration, Modelltests und sicheres Umbrechen behoben.
 
-## 16. FS3-Start – 06.11.2026
+## 16. FS2-Fortsetzung – 06.11.2026
 
-- **Freigabe:** `GO für FS3` wurde vom Nutzer erteilt.
-- **Umgesetzt:** Pure Domainlogik für `HH:mm`-Zeitfenster, gültige Servicefenster, Überschneidungen und explizite Reservierungs-Statusübergänge ergänzt.
-- **Tests:** Typecheck, Lint und vier neue Domain-Unit-Tests erfolgreich.
-- **Offen:** reale Tisch-/Bereichsdaten, Servicezeiten, Dauer/Buffer, Vorlauf, Buchungshorizont, Gruppengrenzen, Sperr- und Bestätigungsregeln müssen vor API- und Concurrency-Implementierung fachlich bestätigt werden.
-- **Freigegebene Entwicklungsannahme:** Der Nutzer hat synthetische FS3-Daten erlaubt. Der Development-Seed wurde gegen die Entwicklungsdatenbank ausgeführt und enthält ausschließlich markierte `PLATZHALTER`-Daten; reale Produktionsregeln bleiben offen.
+- **Erledigt:** Der eingebettete Clerk-Anmeldedialog verwendet die offizielle deutsche Lokalisierung `deDE`. Die Lokalisierung bleibt im lazy geladenen Admin-Bundle und verändert die öffentliche Website nicht.
+- **Prüfungen:** Typecheck, Lint, 38/38 Tests und Production-Build erfolgreich.
+- **Nutzerverifiziert:** Invite-only, Abmeldung und erneute Anmeldung wurden erfolgreich geprüft. Ein weiterer angemeldeter, aber nicht freigeschalteter Benutzer erhielt erwartungsgemäß keinen Adminzugriff.
+- **Tastaturprüfung:** „Zur Website“ und „Mit Google anmelden“ sind in sinnvoller Reihenfolge erreichbar; Enter öffnet den deutschen Clerk-Dialog, Escape schließt ihn und stellt den Fokus am Auslöser wieder her.
+- **Break-UI-Korrektur:** `displayName` ist nun im Mongoose-Modell auf 120 getrimmte Zeichen begrenzt. Migration `0002_admin-display-name-limit` prüft vorhandene Profile ohne Namen stillschweigend zu verändern; lange Namen dürfen in der Begrüßung umbrechen.
+- **Prüfungen:** Typecheck, Lint, 40/40 Tests und Production-Build erfolgreich. Die neue Migration wurde in `colosseo_test` und `colosseo` erfolgreich angewendet.
+- **Gate-Status:** `FS2` ist technisch abgeschlossen und wartet auf Präsentation sowie ausdrückliche Abnahme. `FS3` wurde nicht begonnen.
+- **Admin-Einstieg:** Nach Nutzerfreigabe wurde ein dezenter, lokalisierter Utility-Link im Footer ergänzt. Der Adminbereich bleibt aus Hauptnavigation und Suchindex ausgeschlossen; die Sichtbarkeit des Links ersetzt keine serverseitige Owner-Prüfung.
 
-## 17. FS3-Umsetzung und Prüfung – 09.11.2026
+## 17. FS3-Teilstart – 06.11.2026
 
-- **Nutzerpriorität:** Die abschließende Browserprüfung des Adminzugangs wurde auf Nutzerwunsch verschoben; Admin-API-Endpunkte bleiben dennoch serverseitig geschützt.
-- **Umgesetzt:** Öffentliche Config-, Availability- und Reservation-Endpunkte mit Zod-Validierung, Rate-Limit und Idempotenz; geschützte Admin-Endpunkte für Reservierungen, Statuswechsel und Sperrzeiten; Audit-Ereignisse; Einzel- und Kombinationstische; Dauer/Puffer; atomare Tisch-/Zeitslot-Sperren.
-- **Migrationsbereinigung:** Die nach dem Branch-Abgleich fehlenden, in Atlas bereits angewendeten Migrationen `0002` bis `0007` anhand der unveränderten Historie und des nicht personenbezogenen Schemas wiederhergestellt. `0008_reservation-api-alignment` wurde in Test- und Entwicklungsdatenbank erfolgreich angewendet.
-- **Tatsächlich ausgeführte Prüfungen:** Typecheck, Lint, Env-Tracking-Prüfung, 51/51 Vitest-Tests und Production-Build erfolgreich. Read-only Development-Smoke-Test liefert Config und vier Slots. Echter Parallelitätstest in `colosseo_test` bestätigt: eine von zwei konkurrierenden Anfragen erhält den letzten Tisch, die andere `NO_AVAILABILITY`; Testdaten wurden anschließend entfernt.
-- **Abnahme:** Der Nutzer hat den präsentierten FS3-Stand am 09.11.2026 mit „go“ abgenommen; reale Betriebsregeln müssen die sichtbaren `PLATZHALTER` weiterhin vor einem Livebetrieb ersetzen.
+- **Freigegebener Person-B-Umfang:** Bereiche, Tische, erlaubte Kombinationen und anschließend die noch offenen betrieblichen FS3-Grundwerte. Der Nutzer hat ausdrücklich erfundene Daten erlaubt und neutrale Bezeichnungen ohne `demo` verlangt.
+- **Umgesetzt:** Zwei Bereiche, acht Tische mit Mindest-/Maximalkapazität sowie drei Kombinationspaare als zentrale, idempotente Restaurantkonfiguration modelliert. Neutrale Schlüssel wie `main-dining` und `table-01` ersetzen die bisherigen Entwicklungsmarker.
+- **Datenmodell:** Veraltete Felder `seats` und `combinable` durch `name`, `minPartySize`, `maxPartySize` und `combinationGroupKey` ersetzt. Eine Modellregel verhindert eine Mindestkapazität oberhalb der Maximalkapazität.
+- **Betriebsregeln:** Elf Servicezeiten (Dienstag bis Sonntag), 120 Minuten Reservierungsdauer, 15 Minuten Puffer, 120 Minuten Mindestvorlauf, 60 Tage Buchungshorizont, 30-Minuten-Zeitfenster und 1 bis 10 Personen sind zentral hinterlegt. Montag besitzt keine buchbare Servicezeit.
+- **Migration:** `0003_table-capacity-and-combinations` und `0004_initial-restaurant-configuration` wurden erfolgreich in `colosseo_test` und `colosseo` angewendet. Die zweite Migration ersetzt `demo-*`-Schlüssel, entfernt alte `development-*`-Platzhalter und bereitet mehrere Servicezeiten pro Wochentag vor.
+- **Verifiziert:** Typecheck, Lint und 45/45 Tests sind erfolgreich. Der Seed meldet 2 Bereiche, 8 Tische und 11 Servicezeiten.
+- **Weiter offen:** fachliche Bestätigung der vorläufigen Restaurantwerte sowie die pure Verfügbarkeitslogik, atomare Tischzuweisung, APIs und Concurrency-/Grenztests.
 
-## 18. FS4-Freigabe und erster Umsetzungsstand – 09.11.2026
+## 18. FS3-Fortsetzung des Arbeitspakets vom 06.11. – ausgeführt am 09.11.2026
 
-- **Gate:** Nutzer hat den FS3-Stand mit „go“ abgenommen und damit FS4 freigegeben.
-- **Umgesetzt:** dreisprachiges, responsives Reservierungsformular mit Datum, Gruppengröße, Live-Slots, Name, E-Mail, optionalem Telefon, vollständigen Zuständen und Telefonalternative. Provisorische Regeln sperren Production-Buchungen.
-- **Benachrichtigungen:** Zwei Outbox-Ereignisse entstehen atomar mit jeder Reservierung. Ein Resend-Worker verarbeitet Gast- und Restaurantnachricht seriell, mit Idempotency-Key und exponentiellem Retry.
-- **Prüfungen:** Typecheck, Lint, 53/53 Tests und Production-Build erfolgreich. Build-Warnungen betreffen unverändert Modul-Direktiven und Chunkgröße.
-- **Damals blockiert:** E-Mail-Konfiguration, Aufbewahrungsregel und Gaststornierung wurden anschließend im Person-A-Abschluss geklärt. Offen bleiben finale rechtliche Datenschutztexte und der vollständige Browser-E2E; `gpt-taste` und `break-ui` waren in dieser Sitzung nicht verfügbar.
+- **Domainlogik:** Kalenderdatum, Wochentag, Restaurantzeitzone, Vorlauf, Buchungshorizont, Servicezeiten, Reservierungsdauer, Puffer, Tischkandidaten und erlaubte Statusübergänge als datenbankunabhängige Funktionen implementiert.
+- **Verfügbarkeit:** Das System erzeugt nur vollständig in eine Servicezeit passende Startzeiten, berücksichtigt vorhandene Tisch-Zeit-Sperren und wählt deterministisch die kleinste passende Einzel- oder Kombinationsbelegung.
+- **Atomare Buchung:** Reservierung, Tischzuweisungen und diskrete Sperrsegmente werden gemeinsam in einer MongoDB-Transaktion geschrieben. Der eindeutige Index aus Migration `0005_reservation-locks` verhindert Doppelbelegung bei parallelen Anfragen.
+- **Öffentliche API:** `GET /api/reservations/config`, `GET /api/reservations/availability` und `POST /api/reservations` mit Zod-Validierung, Idempotency-Key und speicherinternem Rate-Limit umgesetzt. Interne Tischschlüssel werden bei öffentlichen Buchungen nicht ausgegeben.
+- **Admin-API:** Manuelle Reservierungen sowie Listen, Anlegen und Entfernen zeitlicher Restaurant-, Bereichs- oder Tischsperren sind ownergeschützt. Migration `0006_reservation-blocks` wurde in Test- und Entwicklungsdatenbank angewendet.
+- **Prüfungen:** Typecheck, Lint und 58/58 automatisierte Tests erfolgreich. Ein echter paralleler Test auf `colosseo_test` ergab genau eine bestätigte und eine konfliktbedingt abgewiesene Buchung. Das Erstellen einer vier Segmente umfassenden Testsperre und deren vollständiges Entfernen wurden ebenfalls auf Atlas geprüft; Testdaten wurden anschließend entfernt.
+- **Offen vor Produktion:** Die vorläufigen Tische, Servicezeiten und Reservierungsregeln müssen vom Restaurant bestätigt werden. `FS3` wartet auf Präsentation und Gate-Abnahme; `FS4` wurde nicht begonnen.
+- **FS4-Eingangsentscheidung:** Resend ist als externer Dienst für Transaktions-E-Mails bestätigt. Noch offen sind die verifizierte Absenderdomain, die Restaurantempfängeradresse, finale E-Mail-Texte und das ausdrückliche `GO für FS4`.
 
-## 19. Person-A-Abschluss – 09.11.2026
+## 19. FS4-Arbeitspaket – 09.11.2026
 
-- **E-Mail-Konfiguration:** Vorhandene Variablen `RESEND_API_KEY`, `RESEND_FROM_EMAIL` und `RESTAURANT_NOTIFICATION_EMAIL` ohne Ausgabe ihrer Werte erkannt. Genau eine technische Testmail wurde von Resend zur Zustellung angenommen.
-- **Stornoregel:** Kostenfreie Online-Stornierung bis zwei Stunden vor Beginn; danach telefonische Klärung. Der Gast erhält einmalig ein zufälliges Token, serverseitig wird nur dessen SHA-256-Hash gespeichert. Storno setzt den Status atomar, gibt Tisch-/Zeitslot-Sperren frei und erzeugt idempotente Gast-/Restaurant-Outbox-Ereignisse.
-- **Aufbewahrung:** stornierte/abgelehnte Reservierungen 90 Tage, abgeschlossene/No-show 180 Tage, gesendete Outbox-Ereignisse 30 Tage, Auditdaten 365 Tage. Reservierungen werden fristgerecht anonymisiert; fachliche Statistik bleibt ohne direkte Kontaktdaten erhalten.
-- **Prüfungen:** Migration `0009_cancellation-and-retention` in `colosseo_test` und `colosseo` erfolgreich. Echter Atlas-Test bestätigt Konkurrenzschutz und anschließende Token-Stornierung; Test-Aufbewahrungsjob erfolgreich ohne betroffene Datensätze.
-- **Für Person A noch offen:** keine weitere heute ausführbare FS4-Backendaufgabe. Rechtliche Prüfung der Datenschutztexte ist eine gemeinsame externe Voraussetzung; Clerk-Browserprüfung bleibt entsprechend der Nutzerpriorität verschoben.
+- **Freigabe:** Nutzer hat `FS4` ausdrücklich gestartet und Resend bestätigt.
+- **Gaststrecke:** Dreisprachiges Reservierungsformular mit Verfügbarkeitsprüfung, Pflichtbestätigung des Datenschutzhinweises, stabiler Idempotenz-ID, Lade-/Fehler-/Erfolgszuständen und telefonischem Fallback integriert.
+- **E-Mail:** Resend-Transport, atomare Outbox-Erzeugung, eindeutige Ereignisschlüssel, begrenzte Wiederholungen und getrennte Gast-/Restaurantnachrichten implementiert. Restaurantempfänger vorläufig `mohammad.amiri@dci-student.org`.
+- **Datenbasis:** Migration `0007_email-outbox` ergänzt Locale-/Datenschutz-Bestand und den Zustellindex und ist in `colosseo_test` sowie `colosseo` angewendet.
+- **Prüfungen:** Typecheck, Lint, 62/62 automatisierte Tests und Production-Build erfolgreich. Öffentliche Config und Verfügbarkeit wurden gegen die laufende API geprüft; Desktop-Formular, Zustände und Fokusstruktur wurden im Browser kontrolliert. Am 09.11.2026 wurde zusätzlich eine reale Gastzustellung über Resend mit Status `Delivered` und genau einem eindeutigen Outbox-Ereignis verifiziert; der erneute Regressionslauf aus Typecheck, Lint, 62/62 Tests und Build war erfolgreich. Der Build enthält nur bekannte Drittanbieterhinweise zu `use client`.
+- **Blockade im Testmodus:** Die Restaurantnachricht an die vorläufige DCI-Adresse wird ohne eigene verifizierte Absenderdomain von Resend erwartungsgemäß abgelehnt. Die Outbox speichert den Fehler und begrenzt die Wiederholungen; es wurden keine doppelten Ereignis-IDs gefunden.
+- **Offen:** verifizierte Produktionsdomain und Render-Konfiguration, rechtliche Freigabe des Datenschutzhinweises, Aufbewahrungs- und Stornoregel sowie die verbleibenden FS4-Qualitätsprüfungen. `FS5` wurde nicht begonnen.
+- **Person B – Mobile/Accessibility-Korrekturen:** Veraltete Uhrzeitauswahl wird bei Änderung von Datum oder Personenzahl vollständig verworfen; parallele Verfügbarkeitsabfragen werden abgebrochen. Fehlende Kontaktangaben markieren E-Mail und Telefon mit `aria-invalid` und verschieben den Fokus auf das erste betroffene Feld. Verfügbarkeitsanzahl und Reservierungsbestätigung besitzen Live-Region beziehungsweise kontrollierten Fokus. Formularfelder bleiben mobil bei mindestens 16 px, interaktive Ziele mindestens 44 px groß; reine Hover-Zustände der produktiven Seite greifen nur bei einem präzisen Zeiger.
+- **Person B – Browserprüfung:** Lokaler Gastfluss auf Deutsch bis zur clientseitigen Kontaktvalidierung geprüft; der Fehlerfokus landet auf E-Mail. Nach Datumswechsel verschwinden alte Uhrzeiten und Kontaktdaten. Deutsche, englische und italienische Reservierungsüberschriften sowie das jeweilige `lang`-Attribut sind korrekt. Bei mobilem Viewport entstand kein horizontaler Überlauf; Desktop-Ankernavigation erreicht nach der sanften Scrollstrecke exakt `#action`.
+- **Person B – tatsächlich ausgeführte Prüfungen:** Typecheck, OXLint, 62/62 Tests und Production-Build erfolgreich. Der Build meldet weiterhin ausschließlich bekannte Drittanbieterhinweise zu `use client`; `SITE_URL` war beim lokalen Lauf nicht gesetzt. Eine echte iOS-/Android-Hardwareprüfung und eine emulierte Betriebssystemeinstellung für Reduced Motion bleiben offen.
+- **Nächster Einstieg Person B:** Auf realem iOS/Android Touch, Bildschirmtastatur und Reduced Motion prüfen; danach Gegenreview durch Person A und FS4-Gate vorbereiten. Resend-Produktionsdomain sowie rechtliche Storno-/Aufbewahrungsentscheidungen bleiben externe Blocker.
+
+## 20. Tagesstart Person B – 10.11.2026
+
+- **Übertrag vom 09.11.:** Reale iOS-/Android-Prüfung einschließlich Bildschirmtastatur sowie Reduced-Motion-Prüfung sind noch offen. Der 09.11. ist deshalb fachlich umgesetzt, aber noch nicht vollständig abgenommen.
+- **Aufgabe 1 – REVIEW:** Viewport, Touch-Ziele, 16-px-Eingaben, Hover-Gating, Safe Areas, Scrollverhalten und Reduced-Motion-Fallback statisch geprüft; die öffentliche Seite und Reservierungsstrecke zusätzlich bei 390 px sowie die Gesamtseite bei schmaler Ansicht im Browser kontrolliert. Vier zu kleine Textlink-Ziele wurden mobil auf mindestens 44 × 44 px erweitert. Danach bestanden Typecheck, OXLint, 62/62 Tests und Production-Build; sichtbar war nur der bekannte Drittanbieterhinweis zu `use client`, `SITE_URL` war lokal nicht gesetzt. Kein horizontaler Überlauf und kein sichtbares Bedienelement unter 44 × 44 px bei der erneuten 390-px-Prüfung.
+- **Mobile Navigation korrigiert:** Die mobile GSAP-Eingangsanimation verändert das zunächst geschlossene Dropdown nicht mehr inline. Auf größeren Ansichten stehen Speisekarte, Feiern und Kontakt als geometrisch zentrierte Dreiergruppe; Reservieren bleibt rahmenlos separat ganz rechts. Mobil bleiben im geschlossenen Zustand nur Logo und Burger sichtbar; beim Öffnen werden alle vier Links bündig als vollbreite Ebene mit einem 220-ms-Clip-Reveal von oben nach unten eingeblendet. Der separate quadratische Reservierungsbutton samt Icon wurde vollständig entfernt, und eine geöffnete Navigation wird durch die Scroll-Ausblendung nicht versteckt. Bei 320, 390 und 1024 px visuell geprüft; Typecheck, OXLint, 62/62 Tests und Production-Build erneut erfolgreich.
+- **Mobile Speisekarten-Reihenfolge korrigiert:** Unterhalb von 900 px steht der aktive Gerichtstext vollständig vor dem zugehörigen Bild. Der Bildbereich besitzt eine eigene feste Zeile und abgeschnittenen Überlauf, sodass auch die Scrollanimation niemals über den Text laufen kann; auf Nutzerwunsch bleibt der Übergang ohne sichtbare Trennlinie. Der Reduced-Motion-Fallback übernimmt dieselbe Reihenfolge. Bei 390 px im Browser visuell und über die tatsächlichen Elementgrenzen geprüft; Text und Bild überlappen nicht. Typecheck, OXLint, 62/62 Tests und Production-Build bestanden anschließend erneut; beim Build erschienen nur die bekannten Hinweise zu `use client` und der lokal nicht gesetzten `SITE_URL`.
+- **Mobile Bildgrenze nachjustiert:** Text- und Bildbereich nutzen auf gestapelten Ansichten nun jeweils 50 Prozent der Viewporthöhe. Dadurch verschwindet das scrollende Gerichtbild deutlich näher am Beschreibungstext, bleibt aber weiterhin vollständig auf seinen eigenen, abgeschnittenen Bildbereich begrenzt.
+- **Person B – Spam-/Ausfallprüfung abgeschlossen:** Die öffentliche Reservierungs-API wurde automatisiert gegen wiederholte Buchungsversuche und simulierte Datenbank-/Provider-Ausfälle geprüft. Nach zehn Versuchen antwortet sie mit `429`, `Retry-After` und Korrelations-ID; unerwartete Ausfälle liefern eine neutrale `500`-Antwort, ohne interne URI, Passwort oder Provider-Token preiszugeben. Der vollständige Regressionslauf aus Typecheck, OXLint, 64/64 Tests und Production-Build ist erfolgreich; sichtbar blieben nur die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL`.
+- **Smartphone-Prüfung bestätigt:** Der Nutzer hat den echten Smartphone-Test am 10.11.2026 als durchgeführt bestätigt. Gerät, Betriebssystem, Browser und einzelne Prüfergebnisse wurden nicht mitgeteilt; diese Bestätigung ersetzt deshalb keinen detaillierten gerätespezifischen Prüfbericht.
+- **Produktions-E2E vorbereitet:** Für den gemeinsamen React-/Express-Web-Service wurde eine Render-Blueprint-Konfiguration mit reproduzierbarem Build, idempotenter Migration unmittelbar vor dem Serverstart, Frankfurt-Region und Health Check ergänzt. Der Free-Plan unterstützt laut offizieller Render-Dokumentation keinen separaten Pre-Deploy-Befehl; deshalb ist die Migration bewusst Teil des Startbefehls. Alle Secrets und noch unbestätigten Produktionswerte sind ausschließlich als manuell zu setzende Render-Umgebungsvariablen markiert; es wurde nichts deployed oder übertragen.
+- **Danach – OFFEN:** Render-Service mit bestätigter Produktions-URL und Umgebungsvariablen anlegen; anschließend vollständigen Produktions-E2E-Test durchführen; dokumentierter Gegenreview durch Person A; FS4-Ergebnis und Restpunkte für das Gate zusammenfassen.
+- **Externe Blocker:** Verifizierte Resend-Produktionsdomain sowie fachlich/rechtlich freigegebene Datenschutz-, Aufbewahrungs- und Stornoregeln.
+- **Phasengrenze:** `FS5` beginnt erst nach abgeschlossener FS4-Präsentation, ausdrücklicher Gate-Abnahme und neuem `GO`.
+- **Branch-Integration:** Die Konflikte zwischen `feature/momo` und `dev` wurden vollständig aufgelöst. Die getestete öffentliche Website, mobile Navigation, Reservierungsstrecke und bestehende Admin-Autorisierung blieben maßgeblich; ergänzende Storno-, Aufbewahrungs-, Outbox- und Migrationsbausteine aus `dev` wurden kompatibel übernommen. `dist/` bleibt generiert und unversioniert. Typecheck, OXLint, 76/76 Tests und Production-Build waren anschließend erfolgreich; der Build meldete nur die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL`.
