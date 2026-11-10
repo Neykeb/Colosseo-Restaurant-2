@@ -175,7 +175,9 @@ export function selectAvailableTables(candidates: TableCandidate[], occupiedTabl
 
 export const reservationStatusTransitions = {
   requested: ["confirmed", "declined", "cancelled"],
+  pending: ["confirmed", "declined", "cancelled"],
   confirmed: ["cancelled", "completed", "no_show"],
+  seated: ["completed", "no_show"],
   declined: [],
   cancelled: [],
   completed: [],
@@ -186,4 +188,18 @@ export type ReservationStatus = keyof typeof reservationStatusTransitions;
 
 export function canTransitionReservationStatus(from: ReservationStatus, to: ReservationStatus): boolean {
   return (reservationStatusTransitions[from] as readonly string[]).includes(to);
+}
+
+export function minutesSinceMidnight(value: string): number {
+  const minutes = timeToMinutes(value);
+  if (minutes === null) throw new Error("Invalid time value.");
+  return minutes;
+}
+
+export function isWithinServiceWindow(startTime: string, endTime: string, window: { opens: string; closes: string }): boolean {
+  return startTime >= window.opens && endTime <= window.closes;
+}
+
+export function assertReservationTransition(from: ReservationStatus, to: ReservationStatus): void {
+  if (!canTransitionReservationStatus(from, to)) throw new Error("Invalid reservation status transition.");
 }

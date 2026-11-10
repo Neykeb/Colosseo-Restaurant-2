@@ -32,8 +32,9 @@ tableSchema.pre("validate", function validateCapacity() {
 });
 tableSchema.index({ areaKey: 1, active: 1 });
 tableSchema.index({ combinationGroupKey: 1, active: 1 });
-const reservationSchema = new Schema({ publicId: { type: String, required: true, unique: true }, date: { type: String, required: true }, startTime: { type: String, required: true }, endTime: { type: String, required: true }, partySize: { type: Number, required: true, min: 1 }, locale: { type: String, required: true, enum: ["de", "en", "it"], default: "de" }, status: { type: String, required: true, enum: ["requested", "confirmed", "cancelled", "declined", "completed", "no_show"] }, guest: { name: { type: String, required: true }, email: String, phone: String }, privacyAcknowledgedAt: { type: Date, required: true }, idempotencyKey: { type: String, required: true, unique: true } }, { timestamps });
+const reservationSchema = new Schema({ publicId: { type: String, required: true, unique: true }, date: { type: String, required: true }, startTime: { type: String, required: true }, endTime: { type: String, required: true }, partySize: { type: Number, required: true, min: 1 }, locale: { type: String, required: true, enum: ["de", "en", "it"], default: "de" }, status: { type: String, required: true, enum: ["requested", "pending", "confirmed", "cancelled", "declined", "seated", "completed", "no_show"] }, source: { type: String, required: true, enum: ["public", "admin"], default: "public" }, guest: { name: { type: String, required: true }, email: String, phone: String }, privacyAcknowledgedAt: Date, internalNote: String, cancellationTokenHash: { type: String, select: false }, idempotencyKey: { type: String, required: true, unique: true } }, { timestamps });
 reservationSchema.index({ date: 1, startTime: 1, status: 1 });
+reservationSchema.index({ publicId: 1, cancellationTokenHash: 1 }, { sparse: true });
 const assignmentSchema = new Schema({ reservationPublicId: { type: String, required: true }, tableKey: { type: String, required: true }, date: { type: String, required: true }, startTime: { type: String, required: true }, endTime: { type: String, required: true } }, { timestamps });
 assignmentSchema.index({ reservationPublicId: 1, tableKey: 1 }, { unique: true });
 assignmentSchema.index({ tableKey: 1, date: 1, startTime: 1, endTime: 1 });
@@ -50,16 +51,20 @@ const reservationBlockSchema = new Schema({
   date: { type: String, required: true },
   startTime: { type: String, required: true, match: timePattern },
   endTime: { type: String, required: true, match: timePattern },
-  scope: { type: String, required: true, enum: ["restaurant", "area", "table"] },
+  scope: { type: String, enum: ["restaurant", "area", "table"], default: "restaurant" },
   scopeKey: { type: String, trim: true, default: null },
-  reason: { type: String, required: true, trim: true, maxlength: 240 },
+  reason: { type: String, trim: true, maxlength: 240 },
+  label: { type: String, trim: true, maxlength: 240 },
+  active: { type: Boolean, required: true, default: true },
   createdBy: { type: String, required: true },
 }, { timestamps });
 reservationBlockSchema.pre("validate", function validateBlock() {
   if (this.startTime >= this.endTime) this.invalidate("endTime", "endTime must be later than startTime");
   if (this.scope !== "restaurant" && !this.scopeKey) this.invalidate("scopeKey", "scopeKey is required for an area or table block");
+  if (!this.reason && !this.label) this.invalidate("reason", "reason or label is required");
 });
 reservationBlockSchema.index({ date: 1, startTime: 1, endTime: 1 });
+reservationBlockSchema.index({ date: 1, active: 1, startTime: 1, endTime: 1 });
 const auditEventSchema = new Schema({ eventId: { type: String, required: true, unique: true }, actorId: String, action: { type: String, required: true }, target: { type: String, required: true }, metadata: { type: Schema.Types.Mixed, required: true } }, { timestamps });
 const outboxEventSchema = new Schema({ eventId: { type: String, required: true, unique: true }, type: { type: String, required: true }, aggregateId: { type: String, required: true }, payload: { type: Schema.Types.Mixed, required: true }, status: { type: String, required: true, enum: ["pending", "processing", "sent", "failed"] }, attempts: { type: Number, required: true, min: 0, default: 0 }, nextAttemptAt: Date, lockedAt: Date, sentAt: Date, providerId: String, lastError: { type: String, maxlength: 500 } }, { timestamps });
 outboxEventSchema.index({ status: 1, nextAttemptAt: 1 });

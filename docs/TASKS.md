@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
 **Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Resend-Testversand verifiziert, Produktionskonfiguration, Rechtsprüfung und Gate-Abnahme offen
-**Letzte Aktualisierung:** 09.11.2026
+**Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -254,6 +254,8 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
 - [-] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und E2E-Prüfungen ausführen. Person B hat DE/EN/IT, mobilen Überlauf, Touchziele, Kontaktfehler-Fokus, Statusrücksetzung und Desktop-Ankernavigation lokal geprüft. Am 10.11.2026 wurden außerdem Rate-Limit sowie sichere korrelierte Antworten bei simulierten Datenbank-/Provider-Ausfällen automatisiert verifiziert; Typecheck, Lint, 64/64 Tests und Build sind erfolgreich. Der Nutzer bestätigte anschließend einen echten Smartphone-Test, jedoch ohne Gerät-/Browserprotokoll. Der vollständige Produktions-E2E-Lauf bleibt bis zur Render-Einrichtung offen.
 - [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
+
+**Integrationsstand 10.11.2026:** Die Merge-Konflikte mit `dev` sind ohne Rücknahme der bestehenden Website-, Admin- und Reservierungsfunktionen aufgelöst. Neue Migrations-, Storno-, Aufbewahrungs- und E-Mail-Verarbeitungsbausteine wurden aufgenommen; `dist/` bleibt aus Git ausgeschlossen. Der Integrationsstand besteht Typecheck, OXLint, 76/76 Tests und Production-Build. Dies ersetzt weder die offenen fachlich/rechtlichen Freigaben noch das Gate `FS4`.
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
 
