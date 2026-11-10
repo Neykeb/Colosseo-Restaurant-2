@@ -278,7 +278,8 @@ export function createApp(options: CreateAppOptions = {}) {
         return;
       }
 
-      const isClientOnlyRoute = request.path === "/admin" || request.path === "/prototypes/colosseo";
+      const normalizedPath = request.path.replace(/\/+$/, "") || "/";
+      const isClientOnlyRoute = normalizedPath === "/admin" || normalizedPath === "/prototypes/colosseo";
       response.status(isClientOnlyRoute ? 200 : 404);
       response.sendFile("index.html", { root: staticDirectory }, (error) => {
         if (error) next(error);

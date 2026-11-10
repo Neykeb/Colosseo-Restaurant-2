@@ -230,5 +230,8 @@ describe("Express platform foundation", () => {
     const adminResponse = await fetch(`${baseUrl}/admin`, { headers: { accept: "text/html" } });
     expect(adminResponse.status).toBe(200);
     expect(adminResponse.headers.get("x-robots-tag")).toBe("noindex, nofollow, noarchive");
+
+    const adminSlashResponse = await fetch(`${baseUrl}/admin/`, { headers: { accept: "text/html" } });
+    expect(adminSlashResponse.status).toBe(200);
   });
 });
