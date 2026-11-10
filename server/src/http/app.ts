@@ -29,6 +29,9 @@ const reservationStatusSchema = z.enum(["pending", "confirmed", "declined", "can
 const tableAssignmentSchema = z.object({ tableKeys: z.array(z.string().trim().min(1).max(80)).min(1).max(4) });
 const blockBodySchema = z.object({ date: dateSchema, startTime: timeSchema, endTime: timeSchema, label: z.string().trim().min(1).max(160) });
 const specialDayBodySchema = z.object({ date: dateSchema, label: z.string().trim().min(1).max(160), closed: z.boolean(), opens: timeSchema.optional(), closes: timeSchema.optional() });
+const eventInquiryBodySchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254), phone: z.string().trim().min(5).max(40).optional(), eventType: z.string().trim().min(1).max(80), requestedDate: dateSchema, partySize: z.number().int().min(1).max(500), message: z.string().trim().min(1).max(2_000) });
+const eventInquiryStatusSchema = z.enum(["new", "in_review", "accepted", "declined", "closed"]);
+const eventInquiryNoteSchema = z.object({ internalNote: z.string().trim().max(2_000) });
 
 const correlationIdMiddleware: RequestHandler = (request, response, next) => {
   const incomingId = request.header("x-correlation-id")?.trim();
@@ -228,6 +231,37 @@ export function createApp(options: CreateAppOptions = {}) {
     try {
       const date = dateSchema.parse(request.params.date);
       response.json({ specialDay: await booking.deleteSpecialDay(date, adminUserId(request)) });
+    } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/event-inquiries", adminGuard, async (_request, response, next) => {
+    try { response.json({ inquiries: await booking.listEventInquiries() }); } catch (error) { next(error); }
+  });
+
+  app.post("/api/admin/event-inquiries", adminGuard, async (request, response, next) => {
+    try { response.status(201).json({ inquiry: await booking.createEventInquiry(eventInquiryBodySchema.parse(request.body)) }); } catch (error) { next(error); }
+  });
+
+  app.patch("/api/admin/event-inquiries/:inquiryId/status", adminGuard, async (request, response, next) => {
+    try {
+      const inquiryId = z.string().regex(/^inq_[A-Za-z0-9]+$/).parse(request.params.inquiryId);
+      const status = eventInquiryStatusSchema.parse(request.body?.status);
+      response.json({ inquiry: await booking.updateEventInquiryStatus(inquiryId, status, adminUserId(request)) });
+    } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/event-inquiries/:inquiryId", adminGuard, async (request, response, next) => {
+    try {
+      const inquiryId = z.string().regex(/^inq_[A-Za-z0-9]+$/).parse(request.params.inquiryId);
+      response.json({ inquiry: await booking.getEventInquiry(inquiryId) });
+    } catch (error) { next(error); }
+  });
+
+  app.patch("/api/admin/event-inquiries/:inquiryId/note", adminGuard, async (request, response, next) => {
+    try {
+      const inquiryId = z.string().regex(/^inq_[A-Za-z0-9]+$/).parse(request.params.inquiryId);
+      const { internalNote } = eventInquiryNoteSchema.parse(request.body);
+      response.json({ inquiry: await booking.updateEventInquiryNote(inquiryId, internalNote, adminUserId(request)) });
     } catch (error) { next(error); }
   });
 

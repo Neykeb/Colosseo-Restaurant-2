@@ -27,6 +27,9 @@ reservationLockSchema.index({ date: 1, tableKey: 1, slotStart: 1 }, { unique: tr
 reservationLockSchema.index({ reservationPublicId: 1 });
 const reservationBlockSchema = new Schema({ blockId: { type: String, required: true, unique: true }, date: { type: String, required: true }, startTime: { type: String, required: true }, endTime: { type: String, required: true }, label: { type: String, required: true }, active: { type: Boolean, required: true, default: true }, createdBy: { type: String, required: true } }, { timestamps });
 reservationBlockSchema.index({ date: 1, active: 1, startTime: 1, endTime: 1 });
+const eventInquirySchema = new Schema({ inquiryId: { type: String, required: true, unique: true }, name: { type: String, required: true }, email: { type: String, required: true }, phone: String, eventType: { type: String, required: true }, requestedDate: { type: String, required: true }, partySize: { type: Number, required: true, min: 1 }, message: { type: String, required: true }, status: { type: String, required: true, enum: ["new", "in_review", "accepted", "declined", "closed"], default: "new" }, internalNote: String }, { timestamps });
+eventInquirySchema.index({ status: 1, requestedDate: 1 });
+eventInquirySchema.index({ email: 1 });
 
 export type Setting = InferSchemaType<typeof settingSchema>;
 export type ServiceHours = InferSchemaType<typeof serviceHoursSchema>;
@@ -44,3 +47,4 @@ export const OutboxEventModel = model("OutboxEvent", outboxEventSchema);
 export const AdminProfileModel = model("AdminProfile", adminProfileSchema);
 export const ReservationBlockModel = model("ReservationBlock", reservationBlockSchema);
 export const ReservationLockModel = model("ReservationLock", reservationLockSchema);
+export const EventInquiryModel = model("EventInquiry", eventInquirySchema);

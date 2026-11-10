@@ -10,6 +10,7 @@ import {
   TableModel,
   ReservationLockModel,
   SpecialDayModel,
+  EventInquiryModel,
   type Reservation,
 } from "../models/core";
 import { assertReservationTransition, isWithinServiceWindow, minutesSinceMidnight, type ReservationStatus } from "../domain/reservation-domain";
@@ -268,6 +269,36 @@ export class BookingService {
     if (!specialDay) throw new BookingError("SPECIAL_DAY_NOT_FOUND", 404, "Special day not found.");
     await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "special_day.deleted", target: date, metadata: {} });
     return specialDay;
+  }
+
+  async listEventInquiries() { return EventInquiryModel.find().sort({ requestedDate: 1, createdAt: -1 }).lean().exec(); }
+
+  async getEventInquiry(inquiryId: string) {
+    const inquiry = await EventInquiryModel.findOne({ inquiryId }).lean().exec();
+    if (!inquiry) throw new BookingError("EVENT_INQUIRY_NOT_FOUND", 404, "Event inquiry not found.");
+    return inquiry;
+  }
+
+  async createEventInquiry(input: { name: string; email: string; phone?: string; eventType: string; requestedDate: string; partySize: number; message: string }) {
+    return EventInquiryModel.create({ ...input, inquiryId: `inq_${randomUUID().replaceAll("-", "")}`, status: "new" });
+  }
+
+  async updateEventInquiryStatus(inquiryId: string, status: "new" | "in_review" | "accepted" | "declined" | "closed", actorId = "system") {
+    const current = await EventInquiryModel.findOne({ inquiryId }).select({ status: 1 }).lean().exec();
+    if (!current) throw new BookingError("EVENT_INQUIRY_NOT_FOUND", 404, "Event inquiry not found.");
+    const allowed: Record<string, readonly string[]> = { new: ["in_review", "declined", "closed"], in_review: ["accepted", "declined", "closed"], accepted: ["closed"], declined: ["closed"], closed: [] };
+    if (!allowed[current.status]?.includes(status)) throw new BookingError("INVALID_EVENT_INQUIRY_TRANSITION", 409, "The requested event inquiry status transition is not allowed.");
+    const inquiry = await EventInquiryModel.findOneAndUpdate({ inquiryId, status: current.status }, { $set: { status } }, { returnDocument: "after" }).lean().exec();
+    if (!inquiry) throw new BookingError("EVENT_INQUIRY_UPDATE_CONFLICT", 409, "The event inquiry was changed by another administrator. Reload and try again.");
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "event_inquiry.status_changed", target: inquiryId, metadata: { status } });
+    return inquiry;
+  }
+
+  async updateEventInquiryNote(inquiryId: string, internalNote: string, actorId = "system") {
+    const inquiry = await EventInquiryModel.findOneAndUpdate({ inquiryId }, { $set: { internalNote } }, { returnDocument: "after" }).lean().exec();
+    if (!inquiry) throw new BookingError("EVENT_INQUIRY_NOT_FOUND", 404, "Event inquiry not found.");
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "event_inquiry.note_changed", target: inquiryId, metadata: {} });
+    return inquiry;
   }
 
   async listBlocks(date?: string) {

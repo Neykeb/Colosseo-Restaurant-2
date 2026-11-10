@@ -250,7 +250,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [ ] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen.
 - [-] Backend-Grundlage für Reservierungssuche, Filter, Pagination und Detail-Endpunkt, atomare Statusänderung sowie atomare Tischzuweisung und Historie implementiert. Frontend und vollständige API-Regression bleiben offen.
 - [-] Sondertage mit Sonderöffnungen und Schließungen sowie Auditierung als Admin-API ergänzt und in Availability-/Buchungslogik priorisiert; bestehende Sperrzeiten-API ist vorhanden. Vollständige Konflikt-/API-Regression bleibt offen.
-- [ ] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren.
+- [-] Synthetische `PLATZHALTER`-Felder, versioniertes Modell, Admin-API, Detailansicht, interne Notizen sowie atomare Status-/Audit-Logik für Veranstaltungsanfragen umgesetzt; öffentlicher Anfrageweg und vollständige API-Regression bleiben offen.
 - [ ] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen.
 - [ ] **GATE FS5:** operative Verwaltung präsentieren; auf GO für `FS6` warten.
 

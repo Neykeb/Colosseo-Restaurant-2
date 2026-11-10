@@ -262,3 +262,21 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 - **Umgesetzt:** Sondertage überschreiben nun die regulären Servicezeiten. Geschlossene Sondertage liefern keine Slots; Sonderöffnungszeiten werden für Availability und Reservierungsvalidierung verwendet.
 - **Prüfungen:** Typecheck, Lint und relevante Booking-/Domain-Tests sind auszuführen; Atlas-/HTTP-Regression bleibt offen.
+
+## 26. Person-A-FS5-Veranstaltungsanfragen – 10.11.2026
+
+- **Umgesetzt:** synthetische `PLATZHALTER`-Felder für Name, E-Mail, Telefon, Veranstaltungsart, Wunschdatum, Personenzahl und Nachricht als versioniertes `EventInquiry`-Modell ergänzt. Geschützte Admin-API für Anlegen, Auflisten und Statusänderung sowie Auditierung ergänzt.
+- **Migration:** `0010-event-inquiries` registriert; sie legt Collection und Verwaltungsindizes an, wurde in dieser Sitzung nicht gegen Atlas ausgeführt.
+- **Prüfungen:** Typecheck, Lint und 13/13 relevante Booking-/Domain-Tests erfolgreich.
+- **Offen:** reale Feldfreigabe, öffentlicher Anfrageweg, vollständige Statusübergänge, Admin-UI und Atlas-Migrationslauf.
+
+## 28. Person-A-FS5-Veranstaltungsanfragen vervollständigt – 10.11.2026
+
+- **Umgesetzt:** Detail-Endpunkt, interne Notizen, erlaubte atomare Statusübergänge, Konfliktbehandlung und Audit-Ereignisse ergänzt.
+- **Prüfungen:** Typecheck, Lint, 13/13 relevante Booking-/Domain-Tests und `git diff --check` erfolgreich.
+- **Migration:** `npm run db:migrate` versucht; Atlas war wegen `querySrv ECONNREFUSED` nicht erreichbar. Migration `0010-event-inquiries` ist daher noch nicht ausgeführt.
+
+## 27. Synthetische Veranstaltungsanfrage-Beispiele – 10.11.2026
+
+- **Ergänzt:** Development-Seed um drei ausdrücklich als `PLATZHALTER` markierte Beispiele erweitert: Privates Dinner mit 24 Personen, Firmenfeier mit 35 Personen und Geburtstag mit 12 Personen.
+- **Sicherheit:** Beide Datensätze verwenden ausschließlich `example.com`-E-Mail-Adressen und dürfen nicht als reale Betriebsdaten veröffentlicht werden.
