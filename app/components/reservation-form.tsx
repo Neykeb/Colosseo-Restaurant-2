@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle, Phone } from "@phosphor-icons/react";
+import { ArrowRight, CalendarBlank, CheckCircle, Phone } from "@phosphor-icons/react";
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
 
 type Locale = "de" | "en" | "it";
@@ -142,7 +142,7 @@ export function ReservationForm({ locale }: { locale: Locale }) {
   return <form aria-busy={checking || submitting} aria-describedby={error ? errorId : undefined} className="reservation-form" onSubmit={submit}>
     <div className="reservation-form-heading"><strong>{labels.online}</strong><a href="tel:+49417162952"><Phone aria-hidden="true" size={18} />{labels.phoneAction}</a></div>
     <div className="reservation-form-search">
-      <label><span>{labels.date}</span><input min={minDate} max={maxDate} name="date" onChange={(event) => { setDate(event.target.value); resetAvailability(); }} required type="date" value={date} /></label>
+      <label className="reservation-date-field"><span>{labels.date}</span><span className="reservation-date-control"><input aria-label={labels.date} className={date ? "has-value" : undefined} min={minDate} max={maxDate} name="date" onChange={(event) => { setDate(event.target.value); resetAvailability(); }} required type="date" value={date} /><span aria-hidden="true" className="reservation-date-placeholder">{locale === "en" ? "MM/DD/YYYY" : "TT.MM.JJJJ"}</span><CalendarBlank aria-hidden="true" className="reservation-date-icon" size={20} /></span></label>
       <label><span>{labels.people}</span><select name="partySize" onChange={(event) => { setPartySize(Number(event.target.value)); resetAvailability(); }} value={partySize}>{Array.from({ length: configuration.partySize.max - configuration.partySize.min + 1 }, (_, index) => configuration.partySize.min + index).map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
       <button className="reservation-check" disabled={!date || checking} onClick={checkAvailability} type="button">{checking ? labels.loading : labels.check}<ArrowRight aria-hidden="true" /></button>
     </div>

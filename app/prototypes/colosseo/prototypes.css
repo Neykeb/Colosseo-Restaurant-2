@@ -876,6 +876,52 @@
   font-size: 1rem;
   color-scheme: dark;
 }
+.reservation-date-control {
+  position: relative;
+  min-width: 0;
+  display: grid;
+}
+.reservation-form .reservation-date-control input {
+  max-width: 100%;
+  padding-right: 3rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.reservation-form .reservation-date-control input:not(.has-value) {
+  color: transparent;
+}
+.reservation-form .reservation-date-control input.has-value {
+  color: #fffaf2;
+}
+.reservation-date-placeholder,
+.reservation-date-icon {
+  position: absolute;
+  top: 50%;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.reservation-date-placeholder {
+  left: 0.8rem;
+  color: rgba(247, 239, 228, 0.72);
+  font-size: 1rem;
+}
+.reservation-date-icon {
+  right: 0.85rem;
+  color: rgba(247, 239, 228, 0.78);
+}
+.reservation-date-control input.has-value + .reservation-date-placeholder {
+  display: none;
+}
+.reservation-date-control input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+}
 .reservation-form [aria-invalid="true"] {
   border-color: #f3a081;
   box-shadow: 0 0 0 1px #f3a081;
