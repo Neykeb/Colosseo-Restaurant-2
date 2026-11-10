@@ -1,6 +1,6 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Resend-Testversand verifiziert, Produktionskonfiguration, Rechtsprüfung und Gate-Abnahme offen
+**Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Render-E2E und Resend-Testversand verifiziert, Produktionsabsender, Rechtsprüfung und Gate-Abnahme offen
 **Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
@@ -249,13 +249,13 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [x] Outbox-Verarbeitung und idempotente Gast-/Restaurant-E-Mails mit begrenzten Wiederholungen integrieren.
 - [x] Migration `0007_email-outbox` in Test- und Entwicklungsdatenbank anwenden; Zustellindex und Bestandsfelder sind aktiv.
 - [x] Restaurantempfänger vorläufig auf `mohammad.amiri@dci-student.org` festlegen; Secret und Absender bleiben ausschließlich in Umgebungsvariablen.
-- [-] Resend-Integration verifizieren: lokaler API-Key und Testabsender sind konfiguriert; reale Gastzustellung mit Status `Delivered`, gespeicherter Provider-ID und eindeutiger Ereignis-ID ist bestätigt. Der gemeinsame Render-Service ist live und seine Grundrouten sind per Produktions-Smoketest erreichbar. Eigene Absenderdomain und beliebige Empfänger bleiben offen; die Restaurantnachricht wurde im Resend-Testmodus erwartungsgemäß blockiert und bleibt nachvollziehbar in der Outbox.
+- [-] Resend-Integration verifizieren: lokaler API-Key und Testabsender sind konfiguriert; reale Gastzustellung mit Status `Delivered`, gespeicherter Provider-ID und eindeutiger Ereignis-ID ist bestätigt. Der gemeinsame Render-Service ist live und technisch geprüft. Eigene Absenderdomain und beliebige Empfänger bleiben offen; die Restaurantnachricht wurde im Resend-Testmodus erwartungsgemäß blockiert und bleibt nachvollziehbar in der Outbox.
 - [ ] Datenschutztext, Aufbewahrungsfristen und Stornoregel fachlich/rechtlich freigeben; öffentliche Stornofunktion bleibt bis dahin bewusst ausgesetzt.
 - [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
-- [-] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und E2E-Prüfungen ausführen. Person B hat DE/EN/IT, mobilen Überlauf, Touchziele, Kontaktfehler-Fokus, Statusrücksetzung und Desktop-Ankernavigation lokal geprüft. Am 10.11.2026 wurden außerdem Rate-Limit sowie sichere korrelierte Antworten bei simulierten Datenbank-/Provider-Ausfällen automatisiert verifiziert; Typecheck, Lint, 64/64 Tests und Build sind erfolgreich. Der Nutzer bestätigte anschließend einen echten Smartphone-Test, jedoch ohne Gerät-/Browserprotokoll. Der vollständige Produktions-E2E-Lauf bleibt bis zur Render-Einrichtung offen.
+- [x] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und technisches Produktions-E2E ausführen. Person B prüfte DE/EN/IT, mobilen Überlauf, Touchziele, Kontaktfehler-Fokus, Statusrücksetzung, Reduced-Motion-Fallback und Desktop-Ankernavigation; der Nutzer bestätigte einen echten Smartphone-Test ohne Geräteprotokoll. Auf Render wurden Health, Config, Availability, Sprach- und Unterseiten, Reloads, Canonical, Sitemap, Robots, Adminschutz, neutrale Validierungsfehler, Secret-Freiheit und die clientseitige 404-Oberfläche geprüft. Eine synthetische Produktionsbuchung wurde bewusst nicht erzeugt, weil sie reale Daten- und E-Mail-Nebenwirkungen auslösen würde; Buchung, Idempotenz und Concurrency bleiben durch automatisierte Tests und den Atlas-Parallellauf nachgewiesen.
 - [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
 
-**Integrationsstand 10.11.2026:** Die Merge-Konflikte mit `dev` sind ohne Rücknahme der bestehenden Website-, Admin- und Reservierungsfunktionen aufgelöst. Neue Migrations-, Storno-, Aufbewahrungs- und E-Mail-Verarbeitungsbausteine wurden aufgenommen; `dist/` bleibt aus Git ausgeschlossen. Der Integrationsstand besteht Typecheck, OXLint, 76/76 Tests und Production-Build. Dies ersetzt weder die offenen fachlich/rechtlichen Freigaben noch das Gate `FS4`.
+**Integrationsstand 10.11.2026:** Die Merge-Konflikte mit `dev` sind ohne Rücknahme der bestehenden Website-, Admin- und Reservierungsfunktionen aufgelöst. Neue Migrations-, Storno-, Aufbewahrungs- und E-Mail-Verarbeitungsbausteine wurden aufgenommen; `dist/` bleibt aus Git ausgeschlossen. Render ist live und der technische Produktions-E2E ist abgeschlossen. Der Integrationsstand besteht Typecheck, OXLint, 76/76 Tests und Production-Build. Dies ersetzt weder die offenen fachlich/rechtlichen Freigaben noch das Gate `FS4`.
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
 

@@ -278,6 +278,8 @@ export function createApp(options: CreateAppOptions = {}) {
         return;
       }
 
+      const isClientOnlyRoute = request.path === "/admin" || request.path === "/prototypes/colosseo";
+      response.status(isClientOnlyRoute ? 200 : 404);
       response.sendFile("index.html", { root: staticDirectory }, (error) => {
         if (error) next(error);
       });

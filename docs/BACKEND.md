@@ -1,6 +1,6 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Render-Blueprint vorbereitet, Produktions-E2E und Gate-Abnahme offen
+**Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Render live und technischer Produktions-E2E abgeschlossen, externe Freigaben und Gate-Abnahme offen
 
 **Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
@@ -18,10 +18,10 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 - Der Atlas-Benutzer besitzt am 03.11.2026 verifiziert ausschließlich datenbankspezifisches `readWrite` für `colosseo` und `colosseo_test`. Entwicklungsverbindung, Testverbindung und Test-Migrationslauf sind damit erfolgreich.
 - Vom Nutzer bestätigter Atlas-Betriebsstand: MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`), Replica Set mit drei Nodes, Backups derzeit inaktiv, keine verknüpften App Services und ein vorhandener Search-Index. Render soll später möglichst regionsnah betrieben werden; Backups bleiben vor einem realen Produktionsbetrieb zu klären.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.
-- Aktuelle Phase: `FS4`. Das öffentliche Reservierungsformular, die atomar erzeugte E-Mail-Outbox und der Resend-Transport sind implementiert. Der reale Versand bleibt deaktiviert, bis API-Key und verifizierte Absenderdomain serverseitig konfiguriert sind.
+- Aktuelle Phase: `FS4`. Das öffentliche Reservierungsformular, die atomar erzeugte E-Mail-Outbox und der Resend-Transport sind implementiert. Der Render-Service ist live; beliebige produktive E-Mail-Empfänger bleiben bis zu einer verifizierten Absenderdomain eingeschränkt.
 - Die reine Reservierungslogik, öffentliche Config-/Verfügbarkeits-/Buchungsendpunkte, idempotente Bestätigung, Rate-Limit, atomare Tisch-Zeit-Sperren sowie geschützte Admin-Endpunkte für manuelle Buchungen und Sperrzeiten sind implementiert. Migrationen `0005` und `0006` sind in `colosseo_test` und `colosseo` angewendet.
 - Die Express-/TypeScript-Grundlage einschließlich statischer Produktionsauslieferung ist implementiert. Entwicklungs- und Produktionsprozess, Healthcheck, API-404 sowie die drei vorgerenderten Sprachseiten wurden am 05.11.2026 über echte lokale Listener geprüft.
-- Ein Render-Blueprint für einen gemeinsamen React-/Express-Web-Service im Free-Plan ist vorbereitet: Frankfurt als regionsnaher technischer Standard, reproduzierbarer Build, idempotente Migration vor dem Serverstart und `/api/health` als Healthcheck. MongoDB-, Clerk- und Resend-Werte sowie `SITE_URL` bleiben manuell zu setzende Render-Umgebungsvariablen; `VITE_CLERK_PUBLISHABLE_KEY` wird zusätzlich beim Build benötigt. Es wurde noch kein Render-Service angelegt oder deployed.
+- Der gemeinsame React-/Express-Web-Service ist per Render-Blueprint in Frankfurt live. Reproduzierbarer Build, idempotente Migration vor dem Serverstart, `/api/health`, MongoDB Atlas, Clerk, Resend-Konfiguration und `SITE_URL` sind in der Render-Umgebung aktiv; Secrets bleiben ausschließlich dort gespeichert.
 - Person A hat am 04.11.2026 vorläufige Kernmodelle, eine typisierte Reservation-Repository-/Service-Grenze, die erste Core-Indexmigration und einen künstlichen Development-Seed ergänzt. Reale Reservierungsregeln und produktive Geschäftsdaten sind nicht festgeschrieben.
 - Person A hat am 05.11.2026 die Clerk-Express-Middleware, `admin_profiles`, das Adminprofil-Repository sowie serverseitige `owner`-/`staff`-Autorisierung mit 401-/403-Tests ergänzt. Clerk bleibt Quelle der Identität; MongoDB bleibt Quelle der fachlichen Adminberechtigung.
 
@@ -132,7 +132,7 @@ Die ausführlichen Regeln stehen in `AGENTS.md` und `docs/SPEC.md`. Für den sch
 - Pro bestätigter Buchung entstehen eindeutige Outbox-Ereignisse für Restaurant und – sofern eine E-Mail angegeben wurde – Gast. Der Worker nutzt dieselbe Ereignis-ID als Resend-Idempotenzschlüssel und wiederholt temporär fehlgeschlagene Zustellungen begrenzt.
 - Empfänger für Restaurantbenachrichtigungen: `mohammad.amiri@dci-student.org` (`VORLÄUFIG BESTÄTIGT 09.11.2026`).
 - Der lokale Resend-API-Key und der Testabsender `onboarding@resend.dev` sind konfiguriert. Ein realer Gastversand wurde am 09.11.2026 mit Providerstatus `Delivered` und genau einem eindeutigen Outbox-Ereignis verifiziert.
-- Ohne verifizierte eigene Domain erlaubt Resend nur Testzustellungen an die Adresse des Resend-Kontos. Die Restaurantbenachrichtigung an die vorläufige DCI-Adresse wurde deshalb erwartungsgemäß abgelehnt und bleibt in der Outbox wiederholbar; eine produktive Absenderdomain und die Render-Konfiguration sind offen.
+- Ohne verifizierte eigene Domain erlaubt Resend nur Testzustellungen an die Adresse des Resend-Kontos. Die Restaurantbenachrichtigung an die vorläufige DCI-Adresse wurde deshalb erwartungsgemäß abgelehnt und bleibt in der Outbox wiederholbar; eine produktive Absenderdomain bleibt offen.
 
 ### Vor späteren Phasen offen
 

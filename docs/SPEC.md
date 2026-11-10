@@ -1,13 +1,11 @@
 # Funktionale und technische Spezifikation
 
-**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS4` technisch umgesetzt, Resend-Testversand verifiziert und Produktionsabsender offen
-**Letzte Aktualisierung:** 09.11.2026
+**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS4` technisch umgesetzt, Render-E2E und Resend-Testversand verifiziert, Produktionsabsender offen
+**Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. `FS1` wurde am 02.11.2026 ausdrücklich freigegeben; spätere Full-Stack-Phasen bleiben bis zu ihrem jeweiligen Gate gesperrt.
 
 > **Änderungsauftrag 30.10.2026, bestätigt 02.11.2026:** Die Abschnitte 20 bis 29 planen ein eigenes Reservierungs-Backend, Administration und Inhaltsverwaltung. Der Zielstack ist Node.js/Express/TypeScript, MongoDB Atlas mit Mongoose, Render, Resend und Clerk OAuth für die Admin-Anmeldung. Eine zusätzliche lokale Docker-Datenbank ist ausgeschlossen. `FS1` ist freigegeben; spätere Phasen benötigen weiterhin jeweils ein eigenes `GO`.
-
-> **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. Der Ist-Zustand bleibt bis zur ausdrücklich freigegebenen Migration React Router Framework Mode. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
 
 > **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. Der Ist-Zustand bleibt bis zur ausdrücklich freigegebenen Migration React Router Framework Mode. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
 

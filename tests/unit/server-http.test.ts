@@ -218,13 +218,13 @@ describe("Express platform foundation", () => {
     expect(body.error.code).toBe("AUTHENTICATION_REQUIRED");
   });
 
-  it("serves generated assets and the SPA fallback in production mode", async () => {
+  it("serves client-only routes and marks unknown HTML routes as not found in production mode", async () => {
     const directory = await mkdtemp(join(tmpdir(), "colosseo-static-"));
     await writeFile(join(directory, "index.html"), "<!doctype html><title>Colosseo test shell</title>");
     const baseUrl = await listen(createApp({ staticDirectory: pathToFileURL(`${directory}/`) }));
 
     const response = await fetch(`${baseUrl}/de/not-found`, { headers: { accept: "text/html" } });
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(404);
     await expect(response.text()).resolves.toContain("Colosseo test shell");
 
     const adminResponse = await fetch(`${baseUrl}/admin`, { headers: { accept: "text/html" } });
