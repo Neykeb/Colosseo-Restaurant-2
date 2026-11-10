@@ -131,6 +131,9 @@ Diese ausdrückliche Nutzerentscheidung ersetzt die frühere deterministische Ge
 - Hilfe unterhalb des Labels, Fehler direkt unterhalb des Feldes.
 - Eingabehöhe mindestens 48 px, Touch-Ziel mindestens 44 x 44 px.
 - Lade-, Erfolgs- und Fehlerzustand müssen vollständig gestaltet werden.
+- Mobile Eingaben verwenden mindestens 16 px Schriftgröße, damit iOS beim Fokussieren nicht automatisch zoomt.
+- Abhängige Reservierungsdaten werden bei Änderung von Datum oder Personenzahl verworfen. Asynchrone Verfügbarkeit und Bestätigung werden über Live-Regionen angekündigt; bei Validierungsfehlern erhält das erste betroffene Feld Fokus und `aria-invalid`.
+- Reine Hover-Reaktionen werden auf Geräte mit `hover: hover` und `pointer: fine` begrenzt; Tastaturfokus bleibt unabhängig davon sichtbar.
 
 ### Sprachumschalter
 

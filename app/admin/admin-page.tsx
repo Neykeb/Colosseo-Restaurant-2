@@ -72,8 +72,10 @@ export function AdminPage() {
       if (response.ok) {
         const body = await response.json() as { admin: AdminProfile };
         setAccess({ status: "authorized", profile: body.admin });
-      } else if (response.status === 401 || response.status === 403) {
+      } else if (response.status === 403) {
         setAccess({ status: "denied" });
+      } else if (response.status === 401) {
+        setAccess({ status: "unavailable" });
       } else {
         setAccess({ status: "unavailable" });
       }

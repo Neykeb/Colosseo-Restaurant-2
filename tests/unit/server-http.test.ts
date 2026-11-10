@@ -84,6 +84,72 @@ describe("Express platform foundation", () => {
     expect(createdBody.reservation.publicId).toBe("COL-1234567890");
   });
 
+  it("limits repeated public reservation attempts per client", async () => {
+    let createCalls = 0;
+    const reservationService = {
+      getPublicConfiguration: async () => ({ timezone: "Europe/Berlin", bookingHorizonDays: 60, leadTimeMinutes: 120, defaultDurationMinutes: 120, slotIntervalMinutes: 30, partySize: { min: 1, max: 10 }, servicePeriods: [] }),
+      getAvailability: async () => ({ date: "2026-11-10", partySize: 2, slots: [] }),
+      createReservation: async () => {
+        createCalls += 1;
+        return { publicId: `COL-${createCalls.toString().padStart(10, "0")}`, status: "confirmed" as const, tableKeys: ["table-01"], reused: false };
+      },
+    };
+    const baseUrl = await listen(createApp({ reservationService }));
+    const requestReservation = (index: number) => fetch(`${baseUrl}/api/reservations`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "idempotency-key": `rate-limit-${index}` },
+      body: JSON.stringify({ date: "2026-11-10", startTime: "17:00", partySize: 2, locale: "de", guest: { name: "Giulia Bianchi", email: "giulia@example.com" }, privacyAcknowledged: true }),
+    });
+
+    for (let index = 0; index < 10; index += 1) {
+      const response = await requestReservation(index);
+      expect(response.status).toBe(201);
+      expect(response.headers.get("ratelimit-remaining")).toBe(String(9 - index));
+    }
+
+    const blocked = await requestReservation(10);
+    const body = await blocked.json() as { error: { code: string; correlationId: string } };
+
+    expect(blocked.status).toBe(429);
+    expect(blocked.headers.get("ratelimit-limit")).toBe("10");
+    expect(Number(blocked.headers.get("retry-after"))).toBeGreaterThan(0);
+    expect(body.error.code).toBe("RATE_LIMITED");
+    expect(body.error.correlationId).toBe(blocked.headers.get("x-correlation-id"));
+    expect(createCalls).toBe(10);
+  });
+
+  it("returns a safe correlated error when the reservation service is unavailable", async () => {
+    const reservationService = {
+      getPublicConfiguration: async () => ({ timezone: "Europe/Berlin", bookingHorizonDays: 60, leadTimeMinutes: 120, defaultDurationMinutes: 120, slotIntervalMinutes: 30, partySize: { min: 1, max: 10 }, servicePeriods: [] }),
+      getAvailability: async () => {
+        throw new Error("mongodb+srv://secret-user:secret-password@example.mongodb.net");
+      },
+      createReservation: async () => {
+        throw new Error("Provider connection failed with a private token");
+      },
+    };
+    const baseUrl = await listen(createApp({ reservationService }));
+    const availability = await fetch(`${baseUrl}/api/reservations/availability?date=2026-11-10&partySize=2`, {
+      headers: { "x-correlation-id": "availability-outage-42" },
+    });
+    const availabilityBody = await availability.json() as { error: { code: string; message: string; correlationId: string } };
+
+    expect(availability.status).toBe(500);
+    expect(availabilityBody.error).toEqual({ code: "INTERNAL_SERVER_ERROR", message: "An unexpected server error occurred.", correlationId: "availability-outage-42" });
+    expect(JSON.stringify(availabilityBody)).not.toContain("secret-password");
+
+    const creation = await fetch(`${baseUrl}/api/reservations`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "idempotency-key": "outage-request-42", "x-correlation-id": "creation-outage-42" },
+      body: JSON.stringify({ date: "2026-11-10", startTime: "17:00", partySize: 2, locale: "de", guest: { name: "Giulia Bianchi", email: "giulia@example.com" }, privacyAcknowledged: true }),
+    });
+    const creationBody = await creation.json() as { error: { code: string; message: string; correlationId: string } };
+
+    expect(creation.status).toBe(500);
+    expect(creationBody.error).toEqual({ code: "INTERNAL_SERVER_ERROR", message: "An unexpected server error occurred.", correlationId: "creation-outage-42" });
+    expect(JSON.stringify(creationBody)).not.toContain("private token");
+  });
+
   it("reports unavailable admin authentication when Clerk is not configured", async () => {
     const baseUrl = await listen(createApp());
     const response = await fetch(`${baseUrl}/api/admin/session`);

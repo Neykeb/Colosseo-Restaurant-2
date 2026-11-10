@@ -252,7 +252,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [-] Resend-Integration verifizieren: lokaler API-Key und Testabsender sind konfiguriert; reale Gastzustellung mit Status `Delivered`, gespeicherter Provider-ID und eindeutiger Ereignis-ID ist bestätigt. Eigene Absenderdomain, beliebige Empfänger sowie die Render-Konfiguration bleiben offen; die Restaurantnachricht wurde im Resend-Testmodus erwartungsgemäß blockiert und bleibt nachvollziehbar in der Outbox.
 - [ ] Datenschutztext, Aufbewahrungsfristen und Stornoregel fachlich/rechtlich freigeben; öffentliche Stornofunktion bleibt bis dahin bewusst ausgesetzt.
 - [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
-- [ ] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und E2E-Prüfungen ausführen.
+- [-] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und E2E-Prüfungen ausführen. Person B hat DE/EN/IT, mobilen Überlauf, Touchziele, Kontaktfehler-Fokus, Statusrücksetzung und Desktop-Ankernavigation lokal geprüft. Am 10.11.2026 wurden außerdem Rate-Limit sowie sichere korrelierte Antworten bei simulierten Datenbank-/Provider-Ausfällen automatisiert verifiziert; Typecheck, Lint, 64/64 Tests und Build sind erfolgreich. Der Nutzer bestätigte anschließend einen echten Smartphone-Test, jedoch ohne Gerät-/Browserprotokoll. Der vollständige Produktions-E2E-Lauf bleibt bis zur Render-Einrichtung offen.
 - [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung

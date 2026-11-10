@@ -1,10 +1,10 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Resend-Testversand verifiziert, Produktionsabsender und Gate-Abnahme offen
+**Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Render-Blueprint vorbereitet, Produktions-E2E und Gate-Abnahme offen
 
 **Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
-**Letzte Aktualisierung:** 09.11.2026
+**Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
@@ -21,6 +21,7 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 - Aktuelle Phase: `FS4`. Das öffentliche Reservierungsformular, die atomar erzeugte E-Mail-Outbox und der Resend-Transport sind implementiert. Der reale Versand bleibt deaktiviert, bis API-Key und verifizierte Absenderdomain serverseitig konfiguriert sind.
 - Die reine Reservierungslogik, öffentliche Config-/Verfügbarkeits-/Buchungsendpunkte, idempotente Bestätigung, Rate-Limit, atomare Tisch-Zeit-Sperren sowie geschützte Admin-Endpunkte für manuelle Buchungen und Sperrzeiten sind implementiert. Migrationen `0005` und `0006` sind in `colosseo_test` und `colosseo` angewendet.
 - Die Express-/TypeScript-Grundlage einschließlich statischer Produktionsauslieferung ist implementiert. Entwicklungs- und Produktionsprozess, Healthcheck, API-404 sowie die drei vorgerenderten Sprachseiten wurden am 05.11.2026 über echte lokale Listener geprüft.
+- Ein Render-Blueprint für einen gemeinsamen React-/Express-Web-Service im Free-Plan ist vorbereitet: Frankfurt als regionsnaher technischer Standard, reproduzierbarer Build, idempotente Migration vor dem Serverstart und `/api/health` als Healthcheck. MongoDB-, Clerk- und Resend-Werte sowie `SITE_URL` bleiben manuell zu setzende Render-Umgebungsvariablen; `VITE_CLERK_PUBLISHABLE_KEY` wird zusätzlich beim Build benötigt. Es wurde noch kein Render-Service angelegt oder deployed.
 - Person A hat am 04.11.2026 vorläufige Kernmodelle, eine typisierte Reservation-Repository-/Service-Grenze, die erste Core-Indexmigration und einen künstlichen Development-Seed ergänzt. Reale Reservierungsregeln und produktive Geschäftsdaten sind nicht festgeschrieben.
 - Person A hat am 05.11.2026 die Clerk-Express-Middleware, `admin_profiles`, das Adminprofil-Repository sowie serverseitige `owner`-/`staff`-Autorisierung mit 401-/403-Tests ergänzt. Clerk bleibt Quelle der Identität; MongoDB bleibt Quelle der fachlichen Adminberechtigung.
 

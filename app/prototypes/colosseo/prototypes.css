@@ -293,6 +293,7 @@
   background: transparent;
   backdrop-filter: blur(0);
   transform: translate3d(-50%, 0, 0);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   transition:
     width 560ms cubic-bezier(0.77, 0, 0.175, 1),
     height 560ms cubic-bezier(0.77, 0, 0.175, 1),
@@ -303,6 +304,24 @@
     backdrop-filter 560ms cubic-bezier(0.77, 0, 0.175, 1),
     transform 460ms cubic-bezier(0.23, 1, 0.32, 1);
 }
+.notte .p-nav nav {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  padding-inline: clamp(1.25rem, 4vw, 4.5rem);
+}
+.no-nav-primary {
+  grid-column: 2;
+  display: flex;
+  gap: clamp(1.3rem, 2.5vw, 3rem);
+}
+.notte .no-nav-reserve {
+  grid-column: 3;
+  justify-self: end;
+}
 .notte .p-nav.is-compact {
   top: 12px;
   width: min(92vw, 1120px);
@@ -312,6 +331,9 @@
   background: rgba(18, 17, 14, 0.72);
   backdrop-filter: blur(14px);
   transform: translate3d(-50%, 0, 0);
+}
+.notte .p-nav.is-compact nav {
+  padding-inline: 1rem;
 }
 .notte .p-nav.is-hidden {
   transform: translate3d(-50%, calc(-100% - 20px), 0);
@@ -621,9 +643,13 @@
   gap: 0.75rem;
   padding-right: 0.75rem;
 }
-.no-review-marquees:hover .no-review-rail,
 .no-review-marquees:focus-within .no-review-rail {
   animation-play-state: paused;
+}
+@media (hover: hover) and (pointer: fine) {
+  .no-review-marquees:hover .no-review-rail {
+    animation-play-state: paused;
+  }
 }
 .no-review-card {
   width: clamp(210px, 19vw, 300px);
@@ -809,6 +835,7 @@
   font-weight: 400;
 }
 .reservation-form-heading a {
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -846,7 +873,12 @@
   background: rgba(247, 239, 228, 0.07);
   color: #fffaf2;
   font: inherit;
+  font-size: 1rem;
   color-scheme: dark;
+}
+.reservation-form [aria-invalid="true"] {
+  border-color: #f3a081;
+  box-shadow: 0 0 0 1px #f3a081;
 }
 .reservation-form input:focus-visible,
 .reservation-form select:focus-visible,
@@ -895,7 +927,7 @@
 }
 .reservation-times button {
   min-width: 4.4rem;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0.55rem 0.7rem;
   border: 1px solid rgba(247, 239, 228, 0.34);
   background: transparent;
@@ -943,6 +975,17 @@
   border-left: 3px solid #d89478;
   background: rgba(216, 148, 120, 0.1);
   color: #fff4ec;
+}
+.reservation-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 .reservation-success {
   justify-items: start;
@@ -1496,9 +1539,13 @@
   text-transform: uppercase;
   text-underline-offset: 0.3em;
 }
-.no-footer .no-footer-admin:hover,
 .no-footer .no-footer-admin:focus-visible {
   color: #f3ece2;
+}
+@media (hover: hover) and (pointer: fine) {
+  .no-footer .no-footer-admin:hover {
+    color: #f3ece2;
+  }
 }
 .no-footer-languages a[aria-current="page"] {
   color: #d89478;
@@ -2133,27 +2180,33 @@
   }
   .no-menu-journey {
     grid-template-columns: 1fr;
-    grid-template-rows: 42svh 58svh;
+    grid-template-rows: 50svh 50svh;
   }
   .no-menu-sticky {
     position: relative;
-    height: 42svh;
+    grid-column: 1;
+    grid-row: 2;
+    height: 50svh;
+    overflow: hidden;
+  }
+  .no-menu-images {
+    overflow: hidden;
   }
   .variant .no-menu-image {
     width: clamp(8rem, 36vw, 11rem);
     height: clamp(8rem, 36vw, 11rem);
   }
   .no-menu-panels {
-    top: 42svh;
+    top: 0;
     width: 100%;
-    height: 58svh;
+    height: 50svh;
   }
   .no-menu-panel {
-    height: 58svh;
+    height: 50svh;
   }
   .no-menu-display {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 1;
     width: min(86%, 34rem);
   }
   .no-menu-display h3 {
@@ -2392,7 +2445,7 @@
     width: 100%;
     height: calc(4rem + env(safe-area-inset-top, 0px));
     min-height: 0;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: 1fr;
     gap: 0.5rem;
     padding: env(safe-area-inset-top, 0px) 1rem 0;
@@ -2410,16 +2463,23 @@
   .notte .p-nav.is-hidden {
     transform: translate3d(0, calc(-100% - 8px), 0);
   }
+  .notte .p-nav.is-hidden.is-menu-open {
+    transform: translate3d(0, 0, 0);
+  }
   .notte .p-logo {
+    min-height: 2.75rem;
+    align-content: center;
     font-size: 1rem;
   }
   .notte .p-nav nav {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    left: 0;
-    width: 100%;
+    position: fixed;
+    top: calc(4rem + env(safe-area-inset-top, 0px) - 1px);
+    right: auto;
+    left: -1rem;
+    width: 100vw;
     display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
     gap: 0;
     padding: 0.5rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
     overflow: visible;
@@ -2427,13 +2487,24 @@
     background: #0d100d;
     opacity: 0;
     pointer-events: none;
-    transform: translate3d(0, -0.5rem, 0);
-    transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1), transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+    clip-path: inset(0 0 100% 0);
+    transition:
+      opacity 220ms cubic-bezier(0.23, 1, 0.32, 1),
+      clip-path 220ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .no-nav-primary {
+    display: contents;
+  }
+  .notte .no-nav-reserve,
+  .notte .p-nav.is-compact .no-nav-reserve {
+    position: static;
+    grid-column: auto;
+    justify-self: stretch;
   }
   .notte .p-nav nav.is-open {
     opacity: 1;
     pointer-events: auto;
-    transform: translate3d(0, 0, 0);
+    clip-path: inset(0 0 0 0);
   }
   .notte .p-nav nav a {
     min-height: 3rem;
@@ -2450,17 +2521,6 @@
     border: 0;
     background: transparent;
     color: inherit;
-  }
-  .notte .p-nav-cta {
-    width: 2.75rem;
-    height: 2.75rem;
-    justify-content: center;
-    padding: 0;
-    font-size: 0;
-  }
-  .notte .p-nav-cta svg {
-    width: 1.2rem;
-    height: 1.2rem;
   }
   .no-copy {
     width: calc(100% - 2rem);
@@ -2483,6 +2543,12 @@
   }
   .no-arrow {
     display: none;
+  }
+  .no-copy .no-hero-link,
+  .no-events a,
+  .no-reviews-footer a {
+    min-height: 2.75rem;
+    align-items: center;
   }
   .no-intro {
     gap: 2.5rem;
@@ -2591,6 +2657,13 @@
     gap: 2.5rem;
     padding: 4rem 1rem calc(4rem + env(safe-area-inset-bottom, 0px));
   }
+  .no-footer-languages a {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
   .full-menu-shell {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -2647,11 +2720,13 @@
     min-height: 100svh;
     height: auto;
     grid-template-columns: 1fr;
-    grid-template-rows: min(42svh, 420px) minmax(58svh, auto);
+    grid-template-rows: minmax(50svh, auto) min(50svh, 460px);
     overflow: visible;
   }
   .no-menu-sticky {
-    height: min(42svh, 420px);
+    grid-row: 2;
+    height: min(50svh, 460px);
+    overflow: hidden;
   }
   .variant .no-menu-image {
     width: clamp(8rem, 24vw, 12rem);
@@ -2661,8 +2736,8 @@
   }
   .no-menu-display {
     grid-column: 1;
-    grid-row: 2;
-    min-height: 58svh;
+    grid-row: 1;
+    min-height: 50svh;
     padding-block: 4rem;
   }
   .no-menu-panels {
