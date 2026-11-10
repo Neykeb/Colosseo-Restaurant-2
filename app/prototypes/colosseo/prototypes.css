@@ -2655,15 +2655,24 @@
   .no-events {
     height: 100svh;
     min-height: 100svh;
-    grid-template-rows: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    grid-template-rows: minmax(0, 65fr) minmax(0, 35fr);
   }
   .no-events > div {
     min-height: 0;
-    padding: 4.5rem 1rem 2.5rem;
+    justify-content: flex-start;
+    padding: clamp(3.25rem, 8svh, 4.25rem) 1rem 1.25rem;
   }
   .no-events h2 {
-    font-size: clamp(2.8rem, 13vw, 4.5rem);
-    line-height: 1;
+    margin: 0.75rem 0 1.25rem;
+    font-size: clamp(2.55rem, 11.5vw, 4rem);
+    line-height: 0.98;
+  }
+  .no-events > div > p:not(:first-child) {
+    margin-block: 0;
+  }
+  .no-events a {
+    flex: 0 0 auto;
+    margin-top: 1.25rem;
   }
   .no-events > img {
     min-height: 0;
