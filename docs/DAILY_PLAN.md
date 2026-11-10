@@ -1,12 +1,12 @@
 # Tagesplan Full-Stack-Finalprojekt
 
-**Status:** FS4 freigegeben und teilweise umgesetzt; Produktionsdaten und externe E-Mail-Konfiguration offen
+**Status:** FS5 freigegeben; Umsetzung noch nicht begonnen
 
-**Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
+**Phase:** `FS5` – Reservierungs-, Kalender- und Anfrageverwaltung
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 05.11.2026
+**Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -225,3 +225,40 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Aufbewahrung:** stornierte/abgelehnte Reservierungen 90 Tage, abgeschlossene/No-show 180 Tage, gesendete Outbox-Ereignisse 30 Tage, Auditdaten 365 Tage. Reservierungen werden fristgerecht anonymisiert; fachliche Statistik bleibt ohne direkte Kontaktdaten erhalten.
 - **Prüfungen:** Migration `0009_cancellation-and-retention` in `colosseo_test` und `colosseo` erfolgreich. Echter Atlas-Test bestätigt Konkurrenzschutz und anschließende Token-Stornierung; Test-Aufbewahrungsjob erfolgreich ohne betroffene Datensätze.
 - **Für Person A noch offen:** keine weitere heute ausführbare FS4-Backendaufgabe. Rechtliche Prüfung der Datenschutztexte ist eine gemeinsame externe Voraussetzung; Clerk-Browserprüfung bleibt entsprechend der Nutzerpriorität verschoben.
+
+## 20. FS5-Freigabe – 10.11.2026
+
+- **Gate:** Der Nutzer hat FS4 mit ausdrücklichem `GO FS5` abgenommen und FS5 freigegeben.
+- **Person A nächster Einstieg:** Backend-Grundlage für Dashboard-, Reservierungssuche-, Filter-, Detail- und Status-APIs prüfen und die erste abgegrenzte FS5-Aufgabe festlegen.
+- **Person B nächster Einstieg:** zugängliche Tages-/Wochenansichten und Reservierungsverwaltung im Adminbereich vorbereiten.
+- **Gemeinsam:** Anfragefelder, Statusmodell, Rollenabgrenzung und Testumfang für FS5 bestätigen.
+- **Status:** FS5 ist freigegeben, aber noch nicht implementiert.
+
+## 21. Person-A-FS5-API-Grundlage – 10.11.2026
+
+- **Umgesetzt:** Admin-Reservierungs-API um Suche über Referenz und Gastkontakte, Filter nach Datum/Status, Pagination mit Gesamtanzahl sowie `GET /api/admin/reservations/:reference` erweitert.
+- **Prüfungen:** `npm run typecheck`, `npm run lint` und `git diff --check` erfolgreich. `npx vitest run` führte 55 Tests erfolgreich aus; 9 HTTP-Tests blieben wegen Sandbox-Blockade `listen EPERM` offen.
+- **Offen:** Tischzuweisung/Historie, vollständige HTTP-Regression außerhalb der Sandbox und Frontend-Anbindung durch Person B.
+
+## 22. Person-A-FS5-Statusänderung – 10.11.2026
+
+- **Umgesetzt:** Statusänderungen prüfen den erlaubten Übergang zunächst fachlich und schreiben anschließend atomar mit dem erwarteten Ausgangsstatus. Bei paralleler Änderung entsteht `STATUS_UPDATE_CONFLICT`; Audit-Ereignisse werden nur nach erfolgreicher Aktualisierung angelegt.
+- **Offen:** Unit-/HTTP-Prüfung gegen echte beziehungsweise gemockte MongoDB-Modelle, Tischzuweisung/Historie und Frontend-Anbindung.
+
+## 23. Person-A-FS5-Tischzuweisung und Historie – 10.11.2026
+
+- **Umgesetzt:** atomare Admin-Tischzuweisung mit aktiven Tisch-/Kapazitätsprüfungen, Lock-Neuaufbau, Konfliktantwort und Audit-Ereignis ergänzt. Historie-Endpunkt liefert die reservierungsbezogenen Audit-Ereignisse.
+- **Routen:** `PATCH /api/admin/reservations/:reference/tables` und `GET /api/admin/reservations/:reference/history`.
+- **Prüfungen:** Typecheck, Lint und 13/13 relevante Domain-/Booking-Tests erfolgreich. HTTP-Tests bleiben wegen der bekannten Sandbox-Listener-Blockade offen.
+- **Offen:** Frontend-Anbindung durch Person B und vollständige API-/Atlas-Regression.
+
+## 24. Person-A-FS5-Sondertage – 10.11.2026
+
+- **Umgesetzt:** geschützte Admin-API für Sondertage mit Sonderöffnungen und Schließungen ergänzt: Auflistung, Speichern/Aktualisieren und Löschen. Ungültige Öffnungsfenster werden serverseitig abgelehnt; Änderungen werden auditiert.
+- **Routen:** `GET /api/admin/special-days`, `PUT /api/admin/special-days/:date` und `DELETE /api/admin/special-days/:date`.
+- **Offen:** Sondertage in die öffentliche Availability-/Buchungslogik integrieren, Konfliktregeln mit Reservierungen prüfen und vollständige API-/Atlas-Regression.
+
+## 25. Person-A-FS5-Sondertage in Buchungslogik – 10.11.2026
+
+- **Umgesetzt:** Sondertage überschreiben nun die regulären Servicezeiten. Geschlossene Sondertage liefern keine Slots; Sonderöffnungszeiten werden für Availability und Reservierungsvalidierung verwendet.
+- **Prüfungen:** Typecheck, Lint und relevante Booking-/Domain-Tests sind auszuführen; Atlas-/HTTP-Regression bleibt offen.

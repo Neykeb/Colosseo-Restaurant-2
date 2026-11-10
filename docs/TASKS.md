@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS4` freigegeben und teilweise umgesetzt; externe Pflichtdaten blockieren den Abschluss
-**Letzte Aktualisierung:** 09.11.2026
+**Status:** Full-Stack-Phase `FS5` freigegeben; Umsetzung noch nicht begonnen
+**Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -150,6 +150,7 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 05.11.2026 | Gate FS1 / Start FS2 | Freigegeben | Nutzer nimmt FS1 ab und erteilt ausdrücklich „GO für FS2“. |
 | 06.11.2026 | Start FS3 | Freigegeben | Nutzer erteilt ausdrücklich „GO für FS3“; reale Betriebsdaten dürfen vorläufig durch markierte synthetische Entwicklungsdaten ersetzt werden. |
 | 09.11.2026 | Gate FS3 / Start FS4 | Freigegeben | Nutzer bestätigt den präsentierten FS3-Stand mit „go“. FS4 ist damit freigegeben; Produktionsfreigabe bleibt von echten Datenschutz-, Storno- und E-Mail-Daten abhängig. |
+| 10.11.2026 | Gate FS4 / Start FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist freigegeben; Umsetzung beginnt. |
 
 ## Aktuelle Blocker
 
@@ -240,13 +241,15 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [x] Outbox-Ereignisse atomar mit der Reservierung anlegen; idempotenten Resend-Worker, lokalisierte Gast-/Stornonachricht, Restaurantnachricht und Wiederholungsplanung implementieren. API-Key, Absender und Empfänger wurden am 09.11.2026 mit genau einer technischen Testmail erfolgreich verifiziert.
 - [x] Sichere Gaststornierung mit zufälligem, nur gehasht gespeichertem Token bis zwei Stunden vor Reservierungsbeginn ergänzen; echter Atlas-Test bestätigt Statuswechsel und Freigabe der Tischsperren.
 - [-] Rate-Limit, Fehlerfälle, drei Locales, responsive Einspaltenansicht und Reduced-Motion-kompatible statische Formularzustände umgesetzt; echter Browser-E2E- und Extremdatenlauf bleibt offen, weil die verpflichtenden Skills `gpt-taste` und `break-ui` in dieser Sitzung nicht verfügbar waren.
-- [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
+- [x] **GATE FS4:** komplette Gaststrecke präsentiert und am 10.11.2026 durch das ausdrückliche `GO FS5` abgenommen. Browser-E2E-/Extremdatenprüfungen bleiben dokumentierte Restpunkte und gelten nicht als ausgeführt.
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
 
+**Start:** `GO FS5` am 10.11.2026 ausdrücklich erteilt; die Umsetzung beginnt jetzt.
+
 - [ ] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen.
-- [ ] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren.
-- [ ] Sonderöffnungen, Schließungen und Sperrzeiten verwalten.
+- [-] Backend-Grundlage für Reservierungssuche, Filter, Pagination und Detail-Endpunkt, atomare Statusänderung sowie atomare Tischzuweisung und Historie implementiert. Frontend und vollständige API-Regression bleiben offen.
+- [-] Sondertage mit Sonderöffnungen und Schließungen sowie Auditierung als Admin-API ergänzt und in Availability-/Buchungslogik priorisiert; bestehende Sperrzeiten-API ist vorhanden. Vollständige Konflikt-/API-Regression bleibt offen.
 - [ ] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren.
 - [ ] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen.
 - [ ] **GATE FS5:** operative Verwaltung präsentieren; auf GO für `FS6` warten.

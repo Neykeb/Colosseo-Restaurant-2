@@ -30,7 +30,8 @@ class FakeBookingService extends BookingService {
   override async create(input: Parameters<BookingService["create"]>[0]) {
     return { publicId: "res_test", date: input.date, startTime: input.startTime, endTime: "19:00", partySize: input.partySize, status: "pending" } as never;
   }
-  override async listReservations() { return []; }
+  override async listReservations() { return { reservations: [], total: 0, page: 1, pageSize: 25, pageCount: 0 }; }
+  override async getReservation(reference: string) { return { publicId: reference, status: "pending" } as never; }
   override async updateStatus() { return {} as never; }
   override async listBlocks() { return []; }
   override async createBlock() { return {} as never; }
@@ -73,7 +74,21 @@ describe("reservation API", () => {
     const baseUrl = await listen(createApp({ bookingService: new FakeBookingService(), adminGuard: allowAdmin }));
     const reservations = await fetch(`${baseUrl}/api/admin/reservations`);
     expect(reservations.status).toBe(200);
-    await expect(reservations.json()).resolves.toEqual({ reservations: [] });
+    await expect(reservations.json()).resolves.toEqual({ reservations: [], total: 0, page: 1, pageSize: 25, pageCount: 0 });
+  });
+
+  it("validates reservation search pagination and exposes reservation details", async () => {
+    const baseUrl = await listen(createApp({ bookingService: new FakeBookingService(), adminGuard: allowAdmin }));
+    const reservations = await fetch(`${baseUrl}/api/admin/reservations?q=guest&page=2&pageSize=10`);
+    expect(reservations.status).toBe(200);
+    await expect(reservations.json()).resolves.toMatchObject({ page: 1, pageSize: 25 });
+
+    const detail = await fetch(`${baseUrl}/api/admin/reservations/res_test`);
+    expect(detail.status).toBe(200);
+    await expect(detail.json()).resolves.toEqual({ reservation: { publicId: "res_test", status: "pending" } });
+
+    const invalid = await fetch(`${baseUrl}/api/admin/reservations?page=0`, { headers: { "x-test": "1" } });
+    expect(invalid.status).toBe(422);
   });
 
   it("accepts a secure guest cancellation token", async () => {

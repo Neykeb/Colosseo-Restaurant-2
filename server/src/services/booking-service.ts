@@ -1,4 +1,5 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
+import mongoose from "mongoose";
 import {
   ReservationBlockModel,
   AuditEventModel,
@@ -7,6 +8,8 @@ import {
   SettingModel,
   TableAssignmentModel,
   TableModel,
+  ReservationLockModel,
+  SpecialDayModel,
   type Reservation,
 } from "../models/core";
 import { assertReservationTransition, isWithinServiceWindow, minutesSinceMidnight, type ReservationStatus } from "../domain/reservation-domain";
@@ -64,12 +67,21 @@ export class BookingService {
     };
   }
 
+  private async serviceWindows(date: string) {
+    const specialDay = await SpecialDayModel.findOne({ date }).lean().exec();
+    if (specialDay) {
+      if (specialDay.closed || !specialDay.opens || !specialDay.closes) return [];
+      return [{ startTime: specialDay.opens, endTime: specialDay.closes }];
+    }
+    const weekday = new Date(`${date}T12:00:00Z`).getUTCDay();
+    return ServiceHoursModel.find({ weekday, active: true }).sort({ startTime: 1 }).lean().exec();
+  }
+
   async availability(date: string, partySize: number, now = new Date()): Promise<string[]> {
     const rules = await this.getRules();
     validateBookingDate(date, rules, now);
     if (partySize < rules.partySizeMin || partySize > rules.partySizeMax) return [];
-    const weekday = new Date(`${date}T12:00:00Z`).getUTCDay();
-    const services = await ServiceHoursModel.find({ weekday, active: true }).sort({ startTime: 1 }).lean().exec();
+    const services = await this.serviceWindows(date);
     if (services.length === 0) return [];
     const interval = rules.slotIntervalMinutes ?? 30;
     const slots: string[] = [];
@@ -97,8 +109,7 @@ export class BookingService {
     }
     const endTime = formatMinutes(minutesSinceMidnight(input.startTime) + rules.defaultDurationMinutes);
     const occupancyEndTime = formatMinutes(minutesSinceMidnight(endTime) + (rules.bufferMinutes ?? 0));
-    const weekday = new Date(`${input.date}T12:00:00Z`).getUTCDay();
-    const services = await ServiceHoursModel.find({ weekday, active: true }).lean().exec();
+    const services = await this.serviceWindows(input.date);
     if (!services.some((service) => isWithinServiceWindow(input.startTime, occupancyEndTime, { opens: service.startTime, closes: service.endTime }))) {
       throw new BookingError("OUTSIDE_SERVICE_WINDOW", 422, "The requested time is outside the service window.");
     }
@@ -150,25 +161,113 @@ export class BookingService {
     }
   }
 
-  async listReservations(filters: { date?: string; status?: string }) {
-    const query: Record<string, string> = {};
+  async listReservations(filters: { date?: string; status?: ReservationStatus; q?: string; page?: number; pageSize?: number }) {
+    const query: Record<string, unknown> = {};
     if (filters.date) query.date = filters.date;
     if (filters.status) query.status = filters.status;
-    return ReservationModel.find(query).sort({ date: 1, startTime: 1 }).lean().exec();
+    if (filters.q) {
+      const escaped = filters.q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const expression = new RegExp(escaped, "i");
+      query.$or = [{ publicId: expression }, { "guest.name": expression }, { "guest.email": expression }, { "guest.phone": expression }];
+    }
+    const page = filters.page ?? 1;
+    const pageSize = filters.pageSize ?? 25;
+    const [reservations, total] = await Promise.all([
+      ReservationModel.find(query).sort({ date: 1, startTime: 1, publicId: 1 }).skip((page - 1) * pageSize).limit(pageSize).lean().exec(),
+      ReservationModel.countDocuments(query).exec(),
+    ]);
+    return { reservations, total, page, pageSize, pageCount: Math.ceil(total / pageSize) };
+  }
+
+  async getReservation(publicId: string) {
+    const reservation = await ReservationModel.findOne({ publicId }).lean().exec();
+    if (!reservation) throw new BookingError("RESERVATION_NOT_FOUND", 404, "Reservation not found.");
+    return reservation;
   }
 
   async updateStatus(publicId: string, status: ReservationStatus, actorId = "system") {
-    const reservation = await ReservationModel.findOne({ publicId }).exec();
-    if (!reservation) throw new BookingError("RESERVATION_NOT_FOUND", 404, "Reservation not found.");
+    const current = await ReservationModel.findOne({ publicId }).select({ status: 1 }).lean().exec();
+    if (!current) throw new BookingError("RESERVATION_NOT_FOUND", 404, "Reservation not found.");
     try {
-      assertReservationTransition(reservation.status as ReservationStatus, status);
+      assertReservationTransition(current.status as ReservationStatus, status);
     } catch {
       throw new BookingError("INVALID_STATUS_TRANSITION", 409, "The requested reservation status transition is not allowed.");
     }
-    reservation.status = status;
-    await reservation.save();
+
+    const reservation = await ReservationModel.findOneAndUpdate(
+      { publicId, status: current.status },
+      { $set: { status } },
+      { returnDocument: "after" },
+    ).lean().exec();
+    if (!reservation) {
+      throw new BookingError("STATUS_UPDATE_CONFLICT", 409, "The reservation was changed by another administrator. Reload and try again.");
+    }
     await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation.status_changed", target: publicId, metadata: { status } });
-    return reservation.toObject();
+    return reservation;
+  }
+
+  async assignTables(publicId: string, tableKeys: string[], actorId = "system") {
+    const session = await mongoose.startSession();
+    try {
+      let result: unknown;
+      await session.withTransaction(async () => {
+        const reservation = await ReservationModel.findOne({ publicId }).session(session).lean().exec();
+        if (!reservation) throw new BookingError("RESERVATION_NOT_FOUND", 404, "Reservation not found.");
+        const uniqueKeys = [...new Set(tableKeys)];
+        const tables = await TableModel.find({ key: { $in: uniqueKeys }, active: true }).session(session).lean().exec();
+        const capacity = tables.reduce((total, table) => total + table.maxPartySize, 0);
+        if (tables.length !== uniqueKeys.length || capacity < reservation.partySize) {
+          throw new BookingError("INVALID_TABLE_ASSIGNMENT", 422, "The selected tables are invalid or cannot accommodate the party.");
+        }
+        await ReservationLockModel.deleteMany({ reservationPublicId: publicId }, { session });
+        await TableAssignmentModel.deleteMany({ reservationPublicId: publicId }, { session });
+        const slotStarts: string[] = [];
+        for (let minute = minutesSinceMidnight(reservation.startTime); minute < minutesSinceMidnight(reservation.endTime); minute += 30) {
+          slotStarts.push(`${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`);
+        }
+        await ReservationLockModel.insertMany(uniqueKeys.flatMap((tableKey) => slotStarts.map((slotStart) => ({ reservationPublicId: publicId, date: reservation.date, tableKey, slotStart }))), { session });
+        const assignments = await TableAssignmentModel.insertMany(uniqueKeys.map((tableKey) => ({ reservationPublicId: publicId, tableKey, date: reservation.date, startTime: reservation.startTime, endTime: reservation.endTime })), { session });
+        await AuditEventModel.create([{ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation.tables_assigned", target: publicId, metadata: { tableKeys: uniqueKeys } }], { session });
+        result = assignments;
+      });
+      return result;
+    } catch (error) {
+      if (error instanceof BookingError) throw error;
+      if (error instanceof Error && "code" in error && (error as { code?: number }).code === 11000) throw new BookingError("TABLE_ASSIGNMENT_CONFLICT", 409, "One of the selected tables is no longer available.");
+      throw error;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  async reservationHistory(publicId: string) {
+    const exists = await ReservationModel.exists({ publicId });
+    if (!exists) throw new BookingError("RESERVATION_NOT_FOUND", 404, "Reservation not found.");
+    return AuditEventModel.find({ target: publicId, action: { $regex: /^reservation\./ } }).sort({ createdAt: -1 }).lean().exec();
+  }
+
+  async listSpecialDays() {
+    return SpecialDayModel.find().sort({ date: 1 }).lean().exec();
+  }
+
+  async saveSpecialDay(input: { date: string; label: string; closed: boolean; opens?: string; closes?: string }, actorId = "system") {
+    if (!input.closed && (!input.opens || !input.closes || minutesSinceMidnight(input.closes) <= minutesSinceMidnight(input.opens))) {
+      throw new BookingError("INVALID_SPECIAL_DAY_WINDOW", 422, "An open special day requires a valid opening window.");
+    }
+    const specialDay = await SpecialDayModel.findOneAndUpdate(
+      { date: input.date },
+      { $set: { ...input, opens: input.closed ? undefined : input.opens, closes: input.closed ? undefined : input.closes } },
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true, runValidators: true },
+    ).lean().exec();
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "special_day.saved", target: input.date, metadata: { closed: input.closed, opens: input.opens, closes: input.closes } });
+    return specialDay;
+  }
+
+  async deleteSpecialDay(date: string, actorId = "system") {
+    const specialDay = await SpecialDayModel.findOneAndDelete({ date }).lean().exec();
+    if (!specialDay) throw new BookingError("SPECIAL_DAY_NOT_FOUND", 404, "Special day not found.");
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "special_day.deleted", target: date, metadata: {} });
+    return specialDay;
   }
 
   async listBlocks(date?: string) {

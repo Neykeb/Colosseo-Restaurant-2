@@ -26,7 +26,9 @@ const reservationBodySchema = z.object({
   internalNote: z.string().trim().max(1_000).optional(),
 });
 const reservationStatusSchema = z.enum(["pending", "confirmed", "declined", "cancelled", "seated", "completed", "no_show"]);
+const tableAssignmentSchema = z.object({ tableKeys: z.array(z.string().trim().min(1).max(80)).min(1).max(4) });
 const blockBodySchema = z.object({ date: dateSchema, startTime: timeSchema, endTime: timeSchema, label: z.string().trim().min(1).max(160) });
+const specialDayBodySchema = z.object({ date: dateSchema, label: z.string().trim().min(1).max(160), closed: z.boolean(), opens: timeSchema.optional(), closes: timeSchema.optional() });
 
 const correlationIdMiddleware: RequestHandler = (request, response, next) => {
   const incomingId = request.header("x-correlation-id")?.trim();
@@ -150,8 +152,21 @@ export function createApp(options: CreateAppOptions = {}) {
 
   app.get("/api/admin/reservations", adminGuard, async (request, response, next) => {
     try {
-      const query = z.object({ date: dateSchema.optional(), status: reservationStatusSchema.optional() }).parse(request.query);
-      response.json({ reservations: await booking.listReservations(query) });
+      const query = z.object({
+        date: dateSchema.optional(),
+        status: reservationStatusSchema.optional(),
+        q: z.string().trim().min(1).max(120).optional(),
+        page: z.coerce.number().int().min(1).default(1),
+        pageSize: z.coerce.number().int().min(1).max(100).default(25),
+      }).parse(request.query);
+      response.json(await booking.listReservations(query));
+    } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/reservations/:reference", adminGuard, async (request, response, next) => {
+    try {
+      const reference = z.string().regex(/^res_[A-Za-z0-9]+$/).parse(request.params.reference);
+      response.json({ reservation: await booking.getReservation(reference) });
     } catch (error) { next(error); }
   });
 
@@ -173,10 +188,46 @@ export function createApp(options: CreateAppOptions = {}) {
     } catch (error) { next(error); }
   });
 
+  app.patch("/api/admin/reservations/:reference/tables", adminGuard, async (request, response, next) => {
+    try {
+      const reference = z.string().regex(/^res_[A-Za-z0-9]+$/).parse(request.params.reference);
+      const body = tableAssignmentSchema.parse(request.body);
+      response.json({ assignments: await booking.assignTables(reference, body.tableKeys, adminUserId(request)) });
+    } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/reservations/:reference/history", adminGuard, async (request, response, next) => {
+    try {
+      const reference = z.string().regex(/^res_[A-Za-z0-9]+$/).parse(request.params.reference);
+      response.json({ events: await booking.reservationHistory(reference) });
+    } catch (error) { next(error); }
+  });
+
   app.get("/api/admin/blocks", adminGuard, async (request, response, next) => {
     try {
       const query = z.object({ date: dateSchema.optional() }).parse(request.query);
       response.json({ blocks: await booking.listBlocks(query.date) });
+    } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/special-days", adminGuard, async (_request, response, next) => {
+    try {
+      response.json({ specialDays: await booking.listSpecialDays() });
+    } catch (error) { next(error); }
+  });
+
+  app.put("/api/admin/special-days/:date", adminGuard, async (request, response, next) => {
+    try {
+      const date = dateSchema.parse(request.params.date);
+      const body = specialDayBodySchema.omit({ date: true }).parse(request.body);
+      response.json({ specialDay: await booking.saveSpecialDay({ ...body, date }, adminUserId(request)) });
+    } catch (error) { next(error); }
+  });
+
+  app.delete("/api/admin/special-days/:date", adminGuard, async (request, response, next) => {
+    try {
+      const date = dateSchema.parse(request.params.date);
+      response.json({ specialDay: await booking.deleteSpecialDay(date, adminUserId(request)) });
     } catch (error) { next(error); }
   });
 
