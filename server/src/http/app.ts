@@ -70,6 +70,8 @@ const eventInquirySchema = z.object({ name: z.string().trim().min(1).max(100), e
 const eventInquiryStatusSchema = z.enum(["new", "in_review", "accepted", "declined", "closed"]);
 const eventInquiryIdSchema = z.string().regex(/^inq_[a-f0-9]{32}$/);
 const eventInquiryListSchema = z.object({ status: eventInquiryStatusSchema.optional(), q: z.string().trim().max(120).optional(), page: z.coerce.number().int().min(1).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() });
+const menuCategorySchema = z.object({ slug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean() });
+const menuItemSchema = z.object({ itemId: z.string().trim().min(1).max(100), categorySlug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), description: z.string().trim().max(2_000).optional(), priceCents: z.number().int().min(0).max(100_000), allergens: z.array(z.string().trim().min(1).max(80)).max(50), imageUrl: z.string().url().max(2_000).optional(), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean(), published: z.boolean() });
 
 function sendValidationError(response: express.Response, details: unknown): void {
   response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "The request data is invalid.", details, correlationId: response.locals.correlationId } });
@@ -186,6 +188,12 @@ export function createApp(options: CreateAppOptions = {}) {
         next(unexpected);
       }
     }
+  });
+  app.get("/api/public/menu", async (_request, response, next) => {
+    try { response.json({ categories: await reservationAdmin.getPublishedMenu() }); } catch (error) { next(error); }
+  });
+  app.get("/api/public/opening-hours", async (_request, response, next) => {
+    try { response.json(await reservationAdmin.getPublicOpeningHours()); } catch (error) { next(error); }
   });
 
   app.post("/api/reservations", createReservationRateLimit(), async (request, response, next) => {
@@ -330,6 +338,29 @@ export function createApp(options: CreateAppOptions = {}) {
     const note = z.string().trim().max(2_000).safeParse(request.body?.internalNote);
     if (!note.success) { sendValidationError(response, note.error.flatten()); return; }
     try { const inquiry = await reservationAdmin.updateEventInquiryNote(inquiryId.data, note.data, response.locals.adminProfile.clerkUserId); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND", message: "The event inquiry was not found.", correlationId: response.locals.correlationId } }); return; } response.json({ inquiry }); } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/menu/categories", ...adminGuard, async (_request, response, next) => { try { response.json({ categories: await reservationAdmin.listMenuCategories() }); } catch (error) { next(error); } });
+  app.put("/api/admin/menu/categories/:slug", ...adminGuard, async (request, response, next) => {
+    const input = menuCategorySchema.safeParse({ ...request.body, slug: request.params.slug });
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.json({ category: await reservationAdmin.saveMenuCategory(input.data, response.locals.adminProfile.clerkUserId) }); } catch (error) { next(error); }
+  });
+  app.get("/api/admin/menu/items", ...adminGuard, async (_request, response, next) => { try { response.json({ items: await reservationAdmin.listMenuItems() }); } catch (error) { next(error); } });
+  app.get("/api/admin/menu/preview", ...adminGuard, async (_request, response, next) => { try { response.json({ categories: await reservationAdmin.getMenuPreview() }); } catch (error) { next(error); } });
+  app.put("/api/admin/menu/items/:itemId", ...adminGuard, async (request, response, next) => {
+    const input = menuItemSchema.safeParse({ ...request.body, itemId: request.params.itemId });
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.json({ item: await reservationAdmin.saveMenuItem(input.data, response.locals.adminProfile.clerkUserId) }); } catch (error) { next(error); }
+  });
+  app.patch("/api/admin/menu/items/:itemId/publication", ...adminGuard, async (request, response, next) => {
+    const published = z.boolean().safeParse(request.body?.published);
+    if (!published.success) { sendValidationError(response, published.error.flatten()); return; }
+    try {
+      const item = await reservationAdmin.publishMenuItem(request.params.itemId as string, published.data, response.locals.adminProfile.clerkUserId);
+      if (!item) { response.status(404).json({ error: { code: "MENU_ITEM_NOT_FOUND", message: "The active menu item was not found.", correlationId: response.locals.correlationId } }); return; }
+      response.json({ item });
+    } catch (error) { next(error); }
   });
 
   app.get("/api/admin/reservation-blocks", ...adminGuard, async (request, response, next) => {

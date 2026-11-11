@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import mongoose from "mongoose";
 import { buildTableCandidates, canTransitionReservationStatus, lockSlotStarts, parseDate, timeToMinutes, type ReservationRules, type ReservationStatus } from "../domain/reservation-domain";
-import { AuditEventModel, EventInquiryModel, ReservationBlockModel, ReservationLockModel, ReservationModel, SettingModel, SpecialDayModel, TableAssignmentModel, TableModel } from "../models/core";
+import { AuditEventModel, EventInquiryModel, MenuCategoryModel, MenuItemModel, ReservationBlockModel, ReservationLockModel, ReservationModel, ServicePeriodModel, SettingModel, SpecialDayModel, TableAssignmentModel, TableModel } from "../models/core";
 import { ReservationLockConflictError } from "../repositories/reservation-repository";
 
 export interface ReservationBlockInput {
@@ -174,6 +174,46 @@ export class ReservationAdminService {
     const inquiry = await EventInquiryModel.findOneAndUpdate({ inquiryId }, { $set: { internalNote } }, { returnDocument: "after", runValidators: true }).lean().exec();
     if (inquiry) await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "event_inquiry.note_changed", target: inquiryId, metadata: {} });
     return inquiry;
+  }
+
+  async listMenuCategories() { return MenuCategoryModel.find().sort({ sortOrder: 1, slug: 1 }).lean().exec(); }
+  async listMenuItems() { return MenuItemModel.find().sort({ categorySlug: 1, sortOrder: 1, itemId: 1 }).lean().exec(); }
+  async getPublishedMenu() {
+    const [categories, items] = await Promise.all([
+      MenuCategoryModel.find({ active: true }).sort({ sortOrder: 1, slug: 1 }).select({ _id: 0, slug: 1, name: 1, sortOrder: 1 }).lean().exec(),
+      MenuItemModel.find({ active: true, published: true }).sort({ categorySlug: 1, sortOrder: 1, itemId: 1 }).select({ _id: 0, itemId: 1, categorySlug: 1, name: 1, description: 1, priceCents: 1, allergens: 1, imageUrl: 1, sortOrder: 1 }).lean().exec(),
+    ]);
+    return categories.map((category) => ({ ...category, items: items.filter((item) => item.categorySlug === category.slug) }));
+  }
+  async getMenuPreview() {
+    const [categories, items] = await Promise.all([
+      MenuCategoryModel.find({ active: true }).sort({ sortOrder: 1, slug: 1 }).select({ _id: 0, slug: 1, name: 1, sortOrder: 1, active: 1 }).lean().exec(),
+      MenuItemModel.find({ active: true }).sort({ categorySlug: 1, sortOrder: 1, itemId: 1 }).select({ _id: 0, itemId: 1, categorySlug: 1, name: 1, description: 1, priceCents: 1, allergens: 1, imageUrl: 1, sortOrder: 1, active: 1, published: 1 }).lean().exec(),
+    ]);
+    return categories.map((category) => ({ ...category, items: items.filter((item) => item.categorySlug === category.slug) }));
+  }
+  async getPublicOpeningHours() {
+    const [regular, specialDays] = await Promise.all([
+      ServicePeriodModel.find({ active: true }).sort({ weekday: 1, startTime: 1 }).select({ _id: 0, weekday: 1, startTime: 1, endTime: 1 }).lean().exec(),
+      SpecialDayModel.find().sort({ date: 1 }).select({ _id: 0, date: 1, label: 1, closed: 1, opens: 1, closes: 1 }).lean().exec(),
+    ]);
+    return { regular, specialDays };
+  }
+  async saveMenuCategory(input: { slug: string; name: string; sortOrder: number; active: boolean }, actorId: string) {
+    const category = await MenuCategoryModel.findOneAndUpdate({ slug: input.slug }, { $set: input }, { upsert: true, returnDocument: "after", runValidators: true }).lean().exec();
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "menu_category.saved", target: input.slug, metadata: { active: input.active } });
+    return category;
+  }
+  async saveMenuItem(input: { itemId: string; categorySlug: string; name: string; description?: string; priceCents: number; allergens: string[]; imageUrl?: string; sortOrder: number; active: boolean; published: boolean }, actorId: string) {
+    const item = await MenuItemModel.findOneAndUpdate({ itemId: input.itemId }, { $set: input }, { upsert: true, returnDocument: "after", runValidators: true }).lean().exec();
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "menu_item.saved", target: input.itemId, metadata: { categorySlug: input.categorySlug, active: input.active, published: input.published } });
+    return item;
+  }
+  async publishMenuItem(itemId: string, published: boolean, actorId: string) {
+    const item = await MenuItemModel.findOneAndUpdate({ itemId, active: true }, { $set: { published } }, { returnDocument: "after", runValidators: true }).lean().exec();
+    if (!item) return null;
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: published ? "menu_item.published" : "menu_item.unpublished", target: itemId, metadata: { categorySlug: item.categorySlug } });
+    return item;
   }
 
   async listBlocks(date?: string) {
