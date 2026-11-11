@@ -148,7 +148,21 @@ export class ReservationAdminService {
     return day;
   }
 
-  async listEventInquiries() { return EventInquiryModel.find().sort({ requestedDate: 1, createdAt: -1 }).lean().exec(); }
+  async listEventInquiries(filters: { status?: "new" | "in_review" | "accepted" | "declined" | "closed"; q?: string; page?: number; pageSize?: number } = {}) {
+    const page = Math.max(1, filters.page ?? 1);
+    const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 25));
+    const query: Record<string, unknown> = {};
+    if (filters.status) query.status = filters.status;
+    if (filters.q) {
+      const escaped = filters.q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.$or = [{ inquiryId: { $regex: escaped, $options: "i" } }, { name: { $regex: escaped, $options: "i" } }, { email: { $regex: escaped, $options: "i" } }, { phone: { $regex: escaped, $options: "i" } }, { eventType: { $regex: escaped, $options: "i" } }];
+    }
+    const [inquiries, total] = await Promise.all([
+      EventInquiryModel.find(query).sort({ requestedDate: 1, createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize).lean().exec(),
+      EventInquiryModel.countDocuments(query).exec(),
+    ]);
+    return { inquiries, total, page, pageSize, pageCount: Math.ceil(total / pageSize) };
+  }
   async getEventInquiry(inquiryId: string) { return EventInquiryModel.findOne({ inquiryId }).lean().exec(); }
   async createEventInquiry(input: { name: string; email: string; phone?: string; eventType: string; requestedDate: string; partySize: number; message: string }) { return EventInquiryModel.create({ ...input, inquiryId: `inq_${randomUUID().replaceAll("-", "")}`, status: "new" }); }
   async updateEventInquiryStatus(inquiryId: string, status: "new" | "in_review" | "accepted" | "declined" | "closed", actorId: string) {

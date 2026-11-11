@@ -254,6 +254,50 @@ describe("Express platform foundation", () => {
     expect(deleted.status).toBe(204);
   });
 
+  it("lists and updates protected event inquiries", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const inquiryId = "inq_1234567890abcdef1234567890abcdef";
+    const inquiry = { inquiryId, name: "Giulia Bianchi", email: "giulia@example.com", eventType: "Familienfeier", requestedDate: "2026-12-12", partySize: 24, message: "Wir möchten gemeinsam feiern.", status: "new" as const };
+    const reservationAdminService = {
+      listEventInquiries: async () => ({ inquiries: [inquiry], total: 1, page: 1, pageSize: 25, pageCount: 1 }),
+      getEventInquiry: async (id: string) => id === inquiryId ? inquiry : null,
+      updateEventInquiryStatus: async (id: string, status: string) => id === inquiryId ? { ...inquiry, status } : null,
+      updateEventInquiryNote: async (id: string, internalNote: string) => id === inquiryId ? { ...inquiry, internalNote } : null,
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService: reservationAdminService as unknown as Partial<ReservationAdminService>,
+    }));
+
+    const listed = await fetch(`${baseUrl}/api/admin/event-inquiries`);
+    expect(listed.status).toBe(200);
+    await expect(listed.json()).resolves.toEqual({ inquiries: [inquiry], total: 1, page: 1, pageSize: 25, pageCount: 1 });
+
+    const detail = await fetch(`${baseUrl}/api/admin/event-inquiries/${inquiryId}`);
+    expect(detail.status).toBe(200);
+    await expect(detail.json()).resolves.toEqual({ inquiry });
+
+    const updatedStatus = await fetch(`${baseUrl}/api/admin/event-inquiries/${inquiryId}/status`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status: "in_review" }),
+    });
+    expect(updatedStatus.status).toBe(200);
+    await expect(updatedStatus.json()).resolves.toEqual({ inquiry: { ...inquiry, status: "in_review" } });
+
+    const updatedNote = await fetch(`${baseUrl}/api/admin/event-inquiries/${inquiryId}/note`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ internalNote: "Rückruf am Nachmittag" }),
+    });
+    expect(updatedNote.status).toBe(200);
+    await expect(updatedNote.json()).resolves.toEqual({ inquiry: { ...inquiry, internalNote: "Rückruf am Nachmittag" } });
+
+    const invalidId = await fetch(`${baseUrl}/api/admin/event-inquiries/not-valid`);
+    expect(invalidId.status).toBe(400);
+  });
+
   it("returns a protected calendar overview and rejects oversized ranges", async () => {
     const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
     const reservationAdminService = {

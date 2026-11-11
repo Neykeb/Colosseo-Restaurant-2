@@ -68,6 +68,8 @@ const specialDaySchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/
   .refine(({ closed, opens, closes }) => closed || Boolean(opens && closes && opens < closes), { path: ["closes"], message: "Closing time must be later than opening time." });
 const eventInquirySchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254), phone: z.string().trim().min(5).max(40).optional(), eventType: z.string().trim().min(1).max(80), requestedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), partySize: z.number().int().min(1).max(500), message: z.string().trim().min(1).max(2_000) });
 const eventInquiryStatusSchema = z.enum(["new", "in_review", "accepted", "declined", "closed"]);
+const eventInquiryIdSchema = z.string().regex(/^inq_[a-f0-9]{32}$/);
+const eventInquiryListSchema = z.object({ status: eventInquiryStatusSchema.optional(), q: z.string().trim().max(120).optional(), page: z.coerce.number().int().min(1).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() });
 
 function sendValidationError(response: express.Response, details: unknown): void {
   response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "The request data is invalid.", details, correlationId: response.locals.correlationId } });
@@ -300,22 +302,34 @@ export function createApp(options: CreateAppOptions = {}) {
     } catch (error) { next(error); }
   });
 
-  app.get("/api/admin/event-inquiries", ...adminGuard, async (_request, response, next) => { try { response.json({ inquiries: await reservationAdmin.listEventInquiries() }); } catch (error) { next(error); } });
+  app.get("/api/admin/event-inquiries", ...adminGuard, async (request, response, next) => {
+    const filters = eventInquiryListSchema.safeParse(request.query);
+    if (!filters.success) { sendValidationError(response, filters.error.flatten()); return; }
+    try { response.json(await reservationAdmin.listEventInquiries(filters.data)); } catch (error) { next(error); }
+  });
   app.post("/api/admin/event-inquiries", ...adminGuard, async (request, response, next) => {
     const input = eventInquirySchema.safeParse(request.body);
     if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
     try { response.status(201).json({ inquiry: await reservationAdmin.createEventInquiry(input.data) }); } catch (error) { next(error); }
   });
-  app.get("/api/admin/event-inquiries/:inquiryId", ...adminGuard, async (request, response, next) => { try { const inquiry = await reservationAdmin.getEventInquiry(request.params.inquiryId as string); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND" } }); return; } response.json({ inquiry }); } catch (error) { next(error); } });
+  app.get("/api/admin/event-inquiries/:inquiryId", ...adminGuard, async (request, response, next) => {
+    const inquiryId = eventInquiryIdSchema.safeParse(request.params.inquiryId);
+    if (!inquiryId.success) { sendValidationError(response, inquiryId.error.flatten()); return; }
+    try { const inquiry = await reservationAdmin.getEventInquiry(inquiryId.data); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND", message: "The event inquiry was not found.", correlationId: response.locals.correlationId } }); return; } response.json({ inquiry }); } catch (error) { next(error); }
+  });
   app.patch("/api/admin/event-inquiries/:inquiryId/status", ...adminGuard, async (request, response, next) => {
+    const inquiryId = eventInquiryIdSchema.safeParse(request.params.inquiryId);
+    if (!inquiryId.success) { sendValidationError(response, inquiryId.error.flatten()); return; }
     const status = eventInquiryStatusSchema.safeParse(request.body?.status);
     if (!status.success) { sendValidationError(response, status.error.flatten()); return; }
-    try { const inquiry = await reservationAdmin.updateEventInquiryStatus(request.params.inquiryId as string, status.data, response.locals.adminProfile.clerkUserId); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND" } }); return; } response.json({ inquiry }); } catch (error) { next(error); }
+    try { const inquiry = await reservationAdmin.updateEventInquiryStatus(inquiryId.data, status.data, response.locals.adminProfile.clerkUserId); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND", message: "The event inquiry was not found.", correlationId: response.locals.correlationId } }); return; } response.json({ inquiry }); } catch (error) { next(error); }
   });
   app.patch("/api/admin/event-inquiries/:inquiryId/note", ...adminGuard, async (request, response, next) => {
+    const inquiryId = eventInquiryIdSchema.safeParse(request.params.inquiryId);
+    if (!inquiryId.success) { sendValidationError(response, inquiryId.error.flatten()); return; }
     const note = z.string().trim().max(2_000).safeParse(request.body?.internalNote);
     if (!note.success) { sendValidationError(response, note.error.flatten()); return; }
-    try { const inquiry = await reservationAdmin.updateEventInquiryNote(request.params.inquiryId as string, note.data, response.locals.adminProfile.clerkUserId); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND" } }); return; } response.json({ inquiry }); } catch (error) { next(error); }
+    try { const inquiry = await reservationAdmin.updateEventInquiryNote(inquiryId.data, note.data, response.locals.adminProfile.clerkUserId); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND", message: "The event inquiry was not found.", correlationId: response.locals.correlationId } }); return; } response.json({ inquiry }); } catch (error) { next(error); }
   });
 
   app.get("/api/admin/reservation-blocks", ...adminGuard, async (request, response, next) => {

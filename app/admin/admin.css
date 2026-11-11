@@ -155,7 +155,8 @@
 .admin-schedule,
 .admin-inquiry-preview,
 .admin-reservations,
-.admin-availability {
+.admin-availability,
+.admin-inquiries {
   margin-top: clamp(3rem, 7vw, 7rem);
   scroll-margin-top: 2rem;
 }
@@ -307,6 +308,33 @@
 .admin-operation-list button { display: grid; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; place-items: center; border: 1px solid rgb(33 29 24 / 24%); color: #6f2e27; background: transparent; cursor: pointer; }
 .admin-operation-list button svg { width: 1rem; height: 1rem; }
 .admin-compact-empty { margin: 0; padding: 1.25rem 0; color: #6a6056; font-size: 0.84rem; }
+
+.admin-inquiry-filters { display: grid; grid-template-columns: minmax(14rem, 2fr) minmax(11rem, 1fr) auto auto; align-items: end; gap: 0.75rem; border-bottom: 1px solid rgb(33 29 24 / 16%); padding: 1.25rem 0; }
+.admin-inquiry-filters label { display: grid; gap: 0.45rem; color: #5d554c; font-size: 0.74rem; font-weight: 650; }
+.admin-inquiry-filters input,
+.admin-inquiry-filters select,
+.admin-detail-edit-row select,
+.admin-note-field textarea { width: 100%; min-height: 2.75rem; border: 1px solid rgb(33 29 24 / 25%); border-radius: 0; padding: 0.65rem 0.75rem; color: #211d18; background: #f8f2e8; font: 400 0.9rem/1.4 "Geist Variable", sans-serif; }
+.admin-inquiry-filters :focus-visible,
+.admin-detail-edit-row :focus-visible,
+.admin-note-field textarea:focus-visible { outline: 3px solid #a94b3f; outline-offset: 3px; }
+.admin-inquiry-table td:nth-child(3) { display: table-cell; min-width: 12rem; }
+.admin-inquiry-table td:nth-child(3) strong,
+.admin-inquiry-table td:nth-child(3) span { display: block; overflow-wrap: anywhere; }
+.admin-inquiry-table td:nth-child(3) span { margin-top: 0.2rem; color: #6a6056; font-size: 0.72rem; }
+.admin-inquiry-table td:nth-child(4) { max-width: 18rem; overflow-wrap: anywhere; }
+.admin-inquiry-status-new,
+.admin-inquiry-status-in_review { border-color: #a35b32; color: #7a3f20; }
+.admin-inquiry-status-accepted { border-color: #4f6b54; color: #36513c; }
+.admin-detail-facts a { display: inline-flex; align-items: center; gap: 0.35rem; overflow-wrap: anywhere; }
+.admin-detail-facts a svg { width: 1rem; height: 1rem; flex: 0 0 auto; }
+.admin-inquiry-message { white-space: pre-wrap; overflow-wrap: anywhere; }
+.admin-detail-edit-row { display: grid; grid-template-columns: minmax(12rem, 1fr) auto; align-items: end; gap: 0.75rem; margin-top: 1rem; }
+.admin-detail-edit-row label,
+.admin-note-field { display: grid; gap: 0.45rem; color: #5d554c; font-size: 0.74rem; font-weight: 650; }
+.admin-detail-edit-row .admin-save-button { margin: 0; }
+.admin-note-field { margin-top: 1rem; }
+.admin-note-field textarea { min-height: 9rem; resize: vertical; line-height: 1.5; }
 
 @keyframes admin-backdrop-enter { from { opacity: 0; } }
 @keyframes admin-panel-enter { from { transform: translateX(2rem); opacity: 0; } }
@@ -464,6 +492,8 @@
   .admin-filterbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-filterbar label:first-child { grid-column: 1 / -1; }
   .admin-operation-grid { grid-template-columns: 1fr; }
+  .admin-inquiry-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-inquiry-filters label:first-child { grid-column: 1 / -1; }
 }
 
 @media (max-width: 430px) {
@@ -480,6 +510,15 @@
   .admin-table-options { grid-template-columns: 1fr; }
   .admin-choice-row,
   .admin-time-row { grid-template-columns: 1fr; }
+  .admin-inquiry-filters,
+  .admin-detail-edit-row { grid-template-columns: 1fr; }
+  .admin-inquiry-filters label:first-child { grid-column: auto; }
+  .admin-inquiry-table th:nth-child(2),
+  .admin-inquiry-table td:nth-child(2),
+  .admin-inquiry-table th:nth-child(4),
+  .admin-inquiry-table td:nth-child(4),
+  .admin-inquiry-table th:nth-child(5),
+  .admin-inquiry-table td:nth-child(5) { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

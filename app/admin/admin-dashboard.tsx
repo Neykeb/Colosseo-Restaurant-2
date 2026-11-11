@@ -2,6 +2,7 @@ import { CalendarBlank, CalendarDots, Confetti, LockKey, UsersThree } from "@pho
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ReservationManagement } from "./reservation-management";
 import { ScheduleManagement } from "./schedule-management";
+import { EventInquiryManagement } from "./event-inquiry-management";
 
 type AdminProfile = {
   displayName: string;
@@ -210,16 +211,8 @@ export function AdminDashboard({ profile, getToken, userControl }: {
 
         <ScheduleManagement getToken={getToken} />
 
-        <section className="admin-inquiry-preview" id="inquiries" aria-labelledby="inquiry-title">
-          <div className="admin-section-heading"><div><p className="admin-kicker">Veranstaltungen</p><h2 id="inquiry-title">Offene Anfragen</h2></div></div>
-          {state === "ready" && openInquiries === 0 ? <p className="admin-empty">Momentan warten keine Veranstaltungsanfragen auf Bearbeitung.</p> : null}
-          {state === "ready" ? data?.inquiries.filter(({ status }) => status === "new" || status === "in_review").slice(0, 3).map((inquiry) => <article className="admin-inquiry-row" key={inquiry.inquiryId}>
-            <div><strong>{inquiry.name}</strong><span>{inquiry.eventType} · {inquiry.partySize} Personen</span></div>
-            <time dateTime={inquiry.requestedDate}>{compactDateFormatter.format(parseIsoDate(inquiry.requestedDate))}</time>
-          </article>) : null}
-        </section>
-
         <ReservationManagement getToken={getToken} />
+        <EventInquiryManagement getToken={getToken} />
       </section>
     </main>
   );

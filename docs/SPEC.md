@@ -570,10 +570,10 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 - `GET|POST|DELETE /api/admin/reservation-blocks` – implementiert; zeitlich begrenzte Restaurant-, Bereichs- oder Tischsperrungen mit demselben atomaren Sperrindex wie Reservierungen.
 - `GET /api/admin/special-days` sowie `PUT|DELETE /api/admin/special-days/:date` – in `FS5` implementiert; datierte Schließtage und Sonderöffnungen. Sonderöffnungen benötigen einen vollständigen, aufsteigenden Öffnungszeitraum.
 - `GET /api/admin/calendar?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` – implementiert in `FS5`; liefert für einen auf 31 Tage begrenzten Zeitraum Reservierungen, Veranstaltungsanfragen, aktive Sperrzeiten und Sondertage. Zugriff nur für serverseitig autorisierte Owner.
+- `GET /api/admin/event-inquiries`, `GET /api/admin/event-inquiries/:inquiryId`, `PATCH /api/admin/event-inquiries/:inquiryId/status` und `PATCH /api/admin/event-inquiries/:inquiryId/note` – in `FS5` implementiert; serverseitig paginierte und filterbare Liste, Detail, Bearbeitungsstatus und ausschließlich intern sichtbare Notiz. Ungültige IDs, Statuswerte und Notizen werden an der API-Grenze abgewiesen.
 - `/api/admin/tables` und `/api/admin/settings` – Kapazität und Buchungsregeln.
 - `/api/admin/menu` – Kategorien, Gerichte, Preise, Beschreibungen, Bilder, Sortierung und Veröffentlichung.
 - `/api/admin/opening-hours` – reguläre und datierte Abweichungen.
-- `/api/admin/inquiries` – Eingang, Status und interne Bearbeitung.
 
 Fehler verwenden stabile maschinenlesbare Codes, eine sichere Nutzermeldung und eine serverseitige Korrelations-ID. Personenbezogene Details erscheinen nicht in URLs oder Logs.
 
