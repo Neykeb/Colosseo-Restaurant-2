@@ -258,6 +258,8 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 **Integrationsstand 10.11.2026:** Die Merge-Konflikte mit `dev` sind ohne Rücknahme der bestehenden Website-, Admin- und Reservierungsfunktionen aufgelöst. Neue Migrations-, Storno-, Aufbewahrungs- und E-Mail-Verarbeitungsbausteine wurden aufgenommen; `dist/` bleibt aus Git ausgeschlossen. Render ist live und der technische Produktions-E2E ist abgeschlossen. Der Integrationsstand besteht Typecheck, OXLint, 76/76 Tests und Production-Build. Dies ersetzt weder die offenen fachlich/rechtlichen Freigaben noch das Gate `FS4`.
 
+**Migrationsnachprüfung 11.11.2026:** Atlas-SRV und Datenbankverbindung sind erreichbar. Migration `0010_event-inquiries` wurde hinsichtlich ID-Format und bereits vorhandener gleichwertiger Indizes korrigiert, erfolgreich angewendet und per Statuslauf als `applied` bestätigt. Alle Migrationen `0001` bis `0010` sind angewendet; Typecheck, OXLint, 76/76 Tests und Production-Build bleiben erfolgreich.
+
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
 
 - [ ] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen.
