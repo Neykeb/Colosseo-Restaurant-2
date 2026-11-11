@@ -1,6 +1,6 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS5` abgenommen; `FS6` wartet auf ausdrückliches GO
+**Status:** Full-Stack-Phase `FS6` freigegeben; Umsetzung beginnt
 **Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
@@ -150,6 +150,7 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 11.11.2026 | Gate FS4 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS4“. FS4 ist abgenommen; `FS5` benötigt ein separates GO. |
 | 11.11.2026 | Gate FS4 / Start FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist freigegeben und darf umgesetzt werden. |
 | 11.11.2026 | Gate FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist abgenommen; `FS6` benötigt ein separates GO. |
+| 11.11.2026 | Gate FS5 / Start FS6 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS6“. FS6 ist freigegeben und darf umgesetzt werden. |
 
 ## Aktuelle Blocker
 
@@ -274,9 +275,11 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 ### FS6 – Speisekarte, Öffnungszeiten und Medienverwaltung
 
-- [ ] Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung und Aktivstatus verwalten.
+**Start:** `GO FS6` am 11.11.2026 ausdrücklich erteilt. Backend-Grundlage für Kategorien und Gerichte ist in Arbeit; öffentliche Veröffentlichung und Medien-Upload bleiben separate Arbeitspakete.
+
+- [-] Versioniertes Backend-Modell, geschützte Admin-API, Vorschau und expliziter Veröffentlichungsworkflow für Kategorien/Gerichte umgesetzt; Uploadregeln, vollständige UI und E2E bleiben offen.
 - [ ] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren.
-- [ ] Reguläre Öffnungszeiten und datierte Abweichungen pflegen.
+- [-] Öffentliche Ausgabe regulärer Servicezeiten und datierter Sondertage sowie geschützte Menüvorschau ergänzt; vollständige Pflege-, Veröffentlichungs- und UI-Integration bleibt offen.
 - [ ] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen.
 - [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
 - [ ] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen.

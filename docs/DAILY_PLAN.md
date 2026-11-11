@@ -328,3 +328,38 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Gate:** Der Nutzer hat die operative Verwaltung mit ausdrücklichem `GO FS5` abgenommen.
 - **Status:** FS5 ist abgenommen. FS6 darf erst nach einem separaten ausdrücklichen `GO FS6` begonnen werden.
 - **Nächster zulässiger Schritt:** FS6-Arbeitsumfang und Zuständigkeiten vorbereiten; keine FS6-Implementierung ohne neues Gate.
+
+## 30. FS6-Freigabe – 11.11.2026
+
+- **Gate:** Der Nutzer erteilt ausdrücklich `GO FS6`.
+- **Status:** FS6 ist freigegeben; die Umsetzung darf beginnen.
+- **Person A nächster Schritt:** Backend-Verträge und Datenmodell für Speisekarte, Öffnungszeiten, Medienverwaltung sowie Entwurf/Vorschau/Veröffentlichen prüfen.
+- **Person B nächster Schritt:** Admin-Oberflächen und öffentliche Synchronisation vorbereiten.
+
+## 31. FS6-Menü-Backend-Grundlage – 11.11.2026
+
+- **Umgesetzt:** versionierte Migration `0011_menu-content`, `MenuCategory`-/`MenuItem`-Modelle und geschützte Admin-API für Kategorien und Gerichte ergänzt.
+- **Datenregeln:** Preise werden als Centwerte gespeichert; Allergene, Sortierung, Aktivstatus und Publikationsstatus sind serverseitig validiert. Bild-URLs sind nur als optionale Referenz vorgesehen; Uploadregeln sind noch offen.
+- **Migration:** `0011_menu-content` erfolgreich in Atlas angewendet; Migrationen `0001` bis `0011` stehen auf `applied`. Ein bereits vorhandener gleichwertiger Index wurde idempotent berücksichtigt.
+- **Prüfungen:** Typecheck, Lint und 81/81 Tests erfolgreich.
+- **Offen:** Öffnungszeiten-/Veröffentlichungslogik, Bild-Upload, öffentliche Synchronisation, Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 32. FS6-Öffentliche Menüausgabe – 11.11.2026
+
+- **Umgesetzt:** `GET /api/public/menu` liefert ausschließlich aktive Kategorien und aktive, veröffentlichte Gerichte; interne IDs und Zeitstempel werden nicht ausgegeben. Sortierung und Kategoriezuordnung sind deterministisch.
+- **Offen:** Admin-UI, Bild-Upload mit Rechte-/Typ-/Größenprüfung, Vorschau-/Veröffentlichungsworkflow und E2E-/Accessibility-Prüfung.
+
+## 33. FS6-Öffentliche Öffnungszeiten – 11.11.2026
+
+- **Umgesetzt:** `GET /api/public/opening-hours` liefert reguläre aktive Servicezeiten und datierte Sondertage mit geschlossen-/geöffnet-Status. Interne IDs und Zeitstempel werden nicht ausgegeben.
+- **Offen:** vollständige Admin-Pflege, Veröffentlichungs-/Vorschauworkflow, Bild-Upload, UI und E2E-/Accessibility-Prüfung.
+
+## 34. FS6-Menüvorschau – 11.11.2026
+
+- **Umgesetzt:** geschützter Endpunkt `GET /api/admin/menu/preview` ergänzt. Er zeigt aktive Entwurfs- und Veröffentlichungsdaten einschließlich `published`-Status; die öffentliche Route bleibt auf veröffentlichte Gerichte begrenzt.
+- **Offen:** expliziter Veröffentlichungsworkflow, Bild-Upload, Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 35. FS6-Veröffentlichungsworkflow – 11.11.2026
+
+- **Umgesetzt:** `PATCH /api/admin/menu/items/:itemId/publication` veröffentlicht oder entzieht die Veröffentlichung eines aktiven Gerichts. Beide Aktionen werden auditiert; nicht aktive oder unbekannte Gerichte werden abgelehnt.
+- **Offen:** Bild-Upload, vollständige Admin-UI und E2E-/Accessibility-Prüfung.
