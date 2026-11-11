@@ -1,6 +1,6 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS5` freigegeben; Umsetzung beginnt
+**Status:** Full-Stack-Phase `FS5` abgenommen; `FS6` wartet auf ausdrückliches GO
 **Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
@@ -149,6 +149,7 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 02.11.2026 | Gate FS0 / Start FS1 | Freigegeben | Nutzer bestätigt MongoDB Atlas ohne zusätzliche Docker-Datenbank und erteilt ausdrücklich „Go für FS1“. |
 | 11.11.2026 | Gate FS4 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS4“. FS4 ist abgenommen; `FS5` benötigt ein separates GO. |
 | 11.11.2026 | Gate FS4 / Start FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist freigegeben und darf umgesetzt werden. |
+| 11.11.2026 | Gate FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist abgenommen; `FS6` benötigt ein separates GO. |
 
 ## Aktuelle Blocker
 
@@ -269,7 +270,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [ ] Sonderöffnungen, Schließungen und Sperrzeiten verwalten.
 - [ ] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren.
 - [ ] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen.
-- [ ] **GATE FS5:** operative Verwaltung präsentieren; auf GO für `FS6` warten.
+- [x] **GATE FS5:** operative Verwaltung präsentiert und am 11.11.2026 durch ausdrückliches `GO FS5` abgenommen. `FS6` bleibt bis zu einem separaten GO gesperrt.
 
 ### FS6 – Speisekarte, Öffnungszeiten und Medienverwaltung
 

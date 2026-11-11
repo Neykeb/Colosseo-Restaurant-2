@@ -322,3 +322,9 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Ergänzt:** API-Test für geschützte Veranstaltungsanfragen, Pflichtfeldvalidierung, Anlegen und Statusänderung.
 - **Prüfungen:** vollständiger `npm test` erfolgreich; 17 Testdateien und 81/81 Tests bestanden, inklusive Secret-Tracking.
 - **Ergebnis:** FS5-Backend-Berechtigungs- und Validierungsabdeckung ist erweitert. Frontend-Admin-UI, Tastaturprüfung und E2E bleiben offen.
+
+## 29. FS5-Abnahme – 11.11.2026
+
+- **Gate:** Der Nutzer hat die operative Verwaltung mit ausdrücklichem `GO FS5` abgenommen.
+- **Status:** FS5 ist abgenommen. FS6 darf erst nach einem separaten ausdrücklichen `GO FS6` begonnen werden.
+- **Nächster zulässiger Schritt:** FS6-Arbeitsumfang und Zuständigkeiten vorbereiten; keine FS6-Implementierung ohne neues Gate.
