@@ -254,13 +254,13 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
 - [x] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und technisches Produktions-E2E ausführen. Person B prüfte DE/EN/IT, mobilen Überlauf, Touchziele, Kontaktfehler-Fokus, Statusrücksetzung, Reduced-Motion-Fallback und Desktop-Ankernavigation; der Nutzer bestätigte einen echten Smartphone-Test ohne Geräteprotokoll. Auf Render wurden Health, Config, Availability, Sprach- und Unterseiten, Reloads, Canonical, Sitemap, Robots, Adminschutz, neutrale Validierungsfehler, Secret-Freiheit und die clientseitige 404-Oberfläche geprüft. Eine synthetische Produktionsbuchung wurde bewusst nicht erzeugt, weil sie reale Daten- und E-Mail-Nebenwirkungen auslösen würde; Buchung, Idempotenz und Concurrency bleiben durch automatisierte Tests und den Atlas-Parallellauf nachgewiesen.
 - [x] Unabhängigen technischen FS4-Gegenreview durch Person A ausführen: am 11.11.2026 bestanden mit Secret-Tracking-Prüfung, `npm audit --omit=dev` ohne bekannte Schwachstellen, Typecheck, OXLint, 76/76 Tests und Production-Build. Bekannte Drittanbieterhinweise zu `use client` sind nicht blockierend; `SITE_URL` war im lokalen Build erwartungsgemäß nicht gesetzt.
-- [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
+- [x] **GATE FS4:** komplette Gaststrecke präsentiert; ausdrückliches `GO` für `FS5` am 11.11.2026 erhalten.
 
 **Integrationsstand 10.11.2026:** Die Merge-Konflikte mit `dev` sind ohne Rücknahme der bestehenden Website-, Admin- und Reservierungsfunktionen aufgelöst. Neue Migrations-, Storno-, Aufbewahrungs- und E-Mail-Verarbeitungsbausteine wurden aufgenommen; `dist/` bleibt aus Git ausgeschlossen. Render ist live und der technische Produktions-E2E ist abgeschlossen. Der Integrationsstand besteht Typecheck, OXLint, 76/76 Tests und Production-Build. Dies ersetzt weder die offenen fachlich/rechtlichen Freigaben noch das Gate `FS4`.
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
 
-- [ ] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen.
+- [x] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen. Person B ergänzte am 11.11.2026 die geschützte Kalender-API und eine responsive Adminübersicht mit Zeitraumwahl, Kennzahlen, Listenalternative, Reservierungen, Sperrzeiten, Sondertagen und offenen Veranstaltungsanfragen. Lade-, Leer- und Fehlerzustände sind enthalten; Typecheck, OXLint, 77/77 Tests und Production-Build sind erfolgreich.
 - [ ] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren.
 - [ ] Sonderöffnungen, Schließungen und Sperrzeiten verwalten.
 - [ ] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren.

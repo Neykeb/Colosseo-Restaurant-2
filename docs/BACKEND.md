@@ -149,6 +149,7 @@ Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 ## 8. Nächster zulässiger Schritt
 
 1. Für die Demo im eingeschränkten Resend-Testmodus bleiben; keine beliebigen realen Empfänger und keine echten Gastdaten verwenden. Eine eigene Absenderdomain ist erst bei einem späteren Produktionsauftrag erforderlich.
-2. `FS4` präsentieren und vor `FS5` auf ein neues ausdrückliches `GO` warten.
+2. `FS5` ist seit dem ausdrücklichen `GO` vom 11.11.2026 aktiv. Die Admin-Tages-/Wochenübersicht ist umgesetzt; als Nächstes folgen für Person B Reservierungssuche, Filter, Detail, Status und Historie.
+3. Speisekarten- und reguläre Öffnungszeitenverwaltung nicht vorziehen; sie gehören zu `FS6` und benötigen nach dem `FS5`-Gate ein neues `GO`.
 
 Der operative Termin- und Personenplan steht in `docs/DAILY_PLAN.md`.

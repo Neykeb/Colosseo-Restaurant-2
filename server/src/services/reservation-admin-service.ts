@@ -19,6 +19,30 @@ function duplicateKey(error: unknown): boolean {
 }
 
 export class ReservationAdminService {
+  async getCalendarOverview(startDate: string, endDate: string) {
+    const dateRange = { $gte: startDate, $lte: endDate };
+    const [reservations, inquiries, blocks, specialDays] = await Promise.all([
+      ReservationModel.find({ date: dateRange })
+        .sort({ date: 1, startTime: 1 })
+        .select({ cancellationTokenHash: 0, idempotencyKey: 0, internalNote: 0 })
+        .lean()
+        .exec(),
+      EventInquiryModel.find({ requestedDate: dateRange })
+        .sort({ requestedDate: 1, createdAt: -1 })
+        .select({ internalNote: 0 })
+        .lean()
+        .exec(),
+      ReservationBlockModel.find({ date: dateRange, active: true })
+        .sort({ date: 1, startTime: 1 })
+        .select({ _id: 0, __v: 0 })
+        .lean()
+        .exec(),
+      SpecialDayModel.find({ date: dateRange }).sort({ date: 1 }).lean().exec(),
+    ]);
+
+    return { startDate, endDate, reservations, inquiries, blocks, specialDays };
+  }
+
   async listReservations(filters: { date?: string; status?: ReservationStatus; q?: string; page?: number; pageSize?: number }) {
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 25));

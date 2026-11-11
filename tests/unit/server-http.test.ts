@@ -206,6 +206,25 @@ describe("Express platform foundation", () => {
     expect(deleted.status).toBe(204);
   });
 
+  it("returns a protected calendar overview and rejects oversized ranges", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const reservationAdminService = {
+      getCalendarOverview: async (startDate: string, endDate: string) => ({ startDate, endDate, reservations: [], inquiries: [], blocks: [], specialDays: [] }),
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService,
+    }));
+
+    const response = await fetch(`${baseUrl}/api/admin/calendar?startDate=2026-11-09&endDate=2026-11-15`);
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ startDate: "2026-11-09", endDate: "2026-11-15", reservations: [], inquiries: [], blocks: [], specialDays: [] });
+
+    const invalid = await fetch(`${baseUrl}/api/admin/calendar?startDate=2026-11-01&endDate=2026-12-31`);
+    expect(invalid.status).toBe(400);
+  });
+
   it("rejects a request without an authenticated Clerk user", async () => {
     const baseUrl = await listen(createApp({
       getAuthenticatedUserId: () => null,

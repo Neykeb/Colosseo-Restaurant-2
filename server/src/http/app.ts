@@ -53,6 +53,15 @@ const reservationBlockSchema = z.object({
   .refine(({ scope, scopeKey }) => scope === "restaurant" || Boolean(scopeKey), { path: ["scopeKey"], message: "Area and table blocks require a scope key." });
 const reservationStatusSchema = z.enum(["requested", "pending", "confirmed", "cancelled", "declined", "seated", "completed", "no_show"]);
 const reservationListSchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), status: reservationStatusSchema.optional(), q: z.string().trim().max(120).optional(), page: z.coerce.number().int().min(1).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() });
+const calendarQuerySchema = z.object({
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+}).refine(({ startDate, endDate }) => startDate <= endDate, { path: ["endDate"], message: "End date must not precede start date." })
+  .refine(({ startDate, endDate }) => {
+    const start = Date.parse(`${startDate}T00:00:00Z`);
+    const end = Date.parse(`${endDate}T00:00:00Z`);
+    return Number.isFinite(start) && Number.isFinite(end) && end - start <= 31 * 86_400_000;
+  }, { path: ["endDate"], message: "Calendar ranges are limited to 31 days." });
 const specialDaySchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), label: z.string().trim().min(1).max(160), closed: z.boolean(), opens: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(), closes: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional() });
 const eventInquirySchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254), phone: z.string().trim().min(5).max(40).optional(), eventType: z.string().trim().min(1).max(80), requestedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), partySize: z.number().int().min(1).max(500), message: z.string().trim().min(1).max(2_000) });
 const eventInquiryStatusSchema = z.enum(["new", "in_review", "accepted", "declined", "closed"]);
@@ -224,6 +233,12 @@ export function createApp(options: CreateAppOptions = {}) {
     const input = reservationListSchema.safeParse(request.query);
     if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
     try { response.json(await reservationAdmin.listReservations(input.data)); } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/calendar", ...adminGuard, async (request, response, next) => {
+    const input = calendarQuerySchema.safeParse(request.query);
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.json(await reservationAdmin.getCalendarOverview(input.data.startDate, input.data.endDate)); } catch (error) { next(error); }
   });
 
   app.get("/api/admin/reservations/:publicId", ...adminGuard, async (request, response, next) => {

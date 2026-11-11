@@ -276,3 +276,11 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Externe Blocker:** Verifizierte Resend-Produktionsdomain sowie fachlich/rechtlich freigegebene Datenschutz-, Aufbewahrungs- und Stornoregeln.
 - **Phasengrenze:** `FS5` beginnt erst nach abgeschlossener FS4-Präsentation, ausdrücklicher Gate-Abnahme und neuem `GO`.
 - **Branch-Integration:** Die Konflikte zwischen `feature/momo` und `dev` wurden vollständig aufgelöst. Die getestete öffentliche Website, mobile Navigation, Reservierungsstrecke und bestehende Admin-Autorisierung blieben maßgeblich; ergänzende Storno-, Aufbewahrungs-, Outbox- und Migrationsbausteine aus `dev` wurden kompatibel übernommen. `dist/` bleibt generiert und unversioniert. Typecheck, OXLint, 76/76 Tests und Production-Build waren anschließend erfolgreich; der Build meldete nur die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL`.
+
+## 22. FS5-Start Person B – 11.11.2026
+
+- **Freigabe:** Der Nutzer hat am 11.11.2026 das ausdrückliche `GO` für `FS5` erteilt; das Gate `FS4` ist damit für den Demo-Umfang abgenommen.
+- **Aufgabenabgrenzung:** Person B bearbeitet in `FS5` Adminübersicht, Reservierungen, Kalender/Sperrzeiten und Veranstaltungsanfragen. Speisekarte und reguläre Öffnungszeiten gehören zu `FS6` und werden nicht vorgezogen.
+- **Erster Baustein erledigt:** Geschützte Kalender-API mit maximal 31 Tagen sowie responsive Tages-/Wochenübersicht mit Zeitraumwahl, vier Kennzahlen, Reservierungs- und Sperrzeitenliste, Sondertagen und Vorschau offener Veranstaltungsanfragen umgesetzt. Lade-, Leer- und Fehlerzustände sind vorhanden; das Dashboard verwendet bewusst keine Marketing-Motion.
+- **Prüfungen:** Typecheck, OXLint, 77/77 automatisierte Tests und Production-Build erfolgreich. Der Build meldet nur die bekannten Hinweise zu fremden `use client`-Direktiven und die lokal nicht gesetzte `SITE_URL`.
+- **Nächster Einstieg Person B:** Reservierungssuche, Filter, Detailansicht, kontrollierte Statusänderung und Historie auf der bestehenden Admin-API umsetzen. Tischzuweisung wird zunächst anhand des vorhandenen Datenmodells geprüft und nicht durch eine erfundene Bedienlogik vorweggenommen.

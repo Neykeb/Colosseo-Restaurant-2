@@ -565,7 +565,7 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 
 - `POST /api/admin/reservations` – implementiert; manuelles Anlegen durch einen serverseitig autorisierten Owner. Listen, Details und spätere Statusänderungen folgen in `FS5`.
 - `GET|POST|DELETE /api/admin/reservation-blocks` – implementiert; zeitlich begrenzte Restaurant-, Bereichs- oder Tischsperrungen mit demselben atomaren Sperrindex wie Reservierungen.
-- `/api/admin/calendar` – Tages-/Wochenbelegung und Sonderöffnungen folgen in `FS5`.
+- `GET /api/admin/calendar?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` – implementiert in `FS5`; liefert für einen auf 31 Tage begrenzten Zeitraum Reservierungen, Veranstaltungsanfragen, aktive Sperrzeiten und Sondertage. Zugriff nur für serverseitig autorisierte Owner.
 - `/api/admin/tables` und `/api/admin/settings` – Kapazität und Buchungsregeln.
 - `/api/admin/menu` – Kategorien, Gerichte, Preise, Beschreibungen, Bilder, Sortierung und Veröffentlichung.
 - `/api/admin/opening-hours` – reguläre und datierte Abweichungen.
