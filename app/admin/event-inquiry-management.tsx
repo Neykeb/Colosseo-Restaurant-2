@@ -1,5 +1,6 @@
 import { ArrowClockwise, EnvelopeSimple, MagnifyingGlass, Phone, X } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 type InquiryStatus = "new" | "in_review" | "accepted" | "declined" | "closed";
 
@@ -63,6 +64,7 @@ export function EventInquiryManagement({ getToken }: { getToken: () => Promise<s
   const [message, setMessage] = useState("");
   const detailRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const detailOpen = detailState !== "idle";
 
   const loadInquiries = useCallback(async (filters: { query: string; status: "" | InquiryStatus }, requestedPage = 1) => {
     setState("loading");
@@ -87,13 +89,15 @@ export function EventInquiryManagement({ getToken }: { getToken: () => Promise<s
   const closeDetail = useCallback(() => {
     setDetailState("idle");
     setSelected(null);
-    window.setTimeout(() => triggerRef.current?.focus(), 0);
   }, []);
 
   useEffect(() => {
-    if (detailState === "idle") return;
+    if (!detailOpen) return;
     const panel = detailRef.current;
+    const dashboard = document.querySelector<HTMLElement>(".admin-dashboard");
+    const wasInert = dashboard?.inert ?? false;
     const previousOverflow = document.body.style.overflow;
+    if (dashboard) dashboard.inert = true;
     document.body.style.overflow = "hidden";
     panel?.querySelector<HTMLElement>("button")?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
@@ -109,9 +113,11 @@ export function EventInquiryManagement({ getToken }: { getToken: () => Promise<s
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
+      if (dashboard) dashboard.inert = wasInert;
       document.body.style.overflow = previousOverflow;
+      triggerRef.current?.focus();
     };
-  }, [closeDetail, detailState]);
+  }, [closeDetail, detailOpen]);
 
   const openInquiry = async (inquiryId: string) => {
     setDetailState("loading");
@@ -206,7 +212,7 @@ export function EventInquiryManagement({ getToken }: { getToken: () => Promise<s
       </div> : null}
       {state === "ready" && pageCount > 1 ? <nav className="admin-pagination" aria-label="Seiten der Veranstaltungsanfragen"><button type="button" disabled={page <= 1} onClick={() => void loadInquiries({ query, status }, page - 1)}>Zurück</button><span>Seite {page} von {pageCount}</span><button type="button" disabled={page >= pageCount} onClick={() => void loadInquiries({ query, status }, page + 1)}>Weiter</button></nav> : null}
 
-      {detailState !== "idle" ? <div className="admin-detail-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDetail(); }}>
+      {detailOpen ? createPortal(<div className="admin-detail-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDetail(); }}>
         <section className="admin-detail" ref={detailRef} role="dialog" aria-modal="true" aria-labelledby="inquiry-detail-title" aria-busy={detailState === "loading" || detailState === "saving"}>
           <button className="admin-detail-close" type="button" aria-label="Detailansicht schließen" onClick={closeDetail}><X aria-hidden="true" /></button>
           {detailState === "loading" ? <p className="admin-empty" role="status">Anfrage wird geladen …</p> : null}
@@ -226,7 +232,7 @@ export function EventInquiryManagement({ getToken }: { getToken: () => Promise<s
             <p className="admin-save-message" aria-live="polite">{message}</p>
           </> : null}
         </section>
-      </div> : null}
+      </div>, document.body) : null}
     </section>
   );
 }

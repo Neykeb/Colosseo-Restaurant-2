@@ -1,5 +1,6 @@
 import { ArrowClockwise, MagnifyingGlass, X } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 type ReservationStatus = "requested" | "pending" | "confirmed" | "cancelled" | "declined" | "seated" | "completed" | "no_show";
 
@@ -94,6 +95,7 @@ export function ReservationManagement({ getToken }: { getToken: () => Promise<st
   const [message, setMessage] = useState("");
   const detailRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const detailOpen = detailState !== "idle";
 
   const loadReservations = useCallback(async (filters: { query: string; date: string; status: "" | ReservationStatus }, requestedPage = 1) => {
     setState("loading");
@@ -118,13 +120,15 @@ export function ReservationManagement({ getToken }: { getToken: () => Promise<st
 
   const closeDetail = useCallback(() => {
     setDetailState("idle");
-    window.setTimeout(() => triggerRef.current?.focus(), 0);
   }, []);
 
   useEffect(() => {
-    if (detailState === "idle") return;
+    if (!detailOpen) return;
     const panel = detailRef.current;
+    const dashboard = document.querySelector<HTMLElement>(".admin-dashboard");
+    const wasInert = dashboard?.inert ?? false;
     const previousOverflow = document.body.style.overflow;
+    if (dashboard) dashboard.inert = true;
     document.body.style.overflow = "hidden";
     panel?.querySelector<HTMLElement>("button")?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
@@ -140,9 +144,11 @@ export function ReservationManagement({ getToken }: { getToken: () => Promise<st
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
+      if (dashboard) dashboard.inert = wasInert;
       document.body.style.overflow = previousOverflow;
+      triggerRef.current?.focus();
     };
-  }, [closeDetail, detailState]);
+  }, [closeDetail, detailOpen]);
 
   const openReservation = async (publicId: string) => {
     setDetailState("loading");
@@ -226,7 +232,7 @@ export function ReservationManagement({ getToken }: { getToken: () => Promise<st
       </table></div> : null}
       {state === "ready" && pageCount > 1 ? <nav className="admin-pagination" aria-label="Reservierungsseiten"><button type="button" disabled={page <= 1} onClick={() => void loadReservations({ query, date, status }, page - 1)}>Zurück</button><span>Seite {page} von {pageCount}</span><button type="button" disabled={page >= pageCount} onClick={() => void loadReservations({ query, date, status }, page + 1)}>Weiter</button></nav> : null}
 
-      {detailState !== "idle" ? <div className="admin-detail-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDetail(); }}>
+      {detailOpen ? createPortal(<div className="admin-detail-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDetail(); }}>
         <aside className="admin-detail" ref={detailRef} role="dialog" aria-modal="true" aria-labelledby="reservation-detail-title">
           <button className="admin-detail-close" type="button" aria-label="Detailansicht schließen" onClick={closeDetail}><X aria-hidden="true" /></button>
           {detailState === "loading" ? <p role="status">Details werden geladen …</p> : null}
@@ -243,7 +249,7 @@ export function ReservationManagement({ getToken }: { getToken: () => Promise<st
             <p className="admin-save-message" aria-live="polite">{message}</p>
           </> : null}
         </aside>
-      </div> : null}
+      </div>, document.body) : null}
     </section>
   );
 }

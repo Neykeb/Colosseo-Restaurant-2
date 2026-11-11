@@ -140,6 +140,7 @@ export function AdminDashboard({ profile, getToken, userControl }: {
 
   return (
     <main className="admin-dashboard" id="main-content">
+      <a className="admin-skip-link" href="#admin-workspace">Zum Arbeitsbereich</a>
       <aside className="admin-sidebar" aria-label="Admin-Navigation">
         <div>
           <p className="admin-wordmark">Colosseo</p>
@@ -155,7 +156,7 @@ export function AdminDashboard({ profile, getToken, userControl }: {
         <a className="admin-site-link" href="/de">Zur Website</a>
       </aside>
 
-      <section className="admin-workspace">
+      <section className="admin-workspace" id="admin-workspace" tabIndex={-1}>
         <header className="admin-dashboard-header" id="overview">
           <div>
             <p className="admin-kicker">Betriebsübersicht</p>

@@ -7,6 +7,13 @@
   color: #211d18;
 }
 
+.admin-skip-link { position: fixed; top: 0.75rem; left: 0.75rem; z-index: 200; transform: translateY(-200%); border: 2px solid #fffaf2; padding: 0.75rem 1rem; color: #fffaf2; background: #211d18; text-decoration: none; }
+.admin-skip-link:focus { transform: translateY(0); }
+.admin-workspace:focus-visible {
+  outline: 3px solid #a94b3f;
+  outline-offset: -3px;
+}
+
 .admin-dashboard {
   display: grid;
   grid-template-columns: 15rem minmax(0, 1fr);

@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 import type { Server } from "node:http";
 import { createApp } from "../../server/src/http/app";
 import { isDirectExecution } from "../../server/src/server";
+import { ReservationLockConflictError } from "../../server/src/repositories/reservation-repository";
 import type { ReservationAdminService } from "../../server/src/services/reservation-admin-service";
 
 const servers: Server[] = [];
@@ -359,6 +360,74 @@ describe("Express platform foundation", () => {
 
     expect(response.status).toBe(401);
     expect(body.error.code).toBe("AUTHENTICATION_REQUIRED");
+  });
+
+  it("protects every FS5 administration module before calling its service", async () => {
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => null,
+      findAdminProfile: async () => null,
+    }));
+    const protectedRoutes = [
+      "/api/admin/calendar?startDate=2026-11-11&endDate=2026-11-11",
+      "/api/admin/reservations",
+      "/api/admin/tables",
+      "/api/admin/special-days",
+      "/api/admin/reservation-blocks",
+      "/api/admin/event-inquiries",
+    ];
+
+    for (const route of protectedRoutes) {
+      const response = await fetch(`${baseUrl}${route}`);
+      const body = (await response.json()) as { error: { code: string } };
+      expect(response.status, route).toBe(401);
+      expect(body.error.code, route).toBe("AUTHENTICATION_REQUIRED");
+    }
+  });
+
+  it("returns a conflict when a reservation block overlaps an active booking", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const reservationAdminService = {
+      createBlock: async () => {
+        throw new ReservationLockConflictError();
+      },
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService: reservationAdminService as unknown as Partial<ReservationAdminService>,
+    }));
+    const response = await fetch(`${baseUrl}/api/admin/reservation-blocks`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ date: "2026-11-11", startTime: "17:00", endTime: "19:00", scope: "restaurant", reason: "Geschlossene Gesellschaft" }),
+    });
+    const body = (await response.json()) as { error: { code: string } };
+
+    expect(response.status).toBe(409);
+    expect(body.error.code).toBe("RESERVATION_CONFLICT");
+  });
+
+  it("returns a conflict when an administrator assigns an unavailable table", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const reservationAdminService = {
+      reassignTables: async () => {
+        throw new ReservationLockConflictError();
+      },
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService: reservationAdminService as unknown as Partial<ReservationAdminService>,
+    }));
+    const response = await fetch(`${baseUrl}/api/admin/reservations/COL-1234567890/tables`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tableKeys: ["table-01"] }),
+    });
+    const body = (await response.json()) as { error: { code: string } };
+
+    expect(response.status).toBe(409);
+    expect(body.error.code).toBe("TABLE_NOT_AVAILABLE");
   });
 
   it("serves client-only routes and marks unknown HTML routes as not found in production mode", async () => {
