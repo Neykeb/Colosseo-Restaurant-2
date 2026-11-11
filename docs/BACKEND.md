@@ -1,6 +1,6 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Render live und technischer Produktions-E2E abgeschlossen, externe Freigaben und Gate-Abnahme offen
+**Status:** Full-Stack-Phase `FS4` für das nicht-produktive Weiterbildungsprojekt technisch geprüft; Gate-Abnahme offen
 
 **Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
@@ -148,8 +148,7 @@ Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 
 ## 8. Nächster zulässiger Schritt
 
-1. Eigene Absenderdomain beschaffen und in Resend verifizieren; bis dahin bleibt der Versand ausdrücklich im eingeschränkten Testmodus.
-2. Datenschutz-, Aufbewahrungs- und Stornoregel fachlich beziehungsweise rechtlich freigeben und die verbleibenden FS4-Prüfungen ausführen.
-3. `FS4` präsentieren und vor `FS5` auf ein neues ausdrückliches `GO` warten.
+1. Für die Demo im eingeschränkten Resend-Testmodus bleiben; keine beliebigen realen Empfänger und keine echten Gastdaten verwenden. Eine eigene Absenderdomain ist erst bei einem späteren Produktionsauftrag erforderlich.
+2. `FS4` präsentieren und vor `FS5` auf ein neues ausdrückliches `GO` warten.
 
 Der operative Termin- und Personenplan steht in `docs/DAILY_PLAN.md`.

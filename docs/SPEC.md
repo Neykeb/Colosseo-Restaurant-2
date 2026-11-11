@@ -1,6 +1,6 @@
 # Funktionale und technische Spezifikation
 
-**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS4` technisch umgesetzt, Render-E2E und Resend-Testversand verifiziert, Produktionsabsender offen
+**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS4` für das nicht-produktive Weiterbildungsprojekt technisch geprüft
 **Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. `FS1` wurde am 02.11.2026 ausdrücklich freigegeben; spätere Full-Stack-Phasen bleiben bis zu ihrem jeweiligen Gate gesperrt.
@@ -585,6 +585,8 @@ Fehler verwenden stabile maschinenlesbare Codes, eine sichere Nutzermeldung und 
 - Das öffentliche Notte-Design bleibt erhalten. Das Dashboard verwendet dieselben Grundtokens, aber eine nüchterne, dichte Arbeitsoberfläche ohne Marketing-Motion.
 
 ## 26. Datenschutz und Aufbewahrung (`OFFEN`)
+
+**Bestätigter Projektumfang 11.11.2026:** Die Anwendung ist ein Weiterbildungs-/Demoprojekt und nicht für einen realen Restaurantbetrieb oder die Eingabe echter Gastdaten freigegeben. Für die Demo gilt der nachfolgende technische Rahmen als ausreichend; er ist keine Rechtsberatung und keine Produktionsfreigabe. Sollte die Anwendung später real genutzt werden, werden sämtliche offenen Punkte dieses Abschnitts wieder zu zwingenden Livegang-Voraussetzungen.
 
 Vor `FS4` müssen mindestens festgelegt und rechtlich geprüft sein:
 
