@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 import type { Server } from "node:http";
 import { createApp } from "../../server/src/http/app";
 import { isDirectExecution } from "../../server/src/server";
+import { ReservationAdminService } from "../../server/src/services/reservation-admin-service";
 
 const servers: Server[] = [];
 
@@ -204,6 +205,29 @@ describe("Express platform foundation", () => {
     await expect(created.json()).resolves.toEqual({ block: { blockId: "BLK-1234567890", date: "2026-11-10", startTime: "17:00", endTime: "19:00", scope: "restaurant", scopeKey: null, tableCount: 8 } });
     const deleted = await fetch(`${baseUrl}/api/admin/reservation-blocks/BLK-1234567890`, { method: "DELETE" });
     expect(deleted.status).toBe(204);
+  });
+
+  it("validates and protects event inquiry administration", async () => {
+    const unauthenticated = await listen(createApp());
+    const denied = await fetch(`${unauthenticated}/api/admin/event-inquiries`);
+    expect(denied.status).toBe(503);
+
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const inquiry = { inquiryId: "INQ-DEV-PRIVATES-DINNER", name: "PLATZHALTER Anna", email: "anna@example.com", eventType: "Privates Dinner", requestedDate: "2026-12-12", partySize: 24, message: "PLATZHALTER", status: "new" as const };
+    const reservationAdminService = {
+      listEventInquiries: async () => [inquiry],
+      createEventInquiry: async (input: Parameters<ReservationAdminService["createEventInquiry"]>[0]) => ({ ...input, inquiryId: "INQ-TEST", status: "new" as const }),
+      getEventInquiry: async () => inquiry,
+      updateEventInquiryStatus: async () => ({ ...inquiry, status: "in_review" }),
+      updateEventInquiryNote: async () => ({ ...inquiry, internalNote: "Follow up" }),
+    };
+    const baseUrl = await listen(createApp({ getAuthenticatedUserId: () => owner.clerkUserId, findAdminProfile: async () => owner, reservationAdminService: reservationAdminService as never }));
+    const invalid = await fetch(`${baseUrl}/api/admin/event-inquiries`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ eventType: "Geburtstag" }) });
+    expect(invalid.status).toBe(400);
+    const created = await fetch(`${baseUrl}/api/admin/event-inquiries`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "PLATZHALTER Lina", email: "lina@example.com", eventType: "Geburtstag", requestedDate: "2027-02-14", partySize: 12, message: "PLATZHALTER" }) });
+    expect(created.status).toBe(201);
+    const status = await fetch(`${baseUrl}/api/admin/event-inquiries/INQ-DEV-PRIVATES-DINNER/status`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "in_review" }) });
+    expect(status.status).toBe(200);
   });
 
   it("rejects a request without an authenticated Clerk user", async () => {

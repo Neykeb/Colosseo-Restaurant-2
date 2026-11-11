@@ -316,3 +316,9 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Seed:** Development-Seed um drei idempotente, ausschließlich synthetische `PLATZHALTER` ergänzt: Privates Dinner (24, `new`), Firmenfeier (35, `in_review`) und Geburtstag (12, `new`).
 - **Atlas-Verifizierung:** Development-Seed erfolgreich ausgeführt; read-only Abfrage bestätigt genau 3 Datensätze mit den erwarteten Typen, Personenzahlen und Statuswerten.
 - **Offen:** öffentliche Anfrage-/Admin-UI-Integration und dedizierte Service-Unit-Tests für die Statusübergangsmatrix.
+
+## 28. FS5-Berechtigungs- und API-Regression – 11.11.2026
+
+- **Ergänzt:** API-Test für geschützte Veranstaltungsanfragen, Pflichtfeldvalidierung, Anlegen und Statusänderung.
+- **Prüfungen:** vollständiger `npm test` erfolgreich; 17 Testdateien und 81/81 Tests bestanden, inklusive Secret-Tracking.
+- **Ergebnis:** FS5-Backend-Berechtigungs- und Validierungsabdeckung ist erweitert. Frontend-Admin-UI, Tastaturprüfung und E2E bleiben offen.
