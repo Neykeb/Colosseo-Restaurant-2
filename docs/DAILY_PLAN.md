@@ -363,3 +363,20 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 - **Umgesetzt:** `PATCH /api/admin/menu/items/:itemId/publication` veröffentlicht oder entzieht die Veröffentlichung eines aktiven Gerichts. Beide Aktionen werden auditiert; nicht aktive oder unbekannte Gerichte werden abgelehnt.
 - **Offen:** Bild-Upload, vollständige Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 36. FS6-GridFS-Medienablage – 11.11.2026
+
+- **Umgesetzt:** MongoDB GridFS mit Bucket `media`, geschütztem JSON-Upload `POST /api/admin/media` und öffentlichem Abruf `GET /api/public/media/:id` ergänzt.
+- **Validierung:** erlaubte Typen JPEG/PNG/WebP, maximale Größe 5 MB, verpflichtender Alternativtext und bereinigter Dateiname. Der Upload bleibt admin-geschützt; Dateien erhalten unveränderliche Cache-Header.
+- **Migration:** `0012_gridfs-media` erfolgreich in Atlas angewendet; Migrationen `0001` bis `0012` stehen auf `applied`.
+- **Offen:** tatsächliche Dateisignaturprüfung, Rechte-/Löschworkflow, Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 37. FS6-Dateisignaturprüfung – 11.11.2026
+
+- **Umgesetzt:** JPEG-, PNG- und WebP-Dateien werden zusätzlich zum MIME-Typ anhand ihrer Binärsignatur geprüft. Falsch deklarierte oder beschädigte Uploads werden mit `MEDIA_SIGNATURE_INVALID` abgelehnt.
+- **Offen:** Rechte-/Löschworkflow, Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 38. FS6-Medien-Rechte und Löschung – 11.11.2026
+
+- **Umgesetzt:** `DELETE /api/admin/media/:id` ergänzt. Medienlöschung ist ownergeschützt, entfernt GridFS-Datei und Chunks und erzeugt ein `media.deleted`-Audit-Ereignis.
+- **Offen:** Admin-UI und E2E-/Accessibility-Prüfung.

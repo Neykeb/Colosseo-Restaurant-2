@@ -8,6 +8,7 @@ import { z } from "zod";
 import { ReservationRequestError, ReservationService } from "../services/reservation-service";
 import { ReservationAdminService } from "../services/reservation-admin-service";
 import { ReservationLockConflictError } from "../repositories/reservation-repository";
+import { deleteMedia, storeMedia, streamMedia } from "../services/media-service";
 
 type ReservationApi = Pick<ReservationService, "getPublicConfiguration" | "getAvailability" | "createReservation">;
 
@@ -145,7 +146,7 @@ export function createApp(options: CreateAppOptions = {}) {
     }));
   }
   app.use(correlationIdMiddleware);
-  app.use(express.json({ limit: "100kb" }));
+  app.use(express.json({ limit: "8mb" }));
 
   app.get("/api/health", (_request, response) => {
     response.status(200).json({ status: "ok", correlationId: response.locals.correlationId });
@@ -181,6 +182,7 @@ export function createApp(options: CreateAppOptions = {}) {
   app.get("/api/public/opening-hours", async (_request, response, next) => {
     try { response.json(await reservationAdmin.getPublicOpeningHours()); } catch (error) { next(error); }
   });
+  app.get("/api/public/media/:id", async (request, response, next) => { try { await streamMedia(request.params.id as string, response); } catch (error) { next(error); } });
 
   app.post("/api/reservations", createReservationRateLimit(), async (request, response, next) => {
     const body = reservationBodySchema.safeParse(request.body);
@@ -310,6 +312,16 @@ export function createApp(options: CreateAppOptions = {}) {
       const item = await reservationAdmin.publishMenuItem(request.params.itemId as string, published.data, response.locals.adminProfile.clerkUserId);
       if (!item) { response.status(404).json({ error: { code: "MENU_ITEM_NOT_FOUND", message: "The active menu item was not found.", correlationId: response.locals.correlationId } }); return; }
       response.json({ item });
+    } catch (error) { next(error); }
+  });
+  app.post("/api/admin/media", ...adminGuard, async (request, response, next) => {
+    try { response.status(201).json({ media: await storeMedia(request.body) }); } catch (error) { next(error); }
+  });
+  app.delete("/api/admin/media/:id", ...adminGuard, async (request, response, next) => {
+    try {
+      const deleted = await deleteMedia(request.params.id as string, response.locals.adminProfile.clerkUserId);
+      if (!deleted) { response.status(404).json({ error: { code: "MEDIA_NOT_FOUND", message: "The media file was not found.", correlationId: response.locals.correlationId } }); return; }
+      response.status(204).end();
     } catch (error) { next(error); }
   });
 

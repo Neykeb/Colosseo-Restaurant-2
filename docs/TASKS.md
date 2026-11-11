@@ -278,7 +278,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 **Start:** `GO FS6` am 11.11.2026 ausdrücklich erteilt. Backend-Grundlage für Kategorien und Gerichte ist in Arbeit; öffentliche Veröffentlichung und Medien-Upload bleiben separate Arbeitspakete.
 
 - [-] Versioniertes Backend-Modell, geschützte Admin-API, Vorschau und expliziter Veröffentlichungsworkflow für Kategorien/Gerichte umgesetzt; Uploadregeln, vollständige UI und E2E bleiben offen.
-- [ ] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren.
+- [-] MongoDB-GridFS-Medienablage mit 5-MB-/MIME-/Alternativtext- und Dateisignaturprüfung, ownergeschütztem Upload/Löschen, Auditierung und öffentlichem Cache-Endpunkt umgesetzt; UI bleibt offen.
 - [-] Öffentliche Ausgabe regulärer Servicezeiten und datierter Sondertage sowie geschützte Menüvorschau ergänzt; vollständige Pflege-, Veröffentlichungs- und UI-Integration bleibt offen.
 - [ ] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen.
 - [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
