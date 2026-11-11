@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import mongoose from "mongoose";
-import { canTransitionReservationStatus, lockSlotStarts, parseDate, timeToMinutes, type ReservationRules, type ReservationStatus } from "../domain/reservation-domain";
+import { canTransitionEventInquiryStatus, canTransitionReservationStatus, lockSlotStarts, parseDate, timeToMinutes, type EventInquiryStatus, type ReservationRules, type ReservationStatus } from "../domain/reservation-domain";
 import { AuditEventModel, EventInquiryModel, ReservationBlockModel, ReservationLockModel, ReservationModel, SettingModel, SpecialDayModel, TableModel } from "../models/core";
 import { ReservationLockConflictError } from "../repositories/reservation-repository";
 
@@ -71,9 +71,13 @@ export class ReservationAdminService {
   async listEventInquiries() { return EventInquiryModel.find().sort({ requestedDate: 1, createdAt: -1 }).lean().exec(); }
   async getEventInquiry(inquiryId: string) { return EventInquiryModel.findOne({ inquiryId }).lean().exec(); }
   async createEventInquiry(input: { name: string; email: string; phone?: string; eventType: string; requestedDate: string; partySize: number; message: string }) { return EventInquiryModel.create({ ...input, inquiryId: `inq_${randomUUID().replaceAll("-", "")}`, status: "new" }); }
-  async updateEventInquiryStatus(inquiryId: string, status: "new" | "in_review" | "accepted" | "declined" | "closed", actorId: string) {
-    const inquiry = await EventInquiryModel.findOneAndUpdate({ inquiryId }, { $set: { status } }, { returnDocument: "after", runValidators: true }).lean().exec();
-    if (inquiry) await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "event_inquiry.status_changed", target: inquiryId, metadata: { status } });
+  async updateEventInquiryStatus(inquiryId: string, status: EventInquiryStatus, actorId: string) {
+    const current = await EventInquiryModel.findOne({ inquiryId }).select({ status: 1 }).lean().exec();
+    if (!current) return null;
+    if (!canTransitionEventInquiryStatus(current.status as EventInquiryStatus, status)) throw new Error("INVALID_EVENT_INQUIRY_TRANSITION");
+    const inquiry = await EventInquiryModel.findOneAndUpdate({ inquiryId, status: current.status }, { $set: { status } }, { returnDocument: "after", runValidators: true }).lean().exec();
+    if (!inquiry) throw new Error("EVENT_INQUIRY_UPDATE_CONFLICT");
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "event_inquiry.status_changed", target: inquiryId, metadata: { status } });
     return inquiry;
   }
   async updateEventInquiryNote(inquiryId: string, internalNote: string, actorId: string) {

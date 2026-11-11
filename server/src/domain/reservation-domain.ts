@@ -203,3 +203,17 @@ export function isWithinServiceWindow(startTime: string, endTime: string, window
 export function assertReservationTransition(from: ReservationStatus, to: ReservationStatus): void {
   if (!canTransitionReservationStatus(from, to)) throw new Error("Invalid reservation status transition.");
 }
+
+export type EventInquiryStatus = "new" | "in_review" | "accepted" | "declined" | "closed";
+
+const eventInquiryStatusTransitions: Record<EventInquiryStatus, readonly EventInquiryStatus[]> = {
+  new: ["in_review", "declined", "closed"],
+  in_review: ["accepted", "declined", "closed"],
+  accepted: ["closed"],
+  declined: ["closed"],
+  closed: [],
+};
+
+export function canTransitionEventInquiryStatus(from: EventInquiryStatus, to: EventInquiryStatus): boolean {
+  return eventInquiryStatusTransitions[from].includes(to);
+}

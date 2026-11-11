@@ -277,3 +277,42 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Externe Blocker:** Verifizierte Resend-Produktionsdomain sowie fachlich/rechtlich freigegebene Datenschutz-, Aufbewahrungs- und Stornoregeln.
 - **Phasengrenze:** `FS5` beginnt erst nach abgeschlossener FS4-Präsentation, ausdrücklicher Gate-Abnahme und neuem `GO`.
 - **Branch-Integration:** Die Konflikte zwischen `feature/momo` und `dev` wurden vollständig aufgelöst. Die getestete öffentliche Website, mobile Navigation, Reservierungsstrecke und bestehende Admin-Autorisierung blieben maßgeblich; ergänzende Storno-, Aufbewahrungs-, Outbox- und Migrationsbausteine aus `dev` wurden kompatibel übernommen. `dist/` bleibt generiert und unversioniert. Typecheck, OXLint, 76/76 Tests und Production-Build waren anschließend erfolgreich; der Build meldete nur die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL`.
+
+## 22. FS4-Abnahme – 11.11.2026
+
+- **Gate:** Der Nutzer hat die präsentierte FS4-Gaststrecke mit ausdrücklichem `GO FS4` abgenommen.
+- **Status:** FS4 ist abgenommen. FS5 darf erst nach einem separaten ausdrücklichen `GO FS5` begonnen werden.
+- **Person A nächster zulässiger Schritt:** FS5-Arbeitsumfang und Zuständigkeiten vorbereiten; keine FS5-Implementierung ohne neues Gate beginnen.
+
+## 23. FS5-Freigabe – 11.11.2026
+
+- **Gate:** Der Nutzer erteilt ausdrücklich `GO FS5`.
+- **Status:** FS5 ist freigegeben; die Umsetzung darf beginnen.
+- **Person A nächster Schritt:** FS5-Backend-Regression für Reservierungsverwaltung und Veranstaltungsanfragen gegen den aktuellen Integrationsstand prüfen und den ersten offenen API-/Datenbankpunkt bearbeiten.
+
+## 24. FS5-Backend-Regression – 11.11.2026
+
+- **Dependency-Prüfung:** `resend` war in `package.json` und `package-lock.json` deklarierter, lokal aber fehlender Bestandteil. `npm ci --include=dev --ignore-scripts` stellte die Lockfile-Installation wieder her.
+- **Ergebnisse:** Typecheck, Lint und Production-Build erfolgreich; der direkte Vitest-Lauf ergab 65/76 erfolgreiche Tests. Die 11 HTTP-Tests scheiterten ausschließlich an der Sandbox-Blockade `listen EPERM` für lokale Listener.
+- **Atlas:** `npm run db:migrate:status` erneut versucht; DNS-SRV-Auflösung zu Atlas scheitert weiterhin mit `querySrv ECONNREFUSED`. Es wurde keine Datenbankänderung durchgeführt.
+- **Nächster Einstieg:** HTTP-Regression und Atlas-Migrationsstatus in einer Umgebung mit lokalem Listener und erreichbarem Atlas-DNS wiederholen; danach FS5-Daten-/API-Regression fortsetzen.
+
+## 25. FS5-Regression nach Umgebungsfreigabe – 11.11.2026
+
+- **Verifiziert:** HTTP-Regression mit lokalem Listener erfolgreich; 12/12 HTTP-Tests bestanden.
+- **Verifiziert:** vollständiger `npm test` erfolgreich; 16 Testdateien und 76/76 Tests bestanden, einschließlich Secret-Tracking-Prüfung.
+- **Atlas:** `npm run db:migrate:status` erfolgreich; Migrationen `0001` bis `0010` stehen auf `applied`.
+- **Ergebnis:** Die bisherigen Sandbox-Blockaden sind für diese Prüfung überwunden. Es wurde keine neue Migration ausgeführt und keine Datenbankstruktur verändert.
+- **Nächster Einstieg:** FS5-Funktionsarbeit fortsetzen; als Person A folgt die fachliche API-/Datenprüfung der operativen Verwaltung und Veranstaltungsanfragen.
+
+## 26. FS5-Fachprüfung Veranstaltungsanfragen – 11.11.2026
+
+- **Befund:** Die aktuelle `ReservationAdminService`-Variante validierte bisher nur das Statusformat, nicht die fachlich erlaubten Übergänge.
+- **Korrektur:** Statusübergänge für Veranstaltungsanfragen sind jetzt atomar gegen den erwarteten Ausgangsstatus abgesichert; ungültige Übergänge und parallele Änderungen werden abgelehnt. Audit-Ereignisse entstehen nur nach erfolgreicher Änderung.
+- **Erledigt:** Statusübergangsmatrix als datenbankunabhängige Domainfunktion zentralisiert und mit 4 dedizierten Unit-Tests abgesichert. Die drei Entwicklungsbeispiele wurden anschließend gegen Atlas geprüft.
+
+## 27. FS5-Atlas-Prüfung Veranstaltungsanfragen – 11.11.2026
+
+- **Seed:** Development-Seed um drei idempotente, ausschließlich synthetische `PLATZHALTER` ergänzt: Privates Dinner (24, `new`), Firmenfeier (35, `in_review`) und Geburtstag (12, `new`).
+- **Atlas-Verifizierung:** Development-Seed erfolgreich ausgeführt; read-only Abfrage bestätigt genau 3 Datensätze mit den erwarteten Typen, Personenzahlen und Statuswerten.
+- **Offen:** öffentliche Anfrage-/Admin-UI-Integration und dedizierte Service-Unit-Tests für die Statusübergangsmatrix.
