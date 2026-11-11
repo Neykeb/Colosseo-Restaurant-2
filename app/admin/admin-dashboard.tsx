@@ -1,6 +1,7 @@
-import { CalendarBlank, CalendarDots, Confetti, UsersThree } from "@phosphor-icons/react";
+import { CalendarBlank, CalendarDots, Confetti, LockKey, UsersThree } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ReservationManagement } from "./reservation-management";
+import { ScheduleManagement } from "./schedule-management";
 
 type AdminProfile = {
   displayName: string;
@@ -147,6 +148,7 @@ export function AdminDashboard({ profile, getToken, userControl }: {
           <a href="#overview" aria-current="page"><CalendarBlank aria-hidden="true" /> Übersicht</a>
           <a href="#reservations"><UsersThree aria-hidden="true" /> Reservierungen</a>
           <a href="#schedule"><CalendarDots aria-hidden="true" /> Kalender</a>
+          <a href="#availability"><LockKey aria-hidden="true" /> Betrieb</a>
           <a href="#inquiries"><Confetti aria-hidden="true" /> Anfragen</a>
         </nav>
         <a className="admin-site-link" href="/de">Zur Website</a>
@@ -205,6 +207,8 @@ export function AdminDashboard({ profile, getToken, userControl }: {
             </div>;
           }) : null}
         </section>
+
+        <ScheduleManagement getToken={getToken} />
 
         <section className="admin-inquiry-preview" id="inquiries" aria-labelledby="inquiry-title">
           <div className="admin-section-heading"><div><p className="admin-kicker">Veranstaltungen</p><h2 id="inquiry-title">Offene Anfragen</h2></div></div>

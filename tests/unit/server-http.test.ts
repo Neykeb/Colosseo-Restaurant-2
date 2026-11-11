@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 import type { Server } from "node:http";
 import { createApp } from "../../server/src/http/app";
 import { isDirectExecution } from "../../server/src/server";
+import type { ReservationAdminService } from "../../server/src/services/reservation-admin-service";
 
 const servers: Server[] = [];
 
@@ -203,6 +204,53 @@ describe("Express platform foundation", () => {
     expect(created.status).toBe(201);
     await expect(created.json()).resolves.toEqual({ block: { blockId: "BLK-1234567890", date: "2026-11-10", startTime: "17:00", endTime: "19:00", scope: "restaurant", scopeKey: null, tableCount: 8 } });
     const deleted = await fetch(`${baseUrl}/api/admin/reservation-blocks/BLK-1234567890`, { method: "DELETE" });
+    expect(deleted.status).toBe(204);
+  });
+
+  it("validates and manages protected special-day rules", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const savedRules: Array<{ date: string; label: string; closed: boolean; opens?: string; closes?: string }> = [];
+    const reservationAdminService = {
+      listSpecialDays: async () => savedRules,
+      saveSpecialDay: async (input: { date: string; label: string; closed: boolean; opens?: string; closes?: string }) => {
+        savedRules.push(input);
+        return input;
+      },
+      deleteSpecialDay: async (date: string) => date === "2026-12-24" ? savedRules.find((day) => day.date === date) ?? { date, label: "Heiligabend", closed: true } : null,
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService: reservationAdminService as unknown as Partial<ReservationAdminService>,
+    }));
+
+    const invalidOpening = await fetch(`${baseUrl}/api/admin/special-days/2026-12-23`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ label: "Sonderöffnung", closed: false }),
+    });
+    expect(invalidOpening.status).toBe(400);
+
+    const invalidRange = await fetch(`${baseUrl}/api/admin/special-days/2026-12-23`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ label: "Sonderöffnung", closed: false, opens: "21:00", closes: "17:00" }),
+    });
+    expect(invalidRange.status).toBe(400);
+
+    const saved = await fetch(`${baseUrl}/api/admin/special-days/2026-12-24`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ label: "Heiligabend", closed: true }),
+    });
+    expect(saved.status).toBe(200);
+    await expect(saved.json()).resolves.toEqual({ specialDay: { date: "2026-12-24", label: "Heiligabend", closed: true } });
+
+    const listed = await fetch(`${baseUrl}/api/admin/special-days`);
+    expect(listed.status).toBe(200);
+    await expect(listed.json()).resolves.toEqual({ specialDays: [{ date: "2026-12-24", label: "Heiligabend", closed: true }] });
+
+    const deleted = await fetch(`${baseUrl}/api/admin/special-days/2026-12-24`, { method: "DELETE" });
     expect(deleted.status).toBe(204);
   });
 

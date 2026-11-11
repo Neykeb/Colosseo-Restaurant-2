@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS4` für das nicht-produktive Weiterbildungsprojekt technisch geprüft; Resend-Testmodus verifiziert, Gate-Abnahme offen
-**Letzte Aktualisierung:** 10.11.2026
+**Status:** Full-Stack-Phase `FS5` in Arbeit; operative Adminverwaltung wird schrittweise umgesetzt
+**Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -262,7 +262,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 - [x] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen. Person B ergänzte am 11.11.2026 die geschützte Kalender-API und eine responsive Adminübersicht mit Zeitraumwahl, Kennzahlen, Listenalternative, Reservierungen, Sperrzeiten, Sondertagen und offenen Veranstaltungsanfragen. Lade-, Leer- und Fehlerzustände sind enthalten; Typecheck, OXLint, 77/77 Tests und Production-Build sind erfolgreich.
 - [x] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren. Person B ergänzte am 11.11.2026 eine paginierte responsive Liste, geschützte Detailansicht mit Fokusbindung/Escape, erlaubte Statusaktionen und Auditverlauf. Tischumlegungen validieren echte aktive Tischkombinationen und schreiben Sperren, Zuordnungen und Auditereignis atomar; Konflikte rollen vollständig zurück. Storno/Ablehnung gibt Belegung atomar frei. Der `break-ui`-Check gegen lange Werte, leere/fehlende Daten, Einzahl und mehr als 100 Treffer führte zu Wortumbruch, korrekter Einzahl und echter Pagination. Typecheck, OXLint, 78/78 Tests und Production-Build sind erfolgreich.
-- [ ] Sonderöffnungen, Schließungen und Sperrzeiten verwalten.
+- [x] Sonderöffnungen, Schließungen und Sperrzeiten verwalten. Person B ergänzte am 11.11.2026 einen geschützten, responsiven Betriebsbereich für datierte Schließtage, Sonderöffnungen sowie Restaurant-, Bereichs- und Tischsperren. Die API verlangt für Sonderöffnungen vollständige, aufsteigende Uhrzeiten; operative Sperren verwenden weiterhin den atomaren Reservierungsindex und melden Überschneidungen verständlich. Lade-, Leer-, Erfolgs- und Fehlerzustände sowie 44-px-Bedienziele sind enthalten. Typecheck, OXLint, 79/79 Tests und Production-Build sind erfolgreich.
 - [ ] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren.
 - [ ] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen.
 - [ ] **GATE FS5:** operative Verwaltung präsentieren; auf GO für `FS6` warten.

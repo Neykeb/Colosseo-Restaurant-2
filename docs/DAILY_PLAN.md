@@ -1,8 +1,8 @@
 # Tagesplan Full-Stack-Finalprojekt
 
-**Status:** FS4 technisch umgesetzt; Person-B-Aufgaben vom 10.11. einschließlich Render-E2E abgeschlossen, externe Freigaben und Gate-Abnahme offen
+**Status:** FS5 aktiv; drei operative Person-B-Bausteine umgesetzt, Veranstaltungsanfragen als nächster freizugebender Schritt
 
-**Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
+**Phase:** `FS5` – Reservierungs-, Kalender- und Anfrageverwaltung
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
@@ -290,3 +290,6 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Extremdatenprüfung:** `break-ui` deckte zwei reale Schwächen auf: fehlende Bedienbarkeit weiterer Treffer oberhalb der ersten 100 Ergebnisse und falscher Plural bei genau einem Eintrag. Die Liste ist nun serverseitig in 25er-Seiten bedienbar, die Einzahl stimmt und lange Gast-/Referenzwerte können umbrechen. Lange Namen/E-Mails, fehlende optionale Kontakte, leere Ergebnisse und schmale Ansichten waren bereits abgesichert.
 - **Nächster Einstieg Person B:** Sonderöffnungen, Schließungen und operative Sperrzeiten in der Adminoberfläche verwalten; danach Veranstaltungsanfragen vollständig bearbeiten.
 - **Lokaler Adminzugriff korrigiert:** Ein alter Vite-Prozess belegte Port `5173`, sodass ein zweiter Lauf unbemerkt auf `5174` startete. Clerk akzeptierte die Anmeldung dort, der Express-Server lehnte die Session aber wegen der nicht autorisierten Herkunft ab und die Oberfläche zeigte nur den allgemeinen Verfügbarkeitsfehler. Doppelte Prozesse wurden beendet, Vite läuft wieder auf `5173`, und `strictPort` verhindert künftig ein stilles Ausweichen auf einen nicht freigegebenen Port.
+- **Dritter FS5-Baustein erledigt:** Der neue Bereich „Betrieb“ verwaltet datierte Schließtage, Sonderöffnungen und zeitlich begrenzte Restaurant-, Bereichs- oder Tischsperren. Der Owner erhält explizite Lade-, Leer-, Erfolgs-, Konflikt- und Fehlerzustände; mobile Ansichten stapeln die beiden Arbeitsbereiche ohne horizontale Abhängigkeit. Sonderöffnungen ohne vollständige oder chronologisch gültige Uhrzeiten werden auch serverseitig abgelehnt.
+- **Prüfungen nach Baustein 3:** Typecheck, OXLint, 79/79 automatisierte Tests und Production-Build erfolgreich. Der Build meldet nur die bekannten Hinweise zu fremden `use client`-Direktiven und die lokal nicht gesetzte `SITE_URL`. Die geschützte Datenansicht konnte ohne erneute Nutzeranmeldung nicht visuell mit Realdaten geöffnet werden; Struktur, Breakpoints, Touchziele und leere Zustände wurden im Code geprüft.
+- **Nächster Einstieg Person B:** Veranstaltungsanfragen mit Status und interner Bearbeitung vollständig in das Admin-Dashboard integrieren. Dafür ist ein neues ausdrückliches `GO` erforderlich.

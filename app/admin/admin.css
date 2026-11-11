@@ -154,7 +154,8 @@
 
 .admin-schedule,
 .admin-inquiry-preview,
-.admin-reservations {
+.admin-reservations,
+.admin-availability {
   margin-top: clamp(3rem, 7vw, 7rem);
   scroll-margin-top: 2rem;
 }
@@ -178,6 +179,7 @@
 }
 
 .admin-section-heading > p { margin: 0; color: #6a6056; font-size: 0.86rem; }
+.admin-section-intro { max-width: 62ch; margin: 1.25rem 0 0; color: #5d554c; line-height: 1.6; }
 .admin-day { display: grid; grid-template-columns: minmax(10rem, 0.28fr) 1fr; gap: 2rem; border-bottom: 1px solid rgb(33 29 24 / 16%); padding: 1.4rem 0; }
 .admin-day h3 { margin: 0; font-size: 0.78rem; text-transform: capitalize; }
 .admin-agenda-list { display: grid; gap: 0.25rem; }
@@ -273,6 +275,38 @@
 .admin-pagination button:disabled { cursor: not-allowed; opacity: 0.42; }
 .admin-pagination button:focus-visible { outline: 3px solid #a94b3f; outline-offset: 3px; }
 .admin-pagination span { color: #5d554c; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+
+.admin-operation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: 2rem; background: rgb(33 29 24 / 16%); }
+.admin-operation-card { min-width: 0; padding: clamp(1.25rem, 3vw, 2.25rem); background: #f8f2e8; }
+.admin-operation-title { display: flex; align-items: flex-start; gap: 1rem; }
+.admin-operation-title > svg { width: 1.4rem; height: 1.4rem; flex: 0 0 auto; color: #8e4036; }
+.admin-operation-title h3 { margin: 0; font-family: "Instrument Serif", Georgia, serif; font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: 400; line-height: 1; }
+.admin-operation-title p { margin: 0.45rem 0 0; color: #6a6056; font-size: 0.84rem; line-height: 1.5; }
+.admin-operation-form { display: grid; gap: 1rem; margin-top: 2rem; }
+.admin-operation-form > label,
+.admin-time-row label { display: grid; gap: 0.45rem; color: #5d554c; font-size: 0.74rem; font-weight: 650; }
+.admin-operation-form input,
+.admin-operation-form select { width: 100%; min-height: 2.75rem; border: 1px solid rgb(33 29 24 / 28%); border-radius: 0; padding: 0.65rem 0.75rem; color: #211d18; background: #fffaf2; font: 400 0.9rem/1 "Geist Variable", sans-serif; }
+.admin-operation-form fieldset { margin: 0; border: 0; padding: 0; }
+.admin-operation-form legend { margin-bottom: 0.45rem; padding: 0; color: #5d554c; font-size: 0.74rem; font-weight: 650; }
+.admin-choice-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+.admin-choice-row label { display: flex; min-height: 2.75rem; align-items: center; gap: 0.55rem; border: 1px solid rgb(33 29 24 / 24%); padding: 0.65rem 0.75rem; cursor: pointer; }
+.admin-choice-row input { width: 1rem; min-height: 1rem; margin: 0; padding: 0; accent-color: #6f2e27; }
+.admin-time-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.admin-operation-form .admin-save-button { justify-self: start; margin: 0.25rem 0 0; }
+.admin-operation-form button:disabled { cursor: not-allowed; opacity: 0.5; }
+.admin-operation-form :focus-visible,
+.admin-operation-list button:focus-visible { outline: 3px solid #a94b3f; outline-offset: 3px; }
+.admin-form-message { min-height: 2.5rem; margin: 1rem 0 0; color: #6f2e27; font-size: 0.82rem; font-weight: 650; line-height: 1.45; }
+.admin-operation-list { border-top: 1px solid rgb(33 29 24 / 18%); }
+.admin-operation-list > div { display: flex; min-height: 4.5rem; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid rgb(33 29 24 / 14%); padding: 0.75rem 0; }
+.admin-operation-list > div > div { display: grid; min-width: 0; gap: 0.25rem; }
+.admin-operation-list strong,
+.admin-operation-list span { overflow-wrap: anywhere; }
+.admin-operation-list span { color: #6a6056; font-size: 0.76rem; line-height: 1.45; }
+.admin-operation-list button { display: grid; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; place-items: center; border: 1px solid rgb(33 29 24 / 24%); color: #6f2e27; background: transparent; cursor: pointer; }
+.admin-operation-list button svg { width: 1rem; height: 1rem; }
+.admin-compact-empty { margin: 0; padding: 1.25rem 0; color: #6a6056; font-size: 0.84rem; }
 
 @keyframes admin-backdrop-enter { from { opacity: 0; } }
 @keyframes admin-panel-enter { from { transform: translateX(2rem); opacity: 0; } }
@@ -429,6 +463,7 @@
   .admin-status { grid-column: 2; justify-self: start; }
   .admin-filterbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-filterbar label:first-child { grid-column: 1 / -1; }
+  .admin-operation-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 430px) {
@@ -443,6 +478,8 @@
   .admin-reservation-table td:nth-child(4) { display: none; }
   .admin-detail-facts,
   .admin-table-options { grid-template-columns: 1fr; }
+  .admin-choice-row,
+  .admin-time-row { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

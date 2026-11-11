@@ -63,7 +63,9 @@ const calendarQuerySchema = z.object({
     const end = Date.parse(`${endDate}T00:00:00Z`);
     return Number.isFinite(start) && Number.isFinite(end) && end - start <= 31 * 86_400_000;
   }, { path: ["endDate"], message: "Calendar ranges are limited to 31 days." });
-const specialDaySchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), label: z.string().trim().min(1).max(160), closed: z.boolean(), opens: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(), closes: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional() });
+const specialDaySchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), label: z.string().trim().min(1).max(160), closed: z.boolean(), opens: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(), closes: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional() })
+  .refine(({ closed, opens, closes }) => closed || Boolean(opens && closes), { path: ["opens"], message: "Special openings require opening and closing times." })
+  .refine(({ closed, opens, closes }) => closed || Boolean(opens && closes && opens < closes), { path: ["closes"], message: "Closing time must be later than opening time." });
 const eventInquirySchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254), phone: z.string().trim().min(5).max(40).optional(), eventType: z.string().trim().min(1).max(80), requestedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), partySize: z.number().int().min(1).max(500), message: z.string().trim().min(1).max(2_000) });
 const eventInquiryStatusSchema = z.enum(["new", "in_review", "accepted", "declined", "closed"]);
 
