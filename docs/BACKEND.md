@@ -1,10 +1,10 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS4` freigegeben und teilweise umgesetzt; externe Pflichtdaten stehen aus
+**Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Render live und technischer Produktions-E2E abgeschlossen, externe Freigaben und Gate-Abnahme offen
 
 **Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
-**Letzte Aktualisierung:** 09.11.2026
+**Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
@@ -18,8 +18,10 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 - Der Atlas-Benutzer besitzt am 03.11.2026 verifiziert ausschließlich datenbankspezifisches `readWrite` für `colosseo` und `colosseo_test`. Entwicklungsverbindung, Testverbindung und Test-Migrationslauf sind damit erfolgreich.
 - Vom Nutzer bestätigter Atlas-Betriebsstand: MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`), Replica Set mit drei Nodes, Backups derzeit inaktiv, keine verknüpften App Services und ein vorhandener Search-Index. Render soll später möglichst regionsnah betrieben werden; Backups bleiben vor einem realen Produktionsbetrieb zu klären.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.
-- Aktuelle Phase: `FS1`. MongoDB Atlas ohne zusätzliche lokale Docker-Datenbank und `GO für FS1` wurden am 02.11.2026 bestätigt.
+- Aktuelle Phase: `FS4`. Das öffentliche Reservierungsformular, die atomar erzeugte E-Mail-Outbox und der Resend-Transport sind implementiert. Der Render-Service ist live; beliebige produktive E-Mail-Empfänger bleiben bis zu einer verifizierten Absenderdomain eingeschränkt.
+- Die reine Reservierungslogik, öffentliche Config-/Verfügbarkeits-/Buchungsendpunkte, idempotente Bestätigung, Rate-Limit, atomare Tisch-Zeit-Sperren sowie geschützte Admin-Endpunkte für manuelle Buchungen und Sperrzeiten sind implementiert. Migrationen `0005` und `0006` sind in `colosseo_test` und `colosseo` angewendet.
 - Die Express-/TypeScript-Grundlage einschließlich statischer Produktionsauslieferung ist implementiert. Entwicklungs- und Produktionsprozess, Healthcheck, API-404 sowie die drei vorgerenderten Sprachseiten wurden am 05.11.2026 über echte lokale Listener geprüft.
+- Der gemeinsame React-/Express-Web-Service ist per Render-Blueprint in Frankfurt live. Reproduzierbarer Build, idempotente Migration vor dem Serverstart, `/api/health`, MongoDB Atlas, Clerk, Resend-Konfiguration und `SITE_URL` sind in der Render-Umgebung aktiv; Secrets bleiben ausschließlich dort gespeichert.
 - Person A hat am 04.11.2026 vorläufige Kernmodelle, eine typisierte Reservation-Repository-/Service-Grenze, die erste Core-Indexmigration und einen künstlichen Development-Seed ergänzt. Reale Reservierungsregeln und produktive Geschäftsdaten sind nicht festgeschrieben.
 - Person A hat am 05.11.2026 die Clerk-Express-Middleware, `admin_profiles`, das Adminprofil-Repository sowie serverseitige `owner`-/`staff`-Autorisierung mit 401-/403-Tests ergänzt. Clerk bleibt Quelle der Identität; MongoDB bleibt Quelle der fachlichen Adminberechtigung.
 
@@ -124,29 +126,30 @@ Die ausführlichen Regeln stehen in `AGENTS.md` und `docs/SPEC.md`. Für den sch
 - E-Mail-Service: Resend
 - Hosting: Render, zunächst für das Finalprojekt
 
-### Aktueller FS2-Einstieg
+### Aktueller FS4-Stand
 
-- `FS1` wurde am 05.11.2026 abgenommen und `FS2` ausdrücklich freigegeben.
-- Eine Clerk-Anwendung existiert; Google ist der einzige OAuth-Anbieter.
-- Der erste Restaurantbesitzer wird über seine Clerk User-ID als `owner` mit Vollzugriff zugelassen.
-- Die Clerk-Änderungen von Person A müssen zuerst auf `dev` verfügbar sein; bis dahin wird keine parallele oder doppelte Authentifizierungsimplementierung begonnen.
+- Die Gaststrecke prüft Verfügbarkeit und bestätigt eine Reservierung ausschließlich nach erfolgreicher atomarer Datenbanktransaktion.
+- Pro bestätigter Buchung entstehen eindeutige Outbox-Ereignisse für Restaurant und – sofern eine E-Mail angegeben wurde – Gast. Der Worker nutzt dieselbe Ereignis-ID als Resend-Idempotenzschlüssel und wiederholt temporär fehlgeschlagene Zustellungen begrenzt.
+- Empfänger für Restaurantbenachrichtigungen: `mohammad.amiri@dci-student.org` (`VORLÄUFIG BESTÄTIGT 09.11.2026`).
+- Der lokale Resend-API-Key und der Testabsender `onboarding@resend.dev` sind konfiguriert. Ein realer Gastversand wurde am 09.11.2026 mit Providerstatus `Delivered` und genau einem eindeutigen Outbox-Ereignis verifiziert.
+- Ohne verifizierte eigene Domain erlaubt Resend nur Testzustellungen an die Adresse des Resend-Kontos. Die Restaurantbenachrichtigung an die vorläufige DCI-Adresse wurde deshalb erwartungsgemäß abgelehnt und bleibt in der Outbox wiederholbar; eine produktive Absenderdomain bleibt offen.
 
 ### Vor späteren Phasen offen
 
 - Backup-Strategie beziehungsweise passender Atlas-Tarif vor einem realen Produktionsbetrieb
-- konkrete Clerk User-ID des ersten Owners
+- konkrete Clerk User-ID jedes freizugebenden Owners
 - konkrete Rechte für `staff`; bis zur Freigabe bleibt diese Rolle gesperrt
 - reale Tische, Bereiche, Kombinations- und Reservierungsregeln
 - Datenschutz-, Aufbewahrungs-, Storno- und No-show-Regeln
-- E-Mail-Absenderdomain und Restaurantempfänger
+- E-Mail-Absenderdomain; Restaurantempfänger ist vorläufig festgelegt
 - Bildspeicher für Speisekartenmedien
 
 Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 
 ## 8. Nächster zulässiger Schritt
 
-1. Auf den Clerk-Push von Person A nach `dev` warten und ihn konfliktfrei integrieren.
-2. Vorhandene Clerk-Umgebungsvariablen, Google-OAuth-Fluss und Secret-Trennung prüfen, ohne Schlüssel auszugeben.
-3. Konkrete Clerk User-ID des ersten Owners erfassen und anschließend nur den noch fehlenden FS2-Umfang implementieren.
+1. Eigene Absenderdomain beschaffen und in Resend verifizieren; bis dahin bleibt der Versand ausdrücklich im eingeschränkten Testmodus.
+2. Datenschutz-, Aufbewahrungs- und Stornoregel fachlich beziehungsweise rechtlich freigeben und die verbleibenden FS4-Prüfungen ausführen.
+3. `FS4` präsentieren und vor `FS5` auf ein neues ausdrückliches `GO` warten.
 
 Der operative Termin- und Personenplan steht in `docs/DAILY_PLAN.md`.

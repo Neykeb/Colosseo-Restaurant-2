@@ -64,16 +64,18 @@ export function AdminPage() {
 
     const controller = new AbortController();
     void getToken().then(async (token) => {
-      const response = await fetch("/api/admin/me", {
+      const response = await fetch("/api/admin/session", {
         headers: token ? { authorization: `Bearer ${token}` } : undefined,
         signal: controller.signal,
       });
 
       if (response.ok) {
-        const body = await response.json() as { userId: string; role: "owner" | "staff"; displayName: string };
-        setAccess({ status: "authorized", profile: { clerkUserId: body.userId, role: body.role, active: true, displayName: body.displayName } });
-      } else if (response.status === 401 || response.status === 403) {
+        const body = await response.json() as { admin: AdminProfile };
+        setAccess({ status: "authorized", profile: body.admin });
+      } else if (response.status === 403) {
         setAccess({ status: "denied" });
+      } else if (response.status === 401) {
+        setAccess({ status: "unavailable" });
       } else {
         setAccess({ status: "unavailable" });
       }

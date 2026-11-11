@@ -1,37 +1,93 @@
 import express, { type ErrorRequestHandler, type RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
 import { clerkMiddleware } from "@clerk/express";
-import { getAuth } from "@clerk/express";
 import { fileURLToPath } from "node:url";
+import { requireAdminRole, type GetAuthenticatedUserId } from "../auth/admin-authorization";
 import { AdminProfileRepository } from "../repositories/admin-profile-repository";
 import { z } from "zod";
-import { BookingError, BookingService } from "../services/booking-service";
-import { createRateLimit } from "./rate-limit";
-import { requireAdminRole } from "../auth/admin-authorization";
+import { ReservationRequestError, ReservationService } from "../services/reservation-service";
+import { ReservationAdminService } from "../services/reservation-admin-service";
+import { ReservationLockConflictError } from "../repositories/reservation-repository";
+
+type ReservationApi = Pick<ReservationService, "getPublicConfiguration" | "getAvailability" | "createReservation">;
 
 interface CreateAppOptions {
   staticDirectory?: URL;
-  bookingService?: BookingService;
-  adminGuard?: RequestHandler;
+  clerk?: {
+    secretKey: string;
+    publishableKey: string;
+    authorizedParties?: string[];
+  };
+  findAdminProfile?: InstanceType<typeof AdminProfileRepository>["findByClerkUserId"];
+  getAuthenticatedUserId?: GetAuthenticatedUserId;
+  reservationService?: ReservationApi;
+  reservationAdminService?: Partial<ReservationAdminService>;
 }
 
-const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
-const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
-const reservationBodySchema = z.object({
-  date: dateSchema,
-  startTime: timeSchema,
-  partySize: z.number().int().min(1).max(50),
-  guest: z.object({ name: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254).optional(), phone: z.string().trim().min(5).max(40).optional() }).refine((guest) => guest.email || guest.phone, "Email or phone is required."),
-  locale: z.enum(["de", "en", "it"]).default("de"),
-  internalNote: z.string().trim().max(1_000).optional(),
+const availabilityQuerySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  partySize: z.coerce.number().int(),
 });
-const reservationStatusSchema = z.enum(["pending", "confirmed", "declined", "cancelled", "seated", "completed", "no_show"]);
-const tableAssignmentSchema = z.object({ tableKeys: z.array(z.string().trim().min(1).max(80)).min(1).max(4) });
-const blockBodySchema = z.object({ date: dateSchema, startTime: timeSchema, endTime: timeSchema, label: z.string().trim().min(1).max(160) });
-const specialDayBodySchema = z.object({ date: dateSchema, label: z.string().trim().min(1).max(160), closed: z.boolean(), opens: timeSchema.optional(), closes: timeSchema.optional() });
-const eventInquiryBodySchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254), phone: z.string().trim().min(5).max(40).optional(), eventType: z.string().trim().min(1).max(80), requestedDate: dateSchema, partySize: z.number().int().min(1).max(500), message: z.string().trim().min(1).max(2_000) });
+
+const reservationBodySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+  partySize: z.number().int(),
+  locale: z.enum(["de", "en", "it"]).default("de"),
+  guest: z.object({
+    name: z.string().trim().min(2).max(120),
+    email: z.string().trim().email().max(254).optional(),
+    phone: z.string().trim().min(6).max(30).optional(),
+  }).refine(({ email, phone }) => Boolean(email || phone), { message: "Email or phone is required." }),
+  privacyAcknowledged: z.literal(true),
+});
+
+const reservationBlockSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+  endTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+  scope: z.enum(["restaurant", "area", "table"]),
+  scopeKey: z.string().trim().min(1).max(80).optional(),
+  reason: z.string().trim().min(2).max(240),
+}).refine(({ startTime, endTime }) => startTime < endTime, { path: ["endTime"], message: "End time must be later than start time." })
+  .refine(({ scope, scopeKey }) => scope === "restaurant" || Boolean(scopeKey), { path: ["scopeKey"], message: "Area and table blocks require a scope key." });
+const reservationStatusSchema = z.enum(["requested", "pending", "confirmed", "cancelled", "declined", "seated", "completed", "no_show"]);
+const reservationListSchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), status: reservationStatusSchema.optional(), q: z.string().trim().max(120).optional(), page: z.coerce.number().int().min(1).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() });
+const specialDaySchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), label: z.string().trim().min(1).max(160), closed: z.boolean(), opens: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(), closes: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional() });
+const eventInquirySchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254), phone: z.string().trim().min(5).max(40).optional(), eventType: z.string().trim().min(1).max(80), requestedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), partySize: z.number().int().min(1).max(500), message: z.string().trim().min(1).max(2_000) });
 const eventInquiryStatusSchema = z.enum(["new", "in_review", "accepted", "declined", "closed"]);
-const eventInquiryNoteSchema = z.object({ internalNote: z.string().trim().max(2_000) });
+
+function sendValidationError(response: express.Response, details: unknown): void {
+  response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "The request data is invalid.", details, correlationId: response.locals.correlationId } });
+}
+
+function sendReservationError(response: express.Response, error: unknown): void {
+  if (error instanceof ReservationRequestError) {
+    response.status(error.reason === "fully_booked" ? 409 : 422).json({ error: { code: error.reason.toUpperCase(), message: error.message, correlationId: response.locals.correlationId } });
+    return;
+  }
+  throw error;
+}
+
+function createReservationRateLimit(maxRequests = 10, windowMs = 60_000): RequestHandler {
+  const clients = new Map<string, { count: number; resetAt: number }>();
+  return (request, response, next) => {
+    const now = Date.now();
+    const key = request.ip ?? request.socket.remoteAddress ?? "unknown";
+    const current = clients.get(key);
+    const entry = !current || current.resetAt <= now ? { count: 0, resetAt: now + windowMs } : current;
+    entry.count += 1;
+    clients.set(key, entry);
+    response.setHeader("ratelimit-limit", String(maxRequests));
+    response.setHeader("ratelimit-remaining", String(Math.max(0, maxRequests - entry.count)));
+    if (entry.count > maxRequests) {
+      response.setHeader("retry-after", String(Math.ceil((entry.resetAt - now) / 1_000)));
+      response.status(429).json({ error: { code: "RATE_LIMITED", message: "Too many reservation attempts. Please try again shortly.", correlationId: response.locals.correlationId } });
+      return;
+    }
+    next();
+  };
+}
 
 const correlationIdMiddleware: RequestHandler = (request, response, next) => {
   const incomingId = request.header("x-correlation-id")?.trim();
@@ -54,13 +110,13 @@ const notFoundHandler: RequestHandler = (request, response) => {
 
 const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
   const correlationId = response.locals.correlationId ?? randomUUID();
-  const statusCode = Number.isInteger(error?.statusCode) && error.statusCode >= 400 && error.statusCode < 600 ? error.statusCode : error instanceof z.ZodError ? 422 : 500;
+  const statusCode = Number.isInteger(error?.statusCode) && error.statusCode >= 400 && error.statusCode < 600 ? error.statusCode : 500;
 
   if (!response.headersSent) {
     response.status(statusCode).json({
       error: {
-        code: statusCode === 500 ? "INTERNAL_SERVER_ERROR" : error instanceof BookingError ? error.code : error instanceof z.ZodError ? "VALIDATION_FAILED" : "REQUEST_ERROR",
-        message: statusCode === 500 ? "An unexpected server error occurred." : error instanceof z.ZodError ? "The request data is invalid." : error.message,
+        code: statusCode === 500 ? "INTERNAL_SERVER_ERROR" : "REQUEST_ERROR",
+        message: statusCode === 500 ? "An unexpected server error occurred." : error.message,
         correlationId,
       },
     });
@@ -69,15 +125,22 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => 
 
 export function createApp(options: CreateAppOptions = {}) {
   const app = express();
-  const booking = options.bookingService ?? new BookingService();
+  const adminProfiles = new AdminProfileRepository();
+  const reservations = options.reservationService ?? new ReservationService();
+  const reservationAdmin = Object.assign(new ReservationAdminService(), options.reservationAdminService ?? {});
+  const adminGuard: RequestHandler[] = options.clerk || options.getAuthenticatedUserId
+    ? [requireAdminRole(options.findAdminProfile ?? adminProfiles.findByClerkUserId.bind(adminProfiles), "owner", options.getAuthenticatedUserId)]
+    : [(_request, response) => {
+        response.status(503).json({ error: { code: "ADMIN_AUTH_NOT_CONFIGURED", message: "Admin authentication is not configured.", correlationId: response.locals.correlationId } });
+      }];
 
   app.disable("x-powered-by");
-  app.set("trust proxy", 1);
-  if (process.env.CLERK_SECRET_KEY) {
-    const authorizedParties = process.env.CLERK_AUTHORIZED_PARTIES
-      ? JSON.parse(process.env.CLERK_AUTHORIZED_PARTIES) as string[]
-      : undefined;
-    app.use(clerkMiddleware({ authorizedParties }));
+  if (options.clerk) {
+    app.use(clerkMiddleware({
+      secretKey: options.clerk.secretKey,
+      publishableKey: options.clerk.publishableKey,
+      authorizedParties: options.clerk.authorizedParties,
+    }));
   }
   app.use(correlationIdMiddleware);
   app.use(express.json({ limit: "100kb" }));
@@ -86,203 +149,194 @@ export function createApp(options: CreateAppOptions = {}) {
     response.status(200).json({ status: "ok", correlationId: response.locals.correlationId });
   });
 
-  app.get("/api/public/config", async (_request, response, next) => {
+  app.get("/api/reservations/config", async (_request, response, next) => {
     try {
-      response.json(await booking.publicConfig());
-    } catch (error) { next(error); }
-  });
-
-  app.get("/api/public/availability", async (request, response, next) => {
-    try {
-      const query = z.object({ date: dateSchema, partySize: z.coerce.number().int().min(1).max(50) }).parse(request.query);
-      response.json({ date: query.date, partySize: query.partySize, slots: await booking.availability(query.date, query.partySize), snapshot: true });
-    } catch (error) { next(error); }
-  });
-
-  app.post("/api/public/reservations", createRateLimit({ windowMs: 15 * 60_000, limit: 10 }), async (request, response, next) => {
-    try {
-      const idempotencyKey = z.string().trim().min(16).max(128).parse(request.header("idempotency-key"));
-      const body = reservationBodySchema.parse(request.body);
-      const reservation = await booking.create({ ...body, idempotencyKey, source: "public" });
-      response.status(201).json(toPublicReservation(reservation));
-    } catch (error) { next(error); }
-  });
-
-  app.post("/api/public/reservations/:reference/cancel", createRateLimit({ windowMs: 15 * 60_000, limit: 10 }), async (request, response, next) => {
-    try {
-      const reference = z.string().regex(/^res_[A-Za-z0-9]+$/).parse(request.params.reference);
-      const token = z.string().min(32).max(128).parse(request.body?.token);
-      const reservation = await booking.cancelByGuest(reference, token);
-      response.json({ reference, status: (reservation as { status?: string })?.status ?? "cancelled" });
-    } catch (error) { next(error); }
-  });
-
-  app.get("/api/admin/me", async (request, response, next) => {
-    try {
-      if (!process.env.CLERK_SECRET_KEY) {
-        response.status(503).json({ error: { code: "CLERK_NOT_CONFIGURED", message: "Admin authentication is not configured." } });
-        return;
-      }
-      const { userId } = getAuth(request as never);
-      if (!userId) {
-        response.status(401).json({ error: { code: "AUTHENTICATION_REQUIRED", message: "Authentication is required." } });
-        return;
-      }
-      const profile = await new AdminProfileRepository().findByClerkUserId(userId);
-      if (!profile || !profile.active) {
-        const configuredOwnerId = process.env.CLERK_OWNER_USER_ID;
-        const configuredOwnerProfile = configuredOwnerId
-          ? await new AdminProfileRepository().findByClerkUserId(configuredOwnerId)
-          : null;
-        const code = userId === configuredOwnerId
-          ? "OWNER_PROFILE_LOOKUP_FAILED"
-          : configuredOwnerProfile ? "OWNER_CLERK_ID_MISMATCH" : "ADMIN_PROFILE_REQUIRED";
-        response.status(403).json({ error: { code, message: "An active admin profile is required." } });
-        return;
-      }
-      response.json({ userId, role: profile.role, displayName: profile.displayName });
+      response.status(200).json(await reservations.getPublicConfiguration());
     } catch (error) {
       next(error);
     }
   });
 
-  const defaultAdminGuard = requireAdminRole(async (userId) => new AdminProfileRepository().findByClerkUserId(userId));
-  const adminGuard = options.adminGuard ?? ((request, response, next) => {
-    const userId = process.env.CLERK_SECRET_KEY ? getAuth(request as never).userId : null;
-    (request as typeof request & { auth?: { userId: string | null } }).auth = { userId };
-    defaultAdminGuard(request, response, next);
+  app.get("/api/reservations/availability", async (request, response, next) => {
+    const input = availabilityQuerySchema.safeParse(request.query);
+    if (!input.success) {
+      sendValidationError(response, input.error.flatten());
+      return;
+    }
+    try {
+      response.status(200).json(await reservations.getAvailability(input.data.date, input.data.partySize));
+    } catch (error) {
+      try {
+        sendReservationError(response, error);
+      } catch (unexpected) {
+        next(unexpected);
+      }
+    }
   });
 
-  app.get("/api/admin/reservations", adminGuard, async (request, response, next) => {
+  app.post("/api/reservations", createReservationRateLimit(), async (request, response, next) => {
+    const body = reservationBodySchema.safeParse(request.body);
+    const idempotencyKey = request.header("idempotency-key")?.trim();
+    if (!body.success || !idempotencyKey || !/^[A-Za-z0-9._:-]{8,128}$/.test(idempotencyKey)) {
+      sendValidationError(response, body.success ? { idempotencyKey: ["A valid Idempotency-Key header is required."] } : body.error.flatten());
+      return;
+    }
     try {
-      const query = z.object({
-        date: dateSchema.optional(),
-        status: reservationStatusSchema.optional(),
-        q: z.string().trim().min(1).max(120).optional(),
-        page: z.coerce.number().int().min(1).default(1),
-        pageSize: z.coerce.number().int().min(1).max(100).default(25),
-      }).parse(request.query);
-      response.json(await booking.listReservations(query));
+      const result = await reservations.createReservation({ ...body.data, idempotencyKey });
+      response.status(result.reused ? 200 : 201).json({ reservation: { publicId: result.publicId, status: result.status, reused: result.reused } });
+    } catch (error) {
+      try {
+        sendReservationError(response, error);
+      } catch (unexpected) {
+        next(unexpected);
+      }
+    }
+  });
+
+  app.get(
+    "/api/admin/session",
+    ...adminGuard,
+    (_request, response) => {
+      response.status(200).json({ admin: response.locals.adminProfile });
+    },
+  );
+
+  app.post("/api/admin/reservations", ...adminGuard, async (request, response, next) => {
+    const body = reservationBodySchema.safeParse(request.body);
+    const idempotencyKey = request.header("idempotency-key")?.trim();
+    if (!body.success || !idempotencyKey || !/^[A-Za-z0-9._:-]{8,128}$/.test(idempotencyKey)) {
+      sendValidationError(response, body.success ? { idempotencyKey: ["A valid Idempotency-Key header is required."] } : body.error.flatten());
+      return;
+    }
+    try {
+      const result = await reservations.createReservation({ ...body.data, idempotencyKey });
+      response.status(result.reused ? 200 : 201).json({ reservation: result });
+    } catch (error) {
+      try {
+        sendReservationError(response, error);
+      } catch (unexpected) {
+        next(unexpected);
+      }
+    }
+  });
+
+  app.get("/api/admin/reservations", ...adminGuard, async (request, response, next) => {
+    const input = reservationListSchema.safeParse(request.query);
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.json(await reservationAdmin.listReservations(input.data)); } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/reservations/:publicId", ...adminGuard, async (request, response, next) => {
+    try {
+      const reservation = await reservationAdmin.getReservation(request.params.publicId as string);
+      if (!reservation) { response.status(404).json({ error: { code: "RESERVATION_NOT_FOUND", message: "The reservation was not found.", correlationId: response.locals.correlationId } }); return; }
+      response.json({ reservation });
     } catch (error) { next(error); }
   });
 
-  app.get("/api/admin/reservations/:reference", adminGuard, async (request, response, next) => {
+  app.patch("/api/admin/reservations/:publicId/status", ...adminGuard, async (request, response, next) => {
+    const status = reservationStatusSchema.safeParse(request.body?.status);
+    if (!status.success) { sendValidationError(response, status.error.flatten()); return; }
     try {
-      const reference = z.string().regex(/^res_[A-Za-z0-9]+$/).parse(request.params.reference);
-      response.json({ reservation: await booking.getReservation(reference) });
+      const reservation = await reservationAdmin.updateStatus(request.params.publicId as string, status.data, response.locals.adminProfile.clerkUserId);
+      if (!reservation) { response.status(404).json({ error: { code: "RESERVATION_NOT_FOUND", message: "The reservation was not found.", correlationId: response.locals.correlationId } }); return; }
+      response.json({ reservation });
     } catch (error) { next(error); }
   });
 
-  app.post("/api/admin/reservations", adminGuard, async (request, response, next) => {
+  app.get("/api/admin/reservations/:publicId/history", ...adminGuard, async (request, response, next) => {
+    try { response.json({ events: await reservationAdmin.reservationHistory(request.params.publicId as string) }); } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/special-days", ...adminGuard, async (_request, response, next) => {
+    try { response.json({ specialDays: await reservationAdmin.listSpecialDays() }); } catch (error) { next(error); }
+  });
+  app.put("/api/admin/special-days/:date", ...adminGuard, async (request, response, next) => {
+    const input = specialDaySchema.safeParse({ ...request.body, date: request.params.date });
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.json({ specialDay: await reservationAdmin.saveSpecialDay(input.data, response.locals.adminProfile.clerkUserId) }); } catch (error) { next(error); }
+  });
+  app.delete("/api/admin/special-days/:date", ...adminGuard, async (request, response, next) => {
     try {
-      const body = reservationBodySchema.parse(request.body);
-      const idempotencyKey = request.header("idempotency-key")?.trim() || `admin_${randomUUID()}`;
-      const reservation = await booking.create({ ...body, idempotencyKey, source: "admin" });
-      response.status(201).json({ reservation });
+      const day = await reservationAdmin.deleteSpecialDay(request.params.date as string, response.locals.adminProfile.clerkUserId);
+      if (!day) { response.status(404).json({ error: { code: "SPECIAL_DAY_NOT_FOUND", message: "The special day was not found.", correlationId: response.locals.correlationId } }); return; }
+      response.status(204).end();
     } catch (error) { next(error); }
   });
 
-  app.patch("/api/admin/reservations/:reference/status", adminGuard, async (request, response, next) => {
+  app.get("/api/admin/event-inquiries", ...adminGuard, async (_request, response, next) => { try { response.json({ inquiries: await reservationAdmin.listEventInquiries() }); } catch (error) { next(error); } });
+  app.post("/api/admin/event-inquiries", ...adminGuard, async (request, response, next) => {
+    const input = eventInquirySchema.safeParse(request.body);
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.status(201).json({ inquiry: await reservationAdmin.createEventInquiry(input.data) }); } catch (error) { next(error); }
+  });
+  app.get("/api/admin/event-inquiries/:inquiryId", ...adminGuard, async (request, response, next) => { try { const inquiry = await reservationAdmin.getEventInquiry(request.params.inquiryId as string); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND" } }); return; } response.json({ inquiry }); } catch (error) { next(error); } });
+  app.patch("/api/admin/event-inquiries/:inquiryId/status", ...adminGuard, async (request, response, next) => {
+    const status = eventInquiryStatusSchema.safeParse(request.body?.status);
+    if (!status.success) { sendValidationError(response, status.error.flatten()); return; }
+    try { const inquiry = await reservationAdmin.updateEventInquiryStatus(request.params.inquiryId as string, status.data, response.locals.adminProfile.clerkUserId); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND" } }); return; } response.json({ inquiry }); } catch (error) { next(error); }
+  });
+  app.patch("/api/admin/event-inquiries/:inquiryId/note", ...adminGuard, async (request, response, next) => {
+    const note = z.string().trim().max(2_000).safeParse(request.body?.internalNote);
+    if (!note.success) { sendValidationError(response, note.error.flatten()); return; }
+    try { const inquiry = await reservationAdmin.updateEventInquiryNote(request.params.inquiryId as string, note.data, response.locals.adminProfile.clerkUserId); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND" } }); return; } response.json({ inquiry }); } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/reservation-blocks", ...adminGuard, async (request, response, next) => {
+    const date = typeof request.query.date === "string" ? request.query.date : undefined;
+    if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      sendValidationError(response, { date: ["A valid date is required."] });
+      return;
+    }
     try {
-      const status = reservationStatusSchema.parse(request.body?.status);
-      const reference = z.string().parse(request.params.reference);
-      const actorId = adminUserId(request);
-      response.json({ reservation: await booking.updateStatus(reference, status, actorId) });
-    } catch (error) { next(error); }
+      response.status(200).json({ blocks: await reservationAdmin.listBlocks(date) });
+    } catch (error) {
+      next(error);
+    }
   });
 
-  app.patch("/api/admin/reservations/:reference/tables", adminGuard, async (request, response, next) => {
+  app.post("/api/admin/reservation-blocks", ...adminGuard, async (request, response, next) => {
+    const body = reservationBlockSchema.safeParse(request.body);
+    if (!body.success) {
+      sendValidationError(response, body.error.flatten());
+      return;
+    }
     try {
-      const reference = z.string().regex(/^res_[A-Za-z0-9]+$/).parse(request.params.reference);
-      const body = tableAssignmentSchema.parse(request.body);
-      response.json({ assignments: await booking.assignTables(reference, body.tableKeys, adminUserId(request)) });
-    } catch (error) { next(error); }
+      const block = await reservationAdmin.createBlock({ ...body.data, createdBy: response.locals.adminProfile.clerkUserId });
+      response.status(201).json({ block });
+    } catch (error) {
+      if (error instanceof ReservationLockConflictError) {
+        response.status(409).json({ error: { code: "RESERVATION_CONFLICT", message: error.message, correlationId: response.locals.correlationId } });
+        return;
+      }
+      next(error);
+    }
   });
 
-  app.get("/api/admin/reservations/:reference/history", adminGuard, async (request, response, next) => {
+  app.delete("/api/admin/reservation-blocks/:blockId", ...adminGuard, async (request, response, next) => {
+    const blockId = Array.isArray(request.params.blockId) ? request.params.blockId[0] : request.params.blockId;
+    if (!blockId || !/^BLK-[A-F0-9]{10}$/.test(blockId)) {
+      sendValidationError(response, { blockId: ["A valid block ID is required."] });
+      return;
+    }
     try {
-      const reference = z.string().regex(/^res_[A-Za-z0-9]+$/).parse(request.params.reference);
-      response.json({ events: await booking.reservationHistory(reference) });
-    } catch (error) { next(error); }
-  });
-
-  app.get("/api/admin/blocks", adminGuard, async (request, response, next) => {
-    try {
-      const query = z.object({ date: dateSchema.optional() }).parse(request.query);
-      response.json({ blocks: await booking.listBlocks(query.date) });
-    } catch (error) { next(error); }
-  });
-
-  app.get("/api/admin/special-days", adminGuard, async (_request, response, next) => {
-    try {
-      response.json({ specialDays: await booking.listSpecialDays() });
-    } catch (error) { next(error); }
-  });
-
-  app.put("/api/admin/special-days/:date", adminGuard, async (request, response, next) => {
-    try {
-      const date = dateSchema.parse(request.params.date);
-      const body = specialDayBodySchema.omit({ date: true }).parse(request.body);
-      response.json({ specialDay: await booking.saveSpecialDay({ ...body, date }, adminUserId(request)) });
-    } catch (error) { next(error); }
-  });
-
-  app.delete("/api/admin/special-days/:date", adminGuard, async (request, response, next) => {
-    try {
-      const date = dateSchema.parse(request.params.date);
-      response.json({ specialDay: await booking.deleteSpecialDay(date, adminUserId(request)) });
-    } catch (error) { next(error); }
-  });
-
-  app.get("/api/admin/event-inquiries", adminGuard, async (_request, response, next) => {
-    try { response.json({ inquiries: await booking.listEventInquiries() }); } catch (error) { next(error); }
-  });
-
-  app.post("/api/admin/event-inquiries", adminGuard, async (request, response, next) => {
-    try { response.status(201).json({ inquiry: await booking.createEventInquiry(eventInquiryBodySchema.parse(request.body)) }); } catch (error) { next(error); }
-  });
-
-  app.patch("/api/admin/event-inquiries/:inquiryId/status", adminGuard, async (request, response, next) => {
-    try {
-      const inquiryId = z.string().regex(/^inq_[A-Za-z0-9]+$/).parse(request.params.inquiryId);
-      const status = eventInquiryStatusSchema.parse(request.body?.status);
-      response.json({ inquiry: await booking.updateEventInquiryStatus(inquiryId, status, adminUserId(request)) });
-    } catch (error) { next(error); }
-  });
-
-  app.get("/api/admin/event-inquiries/:inquiryId", adminGuard, async (request, response, next) => {
-    try {
-      const inquiryId = z.string().regex(/^inq_[A-Za-z0-9]+$/).parse(request.params.inquiryId);
-      response.json({ inquiry: await booking.getEventInquiry(inquiryId) });
-    } catch (error) { next(error); }
-  });
-
-  app.patch("/api/admin/event-inquiries/:inquiryId/note", adminGuard, async (request, response, next) => {
-    try {
-      const inquiryId = z.string().regex(/^inq_[A-Za-z0-9]+$/).parse(request.params.inquiryId);
-      const { internalNote } = eventInquiryNoteSchema.parse(request.body);
-      response.json({ inquiry: await booking.updateEventInquiryNote(inquiryId, internalNote, adminUserId(request)) });
-    } catch (error) { next(error); }
-  });
-
-  app.post("/api/admin/blocks", adminGuard, async (request, response, next) => {
-    try {
-      const body = blockBodySchema.parse(request.body);
-      const userId = adminUserId(request);
-      response.status(201).json({ block: await booking.createBlock({ ...body, createdBy: userId }) });
-    } catch (error) { next(error); }
-  });
-
-  app.delete("/api/admin/blocks/:reference", adminGuard, async (request, response, next) => {
-    try {
-      const reference = z.string().parse(request.params.reference);
-      const actorId = adminUserId(request);
-      response.json({ block: await booking.deactivateBlock(reference, actorId) });
-    } catch (error) { next(error); }
+      const deleted = await reservationAdmin.deleteBlock(blockId);
+      if (!deleted) {
+        response.status(404).json({ error: { code: "BLOCK_NOT_FOUND", message: "The reservation block was not found.", correlationId: response.locals.correlationId } });
+        return;
+      }
+      response.status(204).end();
+    } catch (error) {
+      next(error);
+    }
   });
 
   if (options.staticDirectory) {
     const staticDirectory = fileURLToPath(options.staticDirectory);
+    app.use("/admin", (_request, response, next) => {
+      response.setHeader("x-robots-tag", "noindex, nofollow, noarchive");
+      next();
+    });
     app.use(express.static(staticDirectory, { extensions: ["html"] }));
     app.get(/^(?!\/api(?:\/|$)).*/, (request, response, next) => {
       if (!request.accepts("html")) {
@@ -290,6 +344,9 @@ export function createApp(options: CreateAppOptions = {}) {
         return;
       }
 
+      const normalizedPath = request.path.replace(/\/+$/, "") || "/";
+      const isClientOnlyRoute = normalizedPath === "/admin" || normalizedPath === "/prototypes/colosseo";
+      response.status(isClientOnlyRoute ? 200 : 404);
       response.sendFile("index.html", { root: staticDirectory }, (error) => {
         if (error) next(error);
       });
@@ -300,17 +357,4 @@ export function createApp(options: CreateAppOptions = {}) {
   app.use(errorHandler);
 
   return app;
-}
-
-function toPublicReservation(reservation: unknown) {
-  const value = typeof (reservation as { toObject?: unknown })?.toObject === "function"
-    ? (reservation as { toObject(): Record<string, unknown> }).toObject()
-    : reservation as Record<string, unknown>;
-  return { reference: value.publicId, date: value.date, startTime: value.startTime, endTime: value.endTime, partySize: value.partySize, status: value.status, ...(value.cancellationToken ? { cancellationToken: value.cancellationToken } : {}) };
-}
-
-function adminUserId(request: express.Request): string {
-  const attached = (request as express.Request & { auth?: { userId: string | null } }).auth?.userId;
-  if (attached) return attached;
-  return process.env.CLERK_SECRET_KEY ? getAuth(request as never).userId ?? "unknown-admin" : "test-admin";
 }
