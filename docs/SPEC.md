@@ -558,7 +558,9 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 - `GET /api/reservations/availability?date=…&partySize=…` – implementiert; verfügbare Startzeiten ohne interne Tischdetails.
 - `POST /api/reservations` – implementiert; atomare Reservierungsanfrage, serverseitige Validierung, Rate-Limit und wiederholbare Übermittlung über `Idempotency-Key`.
 - `POST /api/public/reservations/:reference/cancel` – nur mit sicherem, zeitlich begrenztem Gast-Token; genaue Stornoregel `OFFEN`.
-- `GET /api/public/menu` und `GET /api/public/opening-hours` – ausschließlich veröffentlichte Inhalte.
+- `GET /api/public/menu` – ausschließlich aktive Kategorien und aktive Gerichte mit `published: true`; Preise werden als Minor Units (`priceCents`) ausgegeben.
+- `GET /api/public/opening-hours` – aktive reguläre Servicezeiten und datierte Sondertage ohne interne Verwaltungsfelder.
+- `GET /api/public/media/:id` – öffentliches Lesen eines gespeicherten GridFS-Mediums mit serverseitigem Content-Type und Cache-Header.
 - `POST /api/public/inquiries` – Veranstaltung anfragen; Felder und Empfänger `OFFEN`.
 
 ### Geschützt
@@ -567,7 +569,8 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 - `GET|POST|DELETE /api/admin/reservation-blocks` – implementiert; zeitlich begrenzte Restaurant-, Bereichs- oder Tischsperrungen mit demselben atomaren Sperrindex wie Reservierungen.
 - `/api/admin/calendar` – Tages-/Wochenbelegung und Sonderöffnungen folgen in `FS5`.
 - `/api/admin/tables` und `/api/admin/settings` – Kapazität und Buchungsregeln.
-- `/api/admin/menu` – Kategorien, Gerichte, Preise, Beschreibungen, Bilder, Sortierung und Veröffentlichung.
+- `/api/admin/menu/categories`, `/api/admin/menu/items`, `/api/admin/menu/preview` und `/api/admin/menu/items/:itemId/publication` – ownergeschützte Kategorien, Gerichte, Vorschau und explizites Publizieren.
+- `/api/admin/media` – ownergeschützter JSON-Upload und Löschung über MongoDB GridFS; JPEG/PNG/WebP, maximal 5 MB, Alternativtext verpflichtend, Binärsignatur serverseitig geprüft.
 - `/api/admin/opening-hours` – reguläre und datierte Abweichungen.
 - `/api/admin/inquiries` – Eingang, Status und interne Bearbeitung.
 

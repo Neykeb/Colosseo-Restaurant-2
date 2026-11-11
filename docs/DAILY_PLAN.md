@@ -380,3 +380,10 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 - **Umgesetzt:** `DELETE /api/admin/media/:id` ergänzt. Medienlöschung ist ownergeschützt, entfernt GridFS-Datei und Chunks und erzeugt ein `media.deleted`-Audit-Ereignis.
 - **Offen:** Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 39. FS6-Abschlussprüfung Person A – 11.11.2026
+
+- **Voraussetzung:** Die Admin-UI wird auf Nutzerangabe als erledigt übernommen; eine erneute UI-Implementierung wurde übersprungen.
+- **Prüfungen:** `npm test` erfolgreich mit 17 Testdateien und 81/81 Tests; Secret-Tracking erfolgreich. `npm run build` erfolgreich; verbleiben nur bekannte Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL`. `npm audit --omit=dev` meldet 0 bekannte Schwachstellen.
+- **Atlas:** Migrationen `0001` bis `0012` stehen auf `applied`.
+- **Offen:** dokumentierter visueller/E2E-Nachweis der FS6-UI, sofern dieser nicht bereits separat durch Person B vorliegt; danach FS6-Präsentation und Gate-Vorbereitung.
