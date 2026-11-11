@@ -1,10 +1,10 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS4` für das nicht-produktive Weiterbildungsprojekt technisch geprüft; Gate-Abnahme offen
+**Status:** Full-Stack-Phase `FS5` technisch abgeschlossen; Gate-Abnahme steht aus
 
-**Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
+**Phase:** `FS5` – Reservierungs-, Kalender- und Anfrageverwaltung
 
-**Letzte Aktualisierung:** 10.11.2026
+**Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
@@ -18,7 +18,7 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 - Der Atlas-Benutzer besitzt am 03.11.2026 verifiziert ausschließlich datenbankspezifisches `readWrite` für `colosseo` und `colosseo_test`. Entwicklungsverbindung, Testverbindung und Test-Migrationslauf sind damit erfolgreich.
 - Vom Nutzer bestätigter Atlas-Betriebsstand: MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`), Replica Set mit drei Nodes, Backups derzeit inaktiv, keine verknüpften App Services und ein vorhandener Search-Index. Render soll später möglichst regionsnah betrieben werden; Backups bleiben vor einem realen Produktionsbetrieb zu klären.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.
-- Aktuelle Phase: `FS4`. Das öffentliche Reservierungsformular, die atomar erzeugte E-Mail-Outbox und der Resend-Transport sind implementiert. Der Render-Service ist live; beliebige produktive E-Mail-Empfänger bleiben bis zu einer verifizierten Absenderdomain eingeschränkt.
+- Aktuelle Phase: `FS5`. Adminübersicht, Reservierungsverwaltung, Kalender, Sondertage, operative Sperrzeiten und Veranstaltungsanfragen sind implementiert und technisch geprüft. Berechtigungs-, Konflikt-, Tastatur-, Build- und Atlas-Parallelitätsprüfungen sind erfolgreich. Als Nächstes wird Gate `FS5` präsentiert; ohne neues ausdrückliches `GO` beginnt `FS6` nicht. Der Render-Service ist live; beliebige produktive E-Mail-Empfänger bleiben bis zu einer verifizierten Absenderdomain eingeschränkt.
 - Die reine Reservierungslogik, öffentliche Config-/Verfügbarkeits-/Buchungsendpunkte, idempotente Bestätigung, Rate-Limit, atomare Tisch-Zeit-Sperren sowie geschützte Admin-Endpunkte für manuelle Buchungen und Sperrzeiten sind implementiert. Migrationen `0005` und `0006` sind in `colosseo_test` und `colosseo` angewendet.
 - Die Express-/TypeScript-Grundlage einschließlich statischer Produktionsauslieferung ist implementiert. Entwicklungs- und Produktionsprozess, Healthcheck, API-404 sowie die drei vorgerenderten Sprachseiten wurden am 05.11.2026 über echte lokale Listener geprüft.
 - Der gemeinsame React-/Express-Web-Service ist per Render-Blueprint in Frankfurt live. Reproduzierbarer Build, idempotente Migration vor dem Serverstart, `/api/health`, MongoDB Atlas, Clerk, Resend-Konfiguration und `SITE_URL` sind in der Render-Umgebung aktiv; Secrets bleiben ausschließlich dort gespeichert.
@@ -149,6 +149,7 @@ Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 ## 8. Nächster zulässiger Schritt
 
 1. Für die Demo im eingeschränkten Resend-Testmodus bleiben; keine beliebigen realen Empfänger und keine echten Gastdaten verwenden. Eine eigene Absenderdomain ist erst bei einem späteren Produktionsauftrag erforderlich.
-2. `FS4` präsentieren und vor `FS5` auf ein neues ausdrückliches `GO` warten.
+2. `FS5` ist seit dem ausdrücklichen `GO` vom 11.11.2026 aktiv. Admin-Tages-/Wochenübersicht, Reservierungssuche, Detail, Status, Tischzuweisung, Historie, Sondertage, operative Sperrzeiten und Veranstaltungsanfragen sind umgesetzt. Als Nächstes folgt für Person B die abschließende Berechtigungs-, Konflikt-, Tastatur- und E2E-Prüfung; dafür ist ein neues `GO` erforderlich.
+3. Speisekarten- und reguläre Öffnungszeitenverwaltung nicht vorziehen; sie gehören zu `FS6` und benötigen nach dem `FS5`-Gate ein neues `GO`.
 
 Der operative Termin- und Personenplan steht in `docs/DAILY_PLAN.md`.

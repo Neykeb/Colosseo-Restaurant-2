@@ -1,7 +1,7 @@
 # Funktionale und technische Spezifikation
 
-**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS4` für das nicht-produktive Weiterbildungsprojekt technisch geprüft
-**Letzte Aktualisierung:** 10.11.2026
+**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS5` in Arbeit
+**Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. `FS1` wurde am 02.11.2026 ausdrücklich freigegeben; spätere Full-Stack-Phasen bleiben bis zu ihrem jeweiligen Gate gesperrt.
 
@@ -563,13 +563,17 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 
 ### Geschützt
 
-- `POST /api/admin/reservations` – implementiert; manuelles Anlegen durch einen serverseitig autorisierten Owner. Listen, Details und spätere Statusänderungen folgen in `FS5`.
+- `POST /api/admin/reservations` – implementiert; manuelles Anlegen durch einen serverseitig autorisierten Owner.
+- `GET /api/admin/reservations`, `GET /api/admin/reservations/:publicId` und `GET /api/admin/reservations/:publicId/history` – in `FS5` implementiert; Suche/Filter, Detail mit Tischzuweisung und Auditverlauf.
+- `PATCH /api/admin/reservations/:publicId/status` und `PATCH /api/admin/reservations/:publicId/tables` – in `FS5` implementiert; ausschließlich erlaubte Statusübergänge sowie transaktionssichere, kapazitäts- und konfliktgeprüfte Tischumlegung. Storno oder Ablehnung gibt Sperren und Zuordnungen in derselben Transaktion frei.
+- `GET /api/admin/tables` – in `FS5` implementiert; liefert ausschließlich aktive Tische für die geschützte operative Verwaltung.
 - `GET|POST|DELETE /api/admin/reservation-blocks` – implementiert; zeitlich begrenzte Restaurant-, Bereichs- oder Tischsperrungen mit demselben atomaren Sperrindex wie Reservierungen.
-- `/api/admin/calendar` – Tages-/Wochenbelegung und Sonderöffnungen folgen in `FS5`.
+- `GET /api/admin/special-days` sowie `PUT|DELETE /api/admin/special-days/:date` – in `FS5` implementiert; datierte Schließtage und Sonderöffnungen. Sonderöffnungen benötigen einen vollständigen, aufsteigenden Öffnungszeitraum.
+- `GET /api/admin/calendar?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` – implementiert in `FS5`; liefert für einen auf 31 Tage begrenzten Zeitraum Reservierungen, Veranstaltungsanfragen, aktive Sperrzeiten und Sondertage. Zugriff nur für serverseitig autorisierte Owner.
+- `GET /api/admin/event-inquiries`, `GET /api/admin/event-inquiries/:inquiryId`, `PATCH /api/admin/event-inquiries/:inquiryId/status` und `PATCH /api/admin/event-inquiries/:inquiryId/note` – in `FS5` implementiert; serverseitig paginierte und filterbare Liste, Detail, Bearbeitungsstatus und ausschließlich intern sichtbare Notiz. Ungültige IDs, Statuswerte und Notizen werden an der API-Grenze abgewiesen.
 - `/api/admin/tables` und `/api/admin/settings` – Kapazität und Buchungsregeln.
 - `/api/admin/menu` – Kategorien, Gerichte, Preise, Beschreibungen, Bilder, Sortierung und Veröffentlichung.
 - `/api/admin/opening-hours` – reguläre und datierte Abweichungen.
-- `/api/admin/inquiries` – Eingang, Status und interne Bearbeitung.
 
 Fehler verwenden stabile maschinenlesbare Codes, eine sichere Nutzermeldung und eine serverseitige Korrelations-ID. Personenbezogene Details erscheinen nicht in URLs oder Logs.
 

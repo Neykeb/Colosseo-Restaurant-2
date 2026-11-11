@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS4` für das nicht-produktive Weiterbildungsprojekt technisch geprüft; Resend-Testmodus verifiziert, Gate-Abnahme offen
-**Letzte Aktualisierung:** 10.11.2026
+**Status:** Full-Stack-Phase `FS5` technisch abgeschlossen; Gate-Präsentation und ausdrückliches `GO` für `FS6` stehen aus
+**Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -254,17 +254,17 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
 - [x] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und technisches Produktions-E2E ausführen. Person B prüfte DE/EN/IT, mobilen Überlauf, Touchziele, Kontaktfehler-Fokus, Statusrücksetzung, Reduced-Motion-Fallback und Desktop-Ankernavigation; der Nutzer bestätigte einen echten Smartphone-Test ohne Geräteprotokoll. Auf Render wurden Health, Config, Availability, Sprach- und Unterseiten, Reloads, Canonical, Sitemap, Robots, Adminschutz, neutrale Validierungsfehler, Secret-Freiheit und die clientseitige 404-Oberfläche geprüft. Eine synthetische Produktionsbuchung wurde bewusst nicht erzeugt, weil sie reale Daten- und E-Mail-Nebenwirkungen auslösen würde; Buchung, Idempotenz und Concurrency bleiben durch automatisierte Tests und den Atlas-Parallellauf nachgewiesen.
 - [x] Unabhängigen technischen FS4-Gegenreview durch Person A ausführen: am 11.11.2026 bestanden mit Secret-Tracking-Prüfung, `npm audit --omit=dev` ohne bekannte Schwachstellen, Typecheck, OXLint, 76/76 Tests und Production-Build. Bekannte Drittanbieterhinweise zu `use client` sind nicht blockierend; `SITE_URL` war im lokalen Build erwartungsgemäß nicht gesetzt.
-- [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
+- [x] **GATE FS4:** komplette Gaststrecke präsentiert; ausdrückliches `GO` für `FS5` am 11.11.2026 erhalten.
 
 **Integrationsstand 10.11.2026:** Die Merge-Konflikte mit `dev` sind ohne Rücknahme der bestehenden Website-, Admin- und Reservierungsfunktionen aufgelöst. Neue Migrations-, Storno-, Aufbewahrungs- und E-Mail-Verarbeitungsbausteine wurden aufgenommen; `dist/` bleibt aus Git ausgeschlossen. Render ist live und der technische Produktions-E2E ist abgeschlossen. Der Integrationsstand besteht Typecheck, OXLint, 76/76 Tests und Production-Build. Dies ersetzt weder die offenen fachlich/rechtlichen Freigaben noch das Gate `FS4`.
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
 
-- [ ] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen.
-- [ ] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren.
-- [ ] Sonderöffnungen, Schließungen und Sperrzeiten verwalten.
-- [ ] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren.
-- [ ] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen.
+- [x] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen. Person B ergänzte am 11.11.2026 die geschützte Kalender-API und eine responsive Adminübersicht mit Zeitraumwahl, Kennzahlen, Listenalternative, Reservierungen, Sperrzeiten, Sondertagen und offenen Veranstaltungsanfragen. Lade-, Leer- und Fehlerzustände sind enthalten; Typecheck, OXLint, 77/77 Tests und Production-Build sind erfolgreich.
+- [x] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren. Person B ergänzte am 11.11.2026 eine paginierte responsive Liste, geschützte Detailansicht mit Fokusbindung/Escape, erlaubte Statusaktionen und Auditverlauf. Tischumlegungen validieren echte aktive Tischkombinationen und schreiben Sperren, Zuordnungen und Auditereignis atomar; Konflikte rollen vollständig zurück. Storno/Ablehnung gibt Belegung atomar frei. Der `break-ui`-Check gegen lange Werte, leere/fehlende Daten, Einzahl und mehr als 100 Treffer führte zu Wortumbruch, korrekter Einzahl und echter Pagination. Typecheck, OXLint, 78/78 Tests und Production-Build sind erfolgreich.
+- [x] Sonderöffnungen, Schließungen und Sperrzeiten verwalten. Person B ergänzte am 11.11.2026 einen geschützten, responsiven Betriebsbereich für datierte Schließtage, Sonderöffnungen sowie Restaurant-, Bereichs- und Tischsperren. Die API verlangt für Sonderöffnungen vollständige, aufsteigende Uhrzeiten; operative Sperren verwenden weiterhin den atomaren Reservierungsindex und melden Überschneidungen verständlich. Lade-, Leer-, Erfolgs- und Fehlerzustände sowie 44-px-Bedienziele sind enthalten. Typecheck, OXLint, 79/79 Tests und Production-Build sind erfolgreich.
+- [x] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren. Person B ergänzte am 11.11.2026 eine serverseitig durchsuchbare, nach Status filterbare und in 25er-Seiten paginierte Anfrageverwaltung. Die tastaturbedienbare Detailansicht zeigt Kontakt, Wunschtermin, Anlass, Personenanzahl und Gastnachricht; Status und interne Notiz werden getrennt gespeichert und auditiert. Fokusbindung, Escape, Fokus-Rückgabe, Lade-/Leer-/Fehlerzustände und mobile Tabellenreduktion sind enthalten. Der `break-ui`-Check deckte die zuvor unbegrenzte Listenabfrage als Skalierungsfehler auf; sie wurde durch echte Serverpagination behoben. Typecheck, OXLint, 80/80 Tests und Production-Build sind erfolgreich.
+- [x] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen. Person B prüfte am 11.11.2026 alle FS5-Adminmodule auf vorgeschaltete Clerk-/Owner-Autorisierung sowie Sperrzeit- und Tischzuweisungskonflikte mit strukturierten `401`-/`409`-Antworten. Reservierungs- und Anfragedialoge liegen als echte Portale außerhalb des inerten Dashboards, binden den Fokus, schließen per Escape, stellen den Auslöserfokus wieder her und verändern ihn während eines Speichervorgangs nicht mehr. Ein Tastatur-Sprunglink führt direkt zum Arbeitsbereich. Typecheck, OXLint, 83/83 automatisierte Tests, Production-Build und `git diff --check` sind erfolgreich. Der echte Atlas-Parallellauf bestätigt genau eine erfolgreiche Buchung bei zwei gleichzeitigen Zugriffen sowie die Freigabe aller Tischsperren nach Gaststornierung.
 - [ ] **GATE FS5:** operative Verwaltung präsentieren; auf GO für `FS6` warten.
 
 ### FS6 – Speisekarte, Öffnungszeiten und Medienverwaltung

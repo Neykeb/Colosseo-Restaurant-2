@@ -6,6 +6,8 @@ import { pathToFileURL } from "node:url";
 import type { Server } from "node:http";
 import { createApp } from "../../server/src/http/app";
 import { isDirectExecution } from "../../server/src/server";
+import { ReservationLockConflictError } from "../../server/src/repositories/reservation-repository";
+import type { ReservationAdminService } from "../../server/src/services/reservation-admin-service";
 
 const servers: Server[] = [];
 
@@ -206,6 +208,148 @@ describe("Express platform foundation", () => {
     expect(deleted.status).toBe(204);
   });
 
+  it("validates and manages protected special-day rules", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const savedRules: Array<{ date: string; label: string; closed: boolean; opens?: string; closes?: string }> = [];
+    const reservationAdminService = {
+      listSpecialDays: async () => savedRules,
+      saveSpecialDay: async (input: { date: string; label: string; closed: boolean; opens?: string; closes?: string }) => {
+        savedRules.push(input);
+        return input;
+      },
+      deleteSpecialDay: async (date: string) => date === "2026-12-24" ? savedRules.find((day) => day.date === date) ?? { date, label: "Heiligabend", closed: true } : null,
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService: reservationAdminService as unknown as Partial<ReservationAdminService>,
+    }));
+
+    const invalidOpening = await fetch(`${baseUrl}/api/admin/special-days/2026-12-23`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ label: "Sonderöffnung", closed: false }),
+    });
+    expect(invalidOpening.status).toBe(400);
+
+    const invalidRange = await fetch(`${baseUrl}/api/admin/special-days/2026-12-23`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ label: "Sonderöffnung", closed: false, opens: "21:00", closes: "17:00" }),
+    });
+    expect(invalidRange.status).toBe(400);
+
+    const saved = await fetch(`${baseUrl}/api/admin/special-days/2026-12-24`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ label: "Heiligabend", closed: true }),
+    });
+    expect(saved.status).toBe(200);
+    await expect(saved.json()).resolves.toEqual({ specialDay: { date: "2026-12-24", label: "Heiligabend", closed: true } });
+
+    const listed = await fetch(`${baseUrl}/api/admin/special-days`);
+    expect(listed.status).toBe(200);
+    await expect(listed.json()).resolves.toEqual({ specialDays: [{ date: "2026-12-24", label: "Heiligabend", closed: true }] });
+
+    const deleted = await fetch(`${baseUrl}/api/admin/special-days/2026-12-24`, { method: "DELETE" });
+    expect(deleted.status).toBe(204);
+  });
+
+  it("lists and updates protected event inquiries", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const inquiryId = "inq_1234567890abcdef1234567890abcdef";
+    const inquiry = { inquiryId, name: "Giulia Bianchi", email: "giulia@example.com", eventType: "Familienfeier", requestedDate: "2026-12-12", partySize: 24, message: "Wir möchten gemeinsam feiern.", status: "new" as const };
+    const reservationAdminService = {
+      listEventInquiries: async () => ({ inquiries: [inquiry], total: 1, page: 1, pageSize: 25, pageCount: 1 }),
+      getEventInquiry: async (id: string) => id === inquiryId ? inquiry : null,
+      updateEventInquiryStatus: async (id: string, status: string) => id === inquiryId ? { ...inquiry, status } : null,
+      updateEventInquiryNote: async (id: string, internalNote: string) => id === inquiryId ? { ...inquiry, internalNote } : null,
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService: reservationAdminService as unknown as Partial<ReservationAdminService>,
+    }));
+
+    const listed = await fetch(`${baseUrl}/api/admin/event-inquiries`);
+    expect(listed.status).toBe(200);
+    await expect(listed.json()).resolves.toEqual({ inquiries: [inquiry], total: 1, page: 1, pageSize: 25, pageCount: 1 });
+
+    const detail = await fetch(`${baseUrl}/api/admin/event-inquiries/${inquiryId}`);
+    expect(detail.status).toBe(200);
+    await expect(detail.json()).resolves.toEqual({ inquiry });
+
+    const updatedStatus = await fetch(`${baseUrl}/api/admin/event-inquiries/${inquiryId}/status`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status: "in_review" }),
+    });
+    expect(updatedStatus.status).toBe(200);
+    await expect(updatedStatus.json()).resolves.toEqual({ inquiry: { ...inquiry, status: "in_review" } });
+
+    const updatedNote = await fetch(`${baseUrl}/api/admin/event-inquiries/${inquiryId}/note`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ internalNote: "Rückruf am Nachmittag" }),
+    });
+    expect(updatedNote.status).toBe(200);
+    await expect(updatedNote.json()).resolves.toEqual({ inquiry: { ...inquiry, internalNote: "Rückruf am Nachmittag" } });
+
+    const invalidId = await fetch(`${baseUrl}/api/admin/event-inquiries/not-valid`);
+    expect(invalidId.status).toBe(400);
+  });
+
+  it("returns a protected calendar overview and rejects oversized ranges", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const reservationAdminService = {
+      getCalendarOverview: async (startDate: string, endDate: string) => ({ startDate, endDate, reservations: [], inquiries: [], blocks: [], specialDays: [] }),
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService,
+    }));
+
+    const response = await fetch(`${baseUrl}/api/admin/calendar?startDate=2026-11-09&endDate=2026-11-15`);
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ startDate: "2026-11-09", endDate: "2026-11-15", reservations: [], inquiries: [], blocks: [], specialDays: [] });
+
+    const invalid = await fetch(`${baseUrl}/api/admin/calendar?startDate=2026-11-01&endDate=2026-12-31`);
+    expect(invalid.status).toBe(400);
+  });
+
+  it("returns tables and updates a reservation assignment through protected endpoints", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const reservationAdminService = {
+      listTables: async () => [{ key: "table-01", name: "Tisch 1", areaKey: "main", minPartySize: 1, maxPartySize: 4, combinationGroupKey: null }],
+      reassignTables: async (publicId: string, tableKeys: string[]) => publicId === "COL-1234567890" ? { tableKeys } : null,
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService,
+    }));
+
+    const tables = await fetch(`${baseUrl}/api/admin/tables`);
+    expect(tables.status).toBe(200);
+    await expect(tables.json()).resolves.toEqual({ tables: [{ key: "table-01", name: "Tisch 1", areaKey: "main", minPartySize: 1, maxPartySize: 4, combinationGroupKey: null }] });
+
+    const assignment = await fetch(`${baseUrl}/api/admin/reservations/COL-1234567890/tables`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tableKeys: ["table-01"] }),
+    });
+    expect(assignment.status).toBe(200);
+    await expect(assignment.json()).resolves.toEqual({ assignment: { tableKeys: ["table-01"] } });
+
+    const invalid = await fetch(`${baseUrl}/api/admin/reservations/COL-1234567890/tables`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tableKeys: [] }),
+    });
+    expect(invalid.status).toBe(400);
+  });
+
   it("rejects a request without an authenticated Clerk user", async () => {
     const baseUrl = await listen(createApp({
       getAuthenticatedUserId: () => null,
@@ -216,6 +360,74 @@ describe("Express platform foundation", () => {
 
     expect(response.status).toBe(401);
     expect(body.error.code).toBe("AUTHENTICATION_REQUIRED");
+  });
+
+  it("protects every FS5 administration module before calling its service", async () => {
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => null,
+      findAdminProfile: async () => null,
+    }));
+    const protectedRoutes = [
+      "/api/admin/calendar?startDate=2026-11-11&endDate=2026-11-11",
+      "/api/admin/reservations",
+      "/api/admin/tables",
+      "/api/admin/special-days",
+      "/api/admin/reservation-blocks",
+      "/api/admin/event-inquiries",
+    ];
+
+    for (const route of protectedRoutes) {
+      const response = await fetch(`${baseUrl}${route}`);
+      const body = (await response.json()) as { error: { code: string } };
+      expect(response.status, route).toBe(401);
+      expect(body.error.code, route).toBe("AUTHENTICATION_REQUIRED");
+    }
+  });
+
+  it("returns a conflict when a reservation block overlaps an active booking", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const reservationAdminService = {
+      createBlock: async () => {
+        throw new ReservationLockConflictError();
+      },
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService: reservationAdminService as unknown as Partial<ReservationAdminService>,
+    }));
+    const response = await fetch(`${baseUrl}/api/admin/reservation-blocks`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ date: "2026-11-11", startTime: "17:00", endTime: "19:00", scope: "restaurant", reason: "Geschlossene Gesellschaft" }),
+    });
+    const body = (await response.json()) as { error: { code: string } };
+
+    expect(response.status).toBe(409);
+    expect(body.error.code).toBe("RESERVATION_CONFLICT");
+  });
+
+  it("returns a conflict when an administrator assigns an unavailable table", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const reservationAdminService = {
+      reassignTables: async () => {
+        throw new ReservationLockConflictError();
+      },
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService: reservationAdminService as unknown as Partial<ReservationAdminService>,
+    }));
+    const response = await fetch(`${baseUrl}/api/admin/reservations/COL-1234567890/tables`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tableKeys: ["table-01"] }),
+    });
+    const body = (await response.json()) as { error: { code: string } };
+
+    expect(response.status).toBe(409);
+    expect(body.error.code).toBe("TABLE_NOT_AVAILABLE");
   });
 
   it("serves client-only routes and marks unknown HTML routes as not found in production mode", async () => {

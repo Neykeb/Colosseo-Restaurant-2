@@ -176,7 +176,7 @@ export function selectAvailableTables(candidates: TableCandidate[], occupiedTabl
 export const reservationStatusTransitions = {
   requested: ["confirmed", "declined", "cancelled"],
   pending: ["confirmed", "declined", "cancelled"],
-  confirmed: ["cancelled", "completed", "no_show"],
+  confirmed: ["seated", "cancelled", "completed", "no_show"],
   seated: ["completed", "no_show"],
   declined: [],
   cancelled: [],
