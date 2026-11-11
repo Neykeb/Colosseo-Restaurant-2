@@ -225,6 +225,38 @@ describe("Express platform foundation", () => {
     expect(invalid.status).toBe(400);
   });
 
+  it("returns tables and updates a reservation assignment through protected endpoints", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const reservationAdminService = {
+      listTables: async () => [{ key: "table-01", name: "Tisch 1", areaKey: "main", minPartySize: 1, maxPartySize: 4, combinationGroupKey: null }],
+      reassignTables: async (publicId: string, tableKeys: string[]) => publicId === "COL-1234567890" ? { tableKeys } : null,
+    };
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService,
+    }));
+
+    const tables = await fetch(`${baseUrl}/api/admin/tables`);
+    expect(tables.status).toBe(200);
+    await expect(tables.json()).resolves.toEqual({ tables: [{ key: "table-01", name: "Tisch 1", areaKey: "main", minPartySize: 1, maxPartySize: 4, combinationGroupKey: null }] });
+
+    const assignment = await fetch(`${baseUrl}/api/admin/reservations/COL-1234567890/tables`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tableKeys: ["table-01"] }),
+    });
+    expect(assignment.status).toBe(200);
+    await expect(assignment.json()).resolves.toEqual({ assignment: { tableKeys: ["table-01"] } });
+
+    const invalid = await fetch(`${baseUrl}/api/admin/reservations/COL-1234567890/tables`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tableKeys: [] }),
+    });
+    expect(invalid.status).toBe(400);
+  });
+
   it("rejects a request without an authenticated Clerk user", async () => {
     const baseUrl = await listen(createApp({
       getAuthenticatedUserId: () => null,

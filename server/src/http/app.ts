@@ -52,6 +52,7 @@ const reservationBlockSchema = z.object({
 }).refine(({ startTime, endTime }) => startTime < endTime, { path: ["endTime"], message: "End time must be later than start time." })
   .refine(({ scope, scopeKey }) => scope === "restaurant" || Boolean(scopeKey), { path: ["scopeKey"], message: "Area and table blocks require a scope key." });
 const reservationStatusSchema = z.enum(["requested", "pending", "confirmed", "cancelled", "declined", "seated", "completed", "no_show"]);
+const tableAssignmentSchema = z.object({ tableKeys: z.array(z.string().trim().min(1).max(80)).min(1).max(8) });
 const reservationListSchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), status: reservationStatusSchema.optional(), q: z.string().trim().max(120).optional(), page: z.coerce.number().int().min(1).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() });
 const calendarQuerySchema = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -261,6 +262,24 @@ export function createApp(options: CreateAppOptions = {}) {
 
   app.get("/api/admin/reservations/:publicId/history", ...adminGuard, async (request, response, next) => {
     try { response.json({ events: await reservationAdmin.reservationHistory(request.params.publicId as string) }); } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/tables", ...adminGuard, async (_request, response, next) => {
+    try { response.json({ tables: await reservationAdmin.listTables() }); } catch (error) { next(error); }
+  });
+
+  app.patch("/api/admin/reservations/:publicId/tables", ...adminGuard, async (request, response, next) => {
+    const input = tableAssignmentSchema.safeParse(request.body);
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try {
+      const assignment = await reservationAdmin.reassignTables(request.params.publicId as string, input.data.tableKeys, response.locals.adminProfile.clerkUserId);
+      if (!assignment) { response.status(404).json({ error: { code: "RESERVATION_NOT_FOUND", message: "The reservation was not found.", correlationId: response.locals.correlationId } }); return; }
+      response.json({ assignment });
+    } catch (error) {
+      if (error instanceof ReservationLockConflictError) { response.status(409).json({ error: { code: "TABLE_NOT_AVAILABLE", message: "At least one selected table is no longer available.", correlationId: response.locals.correlationId } }); return; }
+      if (error instanceof Error && ["RESERVATION_NOT_ASSIGNABLE", "INVALID_TABLE_COMBINATION"].includes(error.message)) { response.status(409).json({ error: { code: error.message, message: "The selected table assignment is not allowed.", correlationId: response.locals.correlationId } }); return; }
+      next(error);
+    }
   });
 
   app.get("/api/admin/special-days", ...adminGuard, async (_request, response, next) => {

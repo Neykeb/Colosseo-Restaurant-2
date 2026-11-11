@@ -563,7 +563,10 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 
 ### Geschützt
 
-- `POST /api/admin/reservations` – implementiert; manuelles Anlegen durch einen serverseitig autorisierten Owner. Listen, Details und spätere Statusänderungen folgen in `FS5`.
+- `POST /api/admin/reservations` – implementiert; manuelles Anlegen durch einen serverseitig autorisierten Owner.
+- `GET /api/admin/reservations`, `GET /api/admin/reservations/:publicId` und `GET /api/admin/reservations/:publicId/history` – in `FS5` implementiert; Suche/Filter, Detail mit Tischzuweisung und Auditverlauf.
+- `PATCH /api/admin/reservations/:publicId/status` und `PATCH /api/admin/reservations/:publicId/tables` – in `FS5` implementiert; ausschließlich erlaubte Statusübergänge sowie transaktionssichere, kapazitäts- und konfliktgeprüfte Tischumlegung. Storno oder Ablehnung gibt Sperren und Zuordnungen in derselben Transaktion frei.
+- `GET /api/admin/tables` – in `FS5` implementiert; liefert ausschließlich aktive Tische für die geschützte operative Verwaltung.
 - `GET|POST|DELETE /api/admin/reservation-blocks` – implementiert; zeitlich begrenzte Restaurant-, Bereichs- oder Tischsperrungen mit demselben atomaren Sperrindex wie Reservierungen.
 - `GET /api/admin/calendar?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` – implementiert in `FS5`; liefert für einen auf 31 Tage begrenzten Zeitraum Reservierungen, Veranstaltungsanfragen, aktive Sperrzeiten und Sondertage. Zugriff nur für serverseitig autorisierte Owner.
 - `/api/admin/tables` und `/api/admin/settings` – Kapazität und Buchungsregeln.

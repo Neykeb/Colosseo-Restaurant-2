@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import mongoose from "mongoose";
-import { canTransitionReservationStatus, lockSlotStarts, parseDate, timeToMinutes, type ReservationRules, type ReservationStatus } from "../domain/reservation-domain";
-import { AuditEventModel, EventInquiryModel, ReservationBlockModel, ReservationLockModel, ReservationModel, SettingModel, SpecialDayModel, TableModel } from "../models/core";
+import { buildTableCandidates, canTransitionReservationStatus, lockSlotStarts, parseDate, timeToMinutes, type ReservationRules, type ReservationStatus } from "../domain/reservation-domain";
+import { AuditEventModel, EventInquiryModel, ReservationBlockModel, ReservationLockModel, ReservationModel, SettingModel, SpecialDayModel, TableAssignmentModel, TableModel } from "../models/core";
 import { ReservationLockConflictError } from "../repositories/reservation-repository";
 
 export interface ReservationBlockInput {
@@ -61,21 +61,77 @@ export class ReservationAdminService {
   }
 
   async getReservation(publicId: string) {
-    return ReservationModel.findOne({ publicId }).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec();
+    const [reservation, assignments] = await Promise.all([
+      ReservationModel.findOne({ publicId }).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec(),
+      TableAssignmentModel.find({ reservationPublicId: publicId }).sort({ tableKey: 1 }).select({ _id: 0, tableKey: 1 }).lean().exec(),
+    ]);
+    return reservation ? { ...reservation, tableKeys: assignments.map(({ tableKey }) => tableKey) } : null;
   }
 
   async updateStatus(publicId: string, status: ReservationStatus, actorId: string) {
-    const current = await ReservationModel.findOne({ publicId }).select({ status: 1 }).lean().exec();
-    if (!current) return null;
-    if (!canTransitionReservationStatus(current.status as ReservationStatus, status)) throw new Error("INVALID_STATUS_TRANSITION");
-    const reservation = await ReservationModel.findOneAndUpdate({ publicId, status: current.status }, { $set: { status } }, { returnDocument: "after" }).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec();
-    if (!reservation) throw new Error("STATUS_UPDATE_CONFLICT");
-    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation.status_changed", target: publicId, metadata: { status } });
-    return reservation;
+    const session = await mongoose.startSession();
+    try {
+      let updated: unknown = null;
+      await session.withTransaction(async () => {
+        const current = await ReservationModel.findOne({ publicId }).select({ status: 1 }).session(session).lean().exec();
+        if (!current) return;
+        if (!canTransitionReservationStatus(current.status as ReservationStatus, status)) throw new Error("INVALID_STATUS_TRANSITION");
+        const reservation = await ReservationModel.findOneAndUpdate({ publicId, status: current.status }, { $set: { status } }, { returnDocument: "after", session }).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec();
+        if (!reservation) throw new Error("STATUS_UPDATE_CONFLICT");
+        if (status === "cancelled" || status === "declined") {
+          await ReservationLockModel.deleteMany({ reservationPublicId: publicId }, { session });
+          await TableAssignmentModel.deleteMany({ reservationPublicId: publicId }, { session });
+        }
+        await AuditEventModel.create([{ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation.status_changed", target: publicId, metadata: { from: current.status, status } }], { session });
+        updated = reservation;
+      });
+      return updated;
+    } finally {
+      await session.endSession();
+    }
   }
 
   async reservationHistory(publicId: string) {
     return AuditEventModel.find({ target: publicId, action: { $regex: /^reservation\./ } }).sort({ createdAt: -1 }).lean().exec();
+  }
+
+  async listTables() {
+    const tables = await TableModel.find({ active: true }).sort({ areaKey: 1, key: 1 }).select({ _id: 0, key: 1, name: 1, areaKey: 1, minPartySize: 1, maxPartySize: 1, combinationGroupKey: 1 }).lean().exec();
+    return tables.map(({ key, name, areaKey, minPartySize, maxPartySize, combinationGroupKey }) => ({ key, name, areaKey, minPartySize, maxPartySize, combinationGroupKey: combinationGroupKey ?? null }));
+  }
+
+  async reassignTables(publicId: string, tableKeys: string[], actorId: string): Promise<{ tableKeys: string[] } | null> {
+    const session = await mongoose.startSession();
+    try {
+      let result: { tableKeys: string[] } | null = null;
+      await session.withTransaction(async () => {
+        const [reservation, setting, tables] = await Promise.all([
+          ReservationModel.findOne({ publicId }).session(session).lean().exec(),
+          SettingModel.findOne({ key: "reservation.rules" }).session(session).lean().exec(),
+          TableModel.find({ active: true }).session(session).lean().exec(),
+        ]);
+        if (!reservation) return;
+        if (!setting) throw new Error("RESERVATION_RULES_NOT_CONFIGURED");
+        if (["cancelled", "declined", "completed", "no_show"].includes(reservation.status)) throw new Error("RESERVATION_NOT_ASSIGNABLE");
+        const normalized = [...new Set(tableKeys)].sort();
+        const candidates = buildTableCandidates(tables.map(({ key, minPartySize, maxPartySize, combinationGroupKey, active }) => ({ key, minPartySize, maxPartySize, combinationGroupKey: combinationGroupKey ?? null, active })), reservation.partySize);
+        if (!candidates.some((candidate) => candidate.tableKeys.length === normalized.length && candidate.tableKeys.every((key, index) => key === normalized[index]))) throw new Error("INVALID_TABLE_COMBINATION");
+        const rules = setting.value as ReservationRules;
+        const slots = lockSlotStarts(reservation.startTime, rules);
+        await ReservationLockModel.deleteMany({ reservationPublicId: publicId }, { session });
+        await TableAssignmentModel.deleteMany({ reservationPublicId: publicId }, { session });
+        await ReservationLockModel.insertMany(normalized.flatMap((tableKey) => slots.map((slotStart) => ({ reservationPublicId: publicId, date: reservation.date, tableKey, slotStart }))), { session, ordered: true });
+        await TableAssignmentModel.insertMany(normalized.map((tableKey) => ({ reservationPublicId: publicId, tableKey, date: reservation.date, startTime: reservation.startTime, endTime: reservation.endTime })), { session, ordered: true });
+        await AuditEventModel.create([{ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation.tables_changed", target: publicId, metadata: { tableKeys: normalized } }], { session });
+        result = { tableKeys: normalized };
+      });
+      return result;
+    } catch (error) {
+      if (duplicateKey(error)) throw new ReservationLockConflictError();
+      throw error;
+    } finally {
+      await session.endSession();
+    }
   }
 
   async listSpecialDays() { return SpecialDayModel.find().sort({ date: 1 }).lean().exec(); }

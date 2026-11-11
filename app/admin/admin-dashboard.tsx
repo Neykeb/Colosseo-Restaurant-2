@@ -1,5 +1,6 @@
 import { CalendarBlank, CalendarDots, Confetti, UsersThree } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ReservationManagement } from "./reservation-management";
 
 type AdminProfile = {
   displayName: string;
@@ -144,6 +145,7 @@ export function AdminDashboard({ profile, getToken, userControl }: {
         </div>
         <nav aria-label="Verwaltungsbereiche">
           <a href="#overview" aria-current="page"><CalendarBlank aria-hidden="true" /> Übersicht</a>
+          <a href="#reservations"><UsersThree aria-hidden="true" /> Reservierungen</a>
           <a href="#schedule"><CalendarDots aria-hidden="true" /> Kalender</a>
           <a href="#inquiries"><Confetti aria-hidden="true" /> Anfragen</a>
         </nav>
@@ -212,6 +214,8 @@ export function AdminDashboard({ profile, getToken, userControl }: {
             <time dateTime={inquiry.requestedDate}>{compactDateFormatter.format(parseIsoDate(inquiry.requestedDate))}</time>
           </article>) : null}
         </section>
+
+        <ReservationManagement getToken={getToken} />
       </section>
     </main>
   );
