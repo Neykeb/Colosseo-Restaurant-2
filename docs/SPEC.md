@@ -596,6 +596,14 @@ Vor `FS4` müssen mindestens festgelegt und rechtlich geprüft sein:
 
 Marketing-Einwilligung wird nicht mit der Reservierung gebündelt. Zahlungsdaten und besondere Kategorien personenbezogener Daten werden nicht erhoben.
 
+### Fachlicher Prüfentwurf vom 11.11.2026 (`VORSCHLAG`, NICHT RECHTLICH FREIGEGEBEN)
+
+- Zweck der erhobenen Reservierungsdaten ist ausschließlich die Bearbeitung, Bestätigung und operative Durchführung der Tischreservierung. Für Marketing findet keine Mitverarbeitung statt.
+- Mindestens eine Kontaktmöglichkeit aus E-Mail-Adresse oder Telefonnummer wird benötigt. Name, Datum, Uhrzeit und Personenzahl sind für die Reservierungsabwicklung erforderlich; die Telefonnummer bleibt optional, wenn eine E-Mail-Adresse vorhanden ist.
+- Online-Stornierungen werden nur für Reservierungen mit gültigem, nicht im Klartext gespeichertem Gast-Token und nur bis zwei Stunden vor Reservierungsbeginn vorgeschlagen. Danach erfolgt die Klärung telefonisch. Zulässig sind ausschließlich noch offene oder bestätigte Reservierungen; die Freigabe dieser Geschäftsregel bleibt `OFFEN`.
+- Stornierte oder abgelehnte Reservierungen werden nach 90 Tagen anonymisiert; abgeschlossene Reservierungen und No-shows nach 180 Tagen. Erfolgreich versendete Outbox-Ereignisse werden nach 30 Tagen gelöscht, Auditereignisse nach 365 Tagen. Diese Fristen entsprechen dem vorhandenen technischen Entwurf und dürfen erst nach fachlicher/rechtlicher Freigabe produktiv automatisiert werden.
+- Für Veranstaltungsanfragen, Auskunft, Berichtigung, Löschung, Verantwortlichenangaben, Auftragsverarbeitung und mögliche Drittlandtransfers fehlen weiterhin verbindliche Regeln. Diese Lücken verhindern eine rechtliche Produktionsfreigabe.
+
 ## 27. Teststrategie der Full-Stack-Erweiterung (`VORSCHLAG`)
 
 - Unit-Tests: Zeitfenster, Statusübergänge, Validierung, Locale- und Preisformatierung.
