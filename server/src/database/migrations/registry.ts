@@ -10,6 +10,7 @@ import { reservationApiAlignmentMigration } from "./0008_reservation_api_alignme
 import { cancellationAndRetentionMigration } from "./0009_cancellation_and_retention";
 import { eventInquiriesMigration } from "./0010_event_inquiries";
 import { menuContentMigration } from "./0011_menu-content";
+import { gridFsMediaMigration } from "./0012_gridfs-media";
 
 // Add every new migration here in ascending ID order. Migration files are immutable once applied.
-export const migrations: readonly Migration[] = [coreIndexesMigration, adminDisplayNameLimitMigration, tableCapacityAndCombinationsMigration, initialRestaurantConfigurationMigration, reservationLocksMigration, reservationBlocksMigration, emailOutboxMigration, reservationApiAlignmentMigration, cancellationAndRetentionMigration, eventInquiriesMigration, menuContentMigration];
+export const migrations: readonly Migration[] = [coreIndexesMigration, adminDisplayNameLimitMigration, tableCapacityAndCombinationsMigration, initialRestaurantConfigurationMigration, reservationLocksMigration, reservationBlocksMigration, emailOutboxMigration, reservationApiAlignmentMigration, cancellationAndRetentionMigration, eventInquiriesMigration, menuContentMigration, gridFsMediaMigration];
