@@ -6,7 +6,7 @@
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 10.11.2026
+**Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -262,6 +262,17 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Mobile Feiern-Section korrigiert:** Die weiterhin exakt `100svh` hohe Section reserviert mobil ausreichend Raum für Überschrift, Beschreibung und CTA. Eine kleinere responsive Überschrift, kompaktere Abstände und eine 65/35-Aufteilung verhindern, dass „Feier anfragen“ abgeschnitten oder vom anschließend beginnenden Foto überdeckt wird.
 - **Produktions-404 gehärtet:** Unbekannte HTML-Routen zeigen weiterhin die gestaltete TanStack-404-Oberfläche, antworten serverseitig aber nun korrekt mit HTTP `404`. Client-only-Routen wie `/admin` bleiben mit und ohne abschließenden Slash erreichbar; ein eigener Listener-Test verhindert Regressionen.
 - **Tagesabschluss Person B:** Alle für den 10.11. technisch ausführbaren Person-B-Aufgaben sind erledigt und dokumentiert. Offen bleiben ausschließlich der unabhängige Gegenreview durch Person A, die fachlich/rechtliche Freigabe von Datenschutz-, Aufbewahrungs- und Stornoregeln, eine verifizierte Resend-Absenderdomain sowie die ausdrückliche Gate-Abnahme. Diese Punkte benötigen andere Verantwortliche beziehungsweise eine Nutzerentscheidung und werden nicht fälschlich als erledigt markiert.
+
+## 21. Integrationsstand Person A – 11.11.2026
+
+- Der Merge von `origin/dev` in `feature/szymon` wurde Datei für Datei aufgelöst. Der geprüfte Produktionsstand aus `dev` bleibt die technische Grundlage.
+- Person As Reservierungsverwaltungs- und Veranstaltungsanfrage-Code wurde auf die aktuelle `ReservationAdminService`-/Express-Architektur übertragen; veraltete parallele Servicevarianten wurden nicht über den Produktionsstand gelegt.
+- Migration `0010_event_inquiries`, Event-Inquiry-Modell und geschützte Admin-Endpunkte sind integriert. Diese Integration ist noch keine Gate-Abnahme von `FS5`; der dokumentierte Phasenstatus bleibt unverändert.
+- **Verifiziert:** keine Konfliktmarker oder unaufgelösten Git-Konflikte; Typecheck, Lint, alle 76 Tests und Production-Build erfolgreich. Die Build-Hinweise zu externen `use client`-Direktiven sind unveränderte, nicht blockierende Bundler-Warnungen.
+- **FS4-Gegenreview:** Person A hat Reservierungsgrenze, Adminschutz, Outbox-Idempotenz, Wiederholungslogik, Secret-Trennung, Storno-Sperre und Aufbewahrungsskript geprüft. `npm audit --omit=dev` meldet keine bekannten Schwachstellen; Secret-Tracking-Prüfung, Typecheck, OXLint, 76/76 Tests und Production-Build sind erfolgreich.
+- **Vorbereitete Entscheidung:** Der technische Fachentwurf schlägt eine tokenbasierte Online-Stornierung bis zwei Stunden vorher sowie 90/180/30/365 Tage für Anonymisierung beziehungsweise Löschung vor. Das ist ausdrücklich keine Rechtsfreigabe. Ohne Restaurant-/Rechtsfreigabe bleiben öffentlicher Storno und automatische Produktionslöschung deaktiviert.
+- **Nur für einen späteren Produktionsbetrieb offen:** eigene verifizierte Resend-Absenderdomain, verbindliche Datenschutz- und Anbieterangaben sowie Regeln für reale Veranstaltungsanfragen. Für den aktuellen Demo-Umfang bleibt nur die ausdrückliche Gate-Abnahme `FS4` offen.
+- **Umfangsentscheidung:** Der Nutzer hat am 11.11.2026 bestätigt, dass die Anwendung ausschließlich ein nicht-produktives Weiterbildungs-/Demoprojekt ist. Eigene Resend-Domain und rechtliche Produktionsprüfung blockieren die Demo-Abnahme daher nicht mehr. Es dürfen weiterhin keine echten Gastdaten verwendet oder beliebige reale Empfänger über den Testabsender angeschrieben werden.
 - **Externe Blocker:** Verifizierte Resend-Produktionsdomain sowie fachlich/rechtlich freigegebene Datenschutz-, Aufbewahrungs- und Stornoregeln.
 - **Phasengrenze:** `FS5` beginnt erst nach abgeschlossener FS4-Präsentation, ausdrücklicher Gate-Abnahme und neuem `GO`.
 - **Branch-Integration:** Die Konflikte zwischen `feature/momo` und `dev` wurden vollständig aufgelöst. Die getestete öffentliche Website, mobile Navigation, Reservierungsstrecke und bestehende Admin-Autorisierung blieben maßgeblich; ergänzende Storno-, Aufbewahrungs-, Outbox- und Migrationsbausteine aus `dev` wurden kompatibel übernommen. `dist/` bleibt generiert und unversioniert. Typecheck, OXLint, 76/76 Tests und Production-Build waren anschließend erfolgreich; der Build meldete nur die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL`.

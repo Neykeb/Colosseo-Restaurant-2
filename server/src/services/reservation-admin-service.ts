@@ -1,7 +1,7 @@
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import mongoose from "mongoose";
-import { lockSlotStarts, parseDate, timeToMinutes, type ReservationRules } from "../domain/reservation-domain";
-import { ReservationBlockModel, ReservationLockModel, SettingModel, TableModel } from "../models/core";
+import { canTransitionReservationStatus, lockSlotStarts, parseDate, timeToMinutes, type ReservationRules, type ReservationStatus } from "../domain/reservation-domain";
+import { AuditEventModel, EventInquiryModel, ReservationBlockModel, ReservationLockModel, ReservationModel, SettingModel, SpecialDayModel, TableModel } from "../models/core";
 import { ReservationLockConflictError } from "../repositories/reservation-repository";
 
 export interface ReservationBlockInput {
@@ -19,6 +19,69 @@ function duplicateKey(error: unknown): boolean {
 }
 
 export class ReservationAdminService {
+  async listReservations(filters: { date?: string; status?: ReservationStatus; q?: string; page?: number; pageSize?: number }) {
+    const page = Math.max(1, filters.page ?? 1);
+    const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 25));
+    const query: Record<string, unknown> = {};
+    if (filters.date) query.date = filters.date;
+    if (filters.status) query.status = filters.status;
+    if (filters.q) {
+      const escaped = filters.q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.$or = [{ publicId: { $regex: escaped, $options: "i" } }, { "guest.name": { $regex: escaped, $options: "i" } }, { "guest.email": { $regex: escaped, $options: "i" } }, { "guest.phone": { $regex: escaped, $options: "i" } }];
+    }
+    const [reservations, total] = await Promise.all([
+      ReservationModel.find(query).sort({ date: 1, startTime: 1 }).skip((page - 1) * pageSize).limit(pageSize).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec(),
+      ReservationModel.countDocuments(query).exec(),
+    ]);
+    return { reservations, total, page, pageSize, pageCount: Math.ceil(total / pageSize) };
+  }
+
+  async getReservation(publicId: string) {
+    return ReservationModel.findOne({ publicId }).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec();
+  }
+
+  async updateStatus(publicId: string, status: ReservationStatus, actorId: string) {
+    const current = await ReservationModel.findOne({ publicId }).select({ status: 1 }).lean().exec();
+    if (!current) return null;
+    if (!canTransitionReservationStatus(current.status as ReservationStatus, status)) throw new Error("INVALID_STATUS_TRANSITION");
+    const reservation = await ReservationModel.findOneAndUpdate({ publicId, status: current.status }, { $set: { status } }, { returnDocument: "after" }).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec();
+    if (!reservation) throw new Error("STATUS_UPDATE_CONFLICT");
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation.status_changed", target: publicId, metadata: { status } });
+    return reservation;
+  }
+
+  async reservationHistory(publicId: string) {
+    return AuditEventModel.find({ target: publicId, action: { $regex: /^reservation\./ } }).sort({ createdAt: -1 }).lean().exec();
+  }
+
+  async listSpecialDays() { return SpecialDayModel.find().sort({ date: 1 }).lean().exec(); }
+
+  async saveSpecialDay(input: { date: string; label: string; closed: boolean; opens?: string; closes?: string }, actorId: string) {
+    const day = await SpecialDayModel.findOneAndUpdate({ date: input.date }, { $set: { ...input, opens: input.closed ? undefined : input.opens, closes: input.closed ? undefined : input.closes } }, { upsert: true, returnDocument: "after", runValidators: true }).lean().exec();
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "special_day.saved", target: input.date, metadata: { closed: input.closed } });
+    return day;
+  }
+
+  async deleteSpecialDay(date: string, actorId: string) {
+    const day = await SpecialDayModel.findOneAndDelete({ date }).lean().exec();
+    if (day) await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "special_day.deleted", target: date, metadata: {} });
+    return day;
+  }
+
+  async listEventInquiries() { return EventInquiryModel.find().sort({ requestedDate: 1, createdAt: -1 }).lean().exec(); }
+  async getEventInquiry(inquiryId: string) { return EventInquiryModel.findOne({ inquiryId }).lean().exec(); }
+  async createEventInquiry(input: { name: string; email: string; phone?: string; eventType: string; requestedDate: string; partySize: number; message: string }) { return EventInquiryModel.create({ ...input, inquiryId: `inq_${randomUUID().replaceAll("-", "")}`, status: "new" }); }
+  async updateEventInquiryStatus(inquiryId: string, status: "new" | "in_review" | "accepted" | "declined" | "closed", actorId: string) {
+    const inquiry = await EventInquiryModel.findOneAndUpdate({ inquiryId }, { $set: { status } }, { returnDocument: "after", runValidators: true }).lean().exec();
+    if (inquiry) await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "event_inquiry.status_changed", target: inquiryId, metadata: { status } });
+    return inquiry;
+  }
+  async updateEventInquiryNote(inquiryId: string, internalNote: string, actorId: string) {
+    const inquiry = await EventInquiryModel.findOneAndUpdate({ inquiryId }, { $set: { internalNote } }, { returnDocument: "after", runValidators: true }).lean().exec();
+    if (inquiry) await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "event_inquiry.note_changed", target: inquiryId, metadata: {} });
+    return inquiry;
+  }
+
   async listBlocks(date?: string) {
     return ReservationBlockModel.find(date ? { date } : {}).sort({ date: 1, startTime: 1 }).select({ _id: 0, __v: 0 }).lean().exec();
   }

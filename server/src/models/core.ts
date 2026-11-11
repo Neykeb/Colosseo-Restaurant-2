@@ -71,6 +71,9 @@ outboxEventSchema.index({ status: 1, nextAttemptAt: 1 });
 export const ADMIN_DISPLAY_NAME_MAX_LENGTH = 120;
 
 const adminProfileSchema = new Schema({ clerkUserId: { type: String, required: true, unique: true }, role: { type: String, required: true, enum: ["owner", "staff"] }, active: { type: Boolean, required: true, default: true }, displayName: { type: String, required: true, trim: true, maxlength: ADMIN_DISPLAY_NAME_MAX_LENGTH }, lastAdminAccessAt: Date }, { timestamps });
+const eventInquirySchema = new Schema({ inquiryId: { type: String, required: true, unique: true }, name: { type: String, required: true }, email: { type: String, required: true }, phone: String, eventType: { type: String, required: true }, requestedDate: { type: String, required: true }, partySize: { type: Number, required: true, min: 1 }, message: { type: String, required: true }, status: { type: String, required: true, enum: ["new", "in_review", "accepted", "declined", "closed"], default: "new" }, internalNote: String }, { timestamps });
+eventInquirySchema.index({ status: 1, requestedDate: 1 });
+eventInquirySchema.index({ email: 1 });
 
 export type Setting = InferSchemaType<typeof settingSchema>;
 export type ServicePeriod = InferSchemaType<typeof servicePeriodSchema>;
@@ -89,3 +92,4 @@ export const ReservationBlockModel = model("ReservationBlock", reservationBlockS
 export const AuditEventModel = model("AuditEvent", auditEventSchema);
 export const OutboxEventModel = model("OutboxEvent", outboxEventSchema);
 export const AdminProfileModel = model("AdminProfile", adminProfileSchema);
+export const EventInquiryModel = model("EventInquiry", eventInquirySchema);

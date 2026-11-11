@@ -1,6 +1,6 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS4` technisch umgesetzt; Render-E2E und Resend-Testversand verifiziert, Produktionsabsender, Rechtsprüfung und Gate-Abnahme offen
+**Status:** Full-Stack-Phase `FS4` für das nicht-produktive Weiterbildungsprojekt technisch geprüft; Resend-Testmodus verifiziert, Gate-Abnahme offen
 **Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
@@ -249,10 +249,11 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [x] Outbox-Verarbeitung und idempotente Gast-/Restaurant-E-Mails mit begrenzten Wiederholungen integrieren.
 - [x] Migration `0007_email-outbox` in Test- und Entwicklungsdatenbank anwenden; Zustellindex und Bestandsfelder sind aktiv.
 - [x] Restaurantempfänger vorläufig auf `mohammad.amiri@dci-student.org` festlegen; Secret und Absender bleiben ausschließlich in Umgebungsvariablen.
-- [-] Resend-Integration verifizieren: lokaler API-Key und Testabsender sind konfiguriert; reale Gastzustellung mit Status `Delivered`, gespeicherter Provider-ID und eindeutiger Ereignis-ID ist bestätigt. Der gemeinsame Render-Service ist live und technisch geprüft. Eigene Absenderdomain und beliebige Empfänger bleiben offen; die Restaurantnachricht wurde im Resend-Testmodus erwartungsgemäß blockiert und bleibt nachvollziehbar in der Outbox.
-- [ ] Datenschutztext, Aufbewahrungsfristen und Stornoregel fachlich/rechtlich freigeben; öffentliche Stornofunktion bleibt bis dahin bewusst ausgesetzt.
+- [x] Resend-Integration für den bestätigten Demo-/Weiterbildungsumfang verifizieren: API-Key, Testabsender, reale Zustellung an den zulässigen Testempfänger, Provider-ID, Idempotenz und Fehler-Outbox sind bestätigt. Eine eigene Absenderdomain ist für diesen Umfang nicht erforderlich; beliebige reale Empfänger bleiben bewusst ausgeschlossen.
+- [x] Datenschutz-, Aufbewahrungs- und Stornorahmen für den Demo-/Weiterbildungsumfang festlegen: keine reale Nutzung, keine echten Gastdaten und keine Produktionsfreigabe. Person A hat den technischen Bestand am 11.11.2026 gegengeprüft und den Fachentwurf in `SPEC.md` dokumentiert. Eine rechtliche Produktionsprüfung wäre erst bei späterer echter Nutzung erforderlich.
 - [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
 - [x] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und technisches Produktions-E2E ausführen. Person B prüfte DE/EN/IT, mobilen Überlauf, Touchziele, Kontaktfehler-Fokus, Statusrücksetzung, Reduced-Motion-Fallback und Desktop-Ankernavigation; der Nutzer bestätigte einen echten Smartphone-Test ohne Geräteprotokoll. Auf Render wurden Health, Config, Availability, Sprach- und Unterseiten, Reloads, Canonical, Sitemap, Robots, Adminschutz, neutrale Validierungsfehler, Secret-Freiheit und die clientseitige 404-Oberfläche geprüft. Eine synthetische Produktionsbuchung wurde bewusst nicht erzeugt, weil sie reale Daten- und E-Mail-Nebenwirkungen auslösen würde; Buchung, Idempotenz und Concurrency bleiben durch automatisierte Tests und den Atlas-Parallellauf nachgewiesen.
+- [x] Unabhängigen technischen FS4-Gegenreview durch Person A ausführen: am 11.11.2026 bestanden mit Secret-Tracking-Prüfung, `npm audit --omit=dev` ohne bekannte Schwachstellen, Typecheck, OXLint, 76/76 Tests und Production-Build. Bekannte Drittanbieterhinweise zu `use client` sind nicht blockierend; `SITE_URL` war im lokalen Build erwartungsgemäß nicht gesetzt.
 - [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
 
 **Integrationsstand 10.11.2026:** Die Merge-Konflikte mit `dev` sind ohne Rücknahme der bestehenden Website-, Admin- und Reservierungsfunktionen aufgelöst. Neue Migrations-, Storno-, Aufbewahrungs- und E-Mail-Verarbeitungsbausteine wurden aufgenommen; `dist/` bleibt aus Git ausgeschlossen. Render ist live und der technische Produktions-E2E ist abgeschlossen. Der Integrationsstand besteht Typecheck, OXLint, 76/76 Tests und Production-Build. Dies ersetzt weder die offenen fachlich/rechtlichen Freigaben noch das Gate `FS4`.

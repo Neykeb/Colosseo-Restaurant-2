@@ -10,7 +10,6 @@ import { ReservationAdminService } from "../services/reservation-admin-service";
 import { ReservationLockConflictError } from "../repositories/reservation-repository";
 
 type ReservationApi = Pick<ReservationService, "getPublicConfiguration" | "getAvailability" | "createReservation">;
-type ReservationAdminApi = Pick<ReservationAdminService, "listBlocks" | "createBlock" | "deleteBlock">;
 
 interface CreateAppOptions {
   staticDirectory?: URL;
@@ -22,7 +21,7 @@ interface CreateAppOptions {
   findAdminProfile?: InstanceType<typeof AdminProfileRepository>["findByClerkUserId"];
   getAuthenticatedUserId?: GetAuthenticatedUserId;
   reservationService?: ReservationApi;
-  reservationAdminService?: ReservationAdminApi;
+  reservationAdminService?: Partial<ReservationAdminService>;
 }
 
 const availabilityQuerySchema = z.object({
@@ -52,6 +51,11 @@ const reservationBlockSchema = z.object({
   reason: z.string().trim().min(2).max(240),
 }).refine(({ startTime, endTime }) => startTime < endTime, { path: ["endTime"], message: "End time must be later than start time." })
   .refine(({ scope, scopeKey }) => scope === "restaurant" || Boolean(scopeKey), { path: ["scopeKey"], message: "Area and table blocks require a scope key." });
+const reservationStatusSchema = z.enum(["requested", "pending", "confirmed", "cancelled", "declined", "seated", "completed", "no_show"]);
+const reservationListSchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), status: reservationStatusSchema.optional(), q: z.string().trim().max(120).optional(), page: z.coerce.number().int().min(1).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() });
+const specialDaySchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), label: z.string().trim().min(1).max(160), closed: z.boolean(), opens: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(), closes: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional() });
+const eventInquirySchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254), phone: z.string().trim().min(5).max(40).optional(), eventType: z.string().trim().min(1).max(80), requestedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), partySize: z.number().int().min(1).max(500), message: z.string().trim().min(1).max(2_000) });
+const eventInquiryStatusSchema = z.enum(["new", "in_review", "accepted", "declined", "closed"]);
 
 function sendValidationError(response: express.Response, details: unknown): void {
   response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "The request data is invalid.", details, correlationId: response.locals.correlationId } });
@@ -123,7 +127,7 @@ export function createApp(options: CreateAppOptions = {}) {
   const app = express();
   const adminProfiles = new AdminProfileRepository();
   const reservations = options.reservationService ?? new ReservationService();
-  const reservationAdmin = options.reservationAdminService ?? new ReservationAdminService();
+  const reservationAdmin = Object.assign(new ReservationAdminService(), options.reservationAdminService ?? {});
   const adminGuard: RequestHandler[] = options.clerk || options.getAuthenticatedUserId
     ? [requireAdminRole(options.findAdminProfile ?? adminProfiles.findByClerkUserId.bind(adminProfiles), "owner", options.getAuthenticatedUserId)]
     : [(_request, response) => {
@@ -214,6 +218,68 @@ export function createApp(options: CreateAppOptions = {}) {
         next(unexpected);
       }
     }
+  });
+
+  app.get("/api/admin/reservations", ...adminGuard, async (request, response, next) => {
+    const input = reservationListSchema.safeParse(request.query);
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.json(await reservationAdmin.listReservations(input.data)); } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/reservations/:publicId", ...adminGuard, async (request, response, next) => {
+    try {
+      const reservation = await reservationAdmin.getReservation(request.params.publicId as string);
+      if (!reservation) { response.status(404).json({ error: { code: "RESERVATION_NOT_FOUND", message: "The reservation was not found.", correlationId: response.locals.correlationId } }); return; }
+      response.json({ reservation });
+    } catch (error) { next(error); }
+  });
+
+  app.patch("/api/admin/reservations/:publicId/status", ...adminGuard, async (request, response, next) => {
+    const status = reservationStatusSchema.safeParse(request.body?.status);
+    if (!status.success) { sendValidationError(response, status.error.flatten()); return; }
+    try {
+      const reservation = await reservationAdmin.updateStatus(request.params.publicId as string, status.data, response.locals.adminProfile.clerkUserId);
+      if (!reservation) { response.status(404).json({ error: { code: "RESERVATION_NOT_FOUND", message: "The reservation was not found.", correlationId: response.locals.correlationId } }); return; }
+      response.json({ reservation });
+    } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/reservations/:publicId/history", ...adminGuard, async (request, response, next) => {
+    try { response.json({ events: await reservationAdmin.reservationHistory(request.params.publicId as string) }); } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/special-days", ...adminGuard, async (_request, response, next) => {
+    try { response.json({ specialDays: await reservationAdmin.listSpecialDays() }); } catch (error) { next(error); }
+  });
+  app.put("/api/admin/special-days/:date", ...adminGuard, async (request, response, next) => {
+    const input = specialDaySchema.safeParse({ ...request.body, date: request.params.date });
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.json({ specialDay: await reservationAdmin.saveSpecialDay(input.data, response.locals.adminProfile.clerkUserId) }); } catch (error) { next(error); }
+  });
+  app.delete("/api/admin/special-days/:date", ...adminGuard, async (request, response, next) => {
+    try {
+      const day = await reservationAdmin.deleteSpecialDay(request.params.date as string, response.locals.adminProfile.clerkUserId);
+      if (!day) { response.status(404).json({ error: { code: "SPECIAL_DAY_NOT_FOUND", message: "The special day was not found.", correlationId: response.locals.correlationId } }); return; }
+      response.status(204).end();
+    } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/event-inquiries", ...adminGuard, async (_request, response, next) => { try { response.json({ inquiries: await reservationAdmin.listEventInquiries() }); } catch (error) { next(error); } });
+  app.post("/api/admin/event-inquiries", ...adminGuard, async (request, response, next) => {
+    const input = eventInquirySchema.safeParse(request.body);
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.status(201).json({ inquiry: await reservationAdmin.createEventInquiry(input.data) }); } catch (error) { next(error); }
+  });
+  app.get("/api/admin/event-inquiries/:inquiryId", ...adminGuard, async (request, response, next) => { try { const inquiry = await reservationAdmin.getEventInquiry(request.params.inquiryId as string); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND" } }); return; } response.json({ inquiry }); } catch (error) { next(error); } });
+  app.patch("/api/admin/event-inquiries/:inquiryId/status", ...adminGuard, async (request, response, next) => {
+    const status = eventInquiryStatusSchema.safeParse(request.body?.status);
+    if (!status.success) { sendValidationError(response, status.error.flatten()); return; }
+    try { const inquiry = await reservationAdmin.updateEventInquiryStatus(request.params.inquiryId as string, status.data, response.locals.adminProfile.clerkUserId); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND" } }); return; } response.json({ inquiry }); } catch (error) { next(error); }
+  });
+  app.patch("/api/admin/event-inquiries/:inquiryId/note", ...adminGuard, async (request, response, next) => {
+    const note = z.string().trim().max(2_000).safeParse(request.body?.internalNote);
+    if (!note.success) { sendValidationError(response, note.error.flatten()); return; }
+    try { const inquiry = await reservationAdmin.updateEventInquiryNote(request.params.inquiryId as string, note.data, response.locals.adminProfile.clerkUserId); if (!inquiry) { response.status(404).json({ error: { code: "EVENT_INQUIRY_NOT_FOUND" } }); return; } response.json({ inquiry }); } catch (error) { next(error); }
   });
 
   app.get("/api/admin/reservation-blocks", ...adminGuard, async (request, response, next) => {

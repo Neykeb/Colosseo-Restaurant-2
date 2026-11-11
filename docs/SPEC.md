@@ -1,6 +1,6 @@
 # Funktionale und technische Spezifikation
 
-**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS4` technisch umgesetzt, Render-E2E und Resend-Testversand verifiziert, Produktionsabsender offen
+**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS4` für das nicht-produktive Weiterbildungsprojekt technisch geprüft
 **Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. `FS1` wurde am 02.11.2026 ausdrücklich freigegeben; spätere Full-Stack-Phasen bleiben bis zu ihrem jeweiligen Gate gesperrt.
@@ -586,6 +586,8 @@ Fehler verwenden stabile maschinenlesbare Codes, eine sichere Nutzermeldung und 
 
 ## 26. Datenschutz und Aufbewahrung (`OFFEN`)
 
+**Bestätigter Projektumfang 11.11.2026:** Die Anwendung ist ein Weiterbildungs-/Demoprojekt und nicht für einen realen Restaurantbetrieb oder die Eingabe echter Gastdaten freigegeben. Für die Demo gilt der nachfolgende technische Rahmen als ausreichend; er ist keine Rechtsberatung und keine Produktionsfreigabe. Sollte die Anwendung später real genutzt werden, werden sämtliche offenen Punkte dieses Abschnitts wieder zu zwingenden Livegang-Voraussetzungen.
+
 Vor `FS4` müssen mindestens festgelegt und rechtlich geprüft sein:
 
 - Pflichtfelder, Zweck und Rechtsgrundlage je Formular.
@@ -595,6 +597,14 @@ Vor `FS4` müssen mindestens festgelegt und rechtlich geprüft sein:
 - Inhalt und Zeitpunkt der Einwilligung, falls Daten über die reine Reservierungsabwicklung hinaus verwendet werden.
 
 Marketing-Einwilligung wird nicht mit der Reservierung gebündelt. Zahlungsdaten und besondere Kategorien personenbezogener Daten werden nicht erhoben.
+
+### Fachlicher Prüfentwurf vom 11.11.2026 (`VORSCHLAG`, NICHT RECHTLICH FREIGEGEBEN)
+
+- Zweck der erhobenen Reservierungsdaten ist ausschließlich die Bearbeitung, Bestätigung und operative Durchführung der Tischreservierung. Für Marketing findet keine Mitverarbeitung statt.
+- Mindestens eine Kontaktmöglichkeit aus E-Mail-Adresse oder Telefonnummer wird benötigt. Name, Datum, Uhrzeit und Personenzahl sind für die Reservierungsabwicklung erforderlich; die Telefonnummer bleibt optional, wenn eine E-Mail-Adresse vorhanden ist.
+- Online-Stornierungen werden nur für Reservierungen mit gültigem, nicht im Klartext gespeichertem Gast-Token und nur bis zwei Stunden vor Reservierungsbeginn vorgeschlagen. Danach erfolgt die Klärung telefonisch. Zulässig sind ausschließlich noch offene oder bestätigte Reservierungen; die Freigabe dieser Geschäftsregel bleibt `OFFEN`.
+- Stornierte oder abgelehnte Reservierungen werden nach 90 Tagen anonymisiert; abgeschlossene Reservierungen und No-shows nach 180 Tagen. Erfolgreich versendete Outbox-Ereignisse werden nach 30 Tagen gelöscht, Auditereignisse nach 365 Tagen. Diese Fristen entsprechen dem vorhandenen technischen Entwurf und dürfen erst nach fachlicher/rechtlicher Freigabe produktiv automatisiert werden.
+- Für Veranstaltungsanfragen, Auskunft, Berichtigung, Löschung, Verantwortlichenangaben, Auftragsverarbeitung und mögliche Drittlandtransfers fehlen weiterhin verbindliche Regeln. Diese Lücken verhindern eine rechtliche Produktionsfreigabe.
 
 ## 27. Teststrategie der Full-Stack-Erweiterung (`VORSCHLAG`)
 
