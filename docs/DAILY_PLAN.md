@@ -451,3 +451,9 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Manuell geprüft:** Worst-Case-Testdaten mit langen Kategorien, langen Gerichtsnamen, Preisen und Bildern geladen; Vorschau geöffnet, gelesen und über die Schließen-Aktion beendet. Der Fokus kehrte auf die Vorschau-Schaltfläche zurück. Der Empty-Zustand ist im Accessibility-Baum explizit erklärt.
 - **Regression:** Typecheck, Lint, 88/88 Tests, Production-Build und `git diff --check` erfolgreich. Die bekannten Build-Hinweise zu Drittanbieter-`use client`-Direktiven und die lokal fehlende `SITE_URL` bleiben nicht blockierend.
 - **Einschränkung:** Eine echte 320-px-Viewport-Umschaltung war über die verfügbare Browsersteuerung nicht möglich; der Reflow ist durch die CSS-Regeln abgedeckt, benötigt aber noch eine Prüfung in einem Browser mit expliziter Viewportsteuerung.
+
+## 49. FS7-Abschlussprüfung Reflow und Tastatur – 12.11.2026
+
+- **Browserprüfung:** Eine separate Browseransicht mit angeforderter 320×800-Größe wurde geöffnet; der tatsächlich verfügbare Layoutbereich lag bei etwa 377 px. Die Admin-Navigation blieb intern scrollbar, aber die Messung meldete weiterhin Dokumentüberlauf (`scrollWidth` 414 px gegenüber `clientWidth` 362 px). Damit ist die Reflow-Prüfung nicht bestanden und bleibt ein konkreter offener Befund.
+- **Tastatur/Vorschau:** Worst-Case-Daten wurden geladen, die Vorschau geöffnet und geschlossen. Der Dialog besitzt einen zugänglichen Schließen-Button; der Fokus kehrte danach zur Vorschau-Schaltfläche zurück.
+- **Nächster Schritt:** Den verbleibenden Dokumentüberlauf mit echter 320-px-Steuerung isolieren und beheben; danach FS7-Abnahmebericht erstellen.
