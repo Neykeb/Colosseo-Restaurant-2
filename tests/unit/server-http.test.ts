@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -7,6 +7,13 @@ import type { Server } from "node:http";
 import { createApp } from "../../server/src/http/app";
 import { isDirectExecution } from "../../server/src/server";
 import { ReservationAdminService } from "../../server/src/services/reservation-admin-service";
+import { storeMedia } from "../../server/src/services/media-service";
+
+vi.mock("../../server/src/services/media-service", () => ({
+  deleteMedia: vi.fn(),
+  storeMedia: vi.fn(),
+  streamMedia: vi.fn(),
+}));
 
 const servers: Server[] = [];
 
@@ -228,6 +235,40 @@ describe("Express platform foundation", () => {
     expect(created.status).toBe(201);
     const status = await fetch(`${baseUrl}/api/admin/event-inquiries/INQ-DEV-PRIVATES-DINNER/status`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: "in_review" }) });
     expect(status.status).toBe(200);
+  });
+
+  it("supports the media upload to menu save and publication flow", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const savedItems: Array<Record<string, unknown>> = [];
+    const reservationAdminService = {
+      saveMenuItem: async (input: Record<string, unknown>) => {
+        savedItems.push(input);
+        return { ...input, published: false };
+      },
+      publishMenuItem: async (itemId: string, published: boolean) => ({ ...savedItems.find((item) => item.itemId === itemId), published }),
+    };
+    vi.mocked(storeMedia).mockResolvedValue({ id: "507f1f77bcf86cd799439011", url: "/api/public/media/507f1f77bcf86cd799439011", contentType: "image/png", size: 8, altText: "Pasta" });
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService: reservationAdminService as never,
+    }));
+
+    const upload = await fetch(`${baseUrl}/api/admin/media`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fileName: "pasta.png", contentType: "image/png", altText: "Pasta", dataBase64: "iVBORw0KGgo=" }) });
+    expect(upload.status).toBe(201);
+    const media = await upload.json() as { media: { url: string } };
+    expect(media.media.url).toBe("/api/public/media/507f1f77bcf86cd799439011");
+
+    const saved = await fetch(`${baseUrl}/api/admin/menu/items/pasta-01`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ categorySlug: "main", name: "Pasta", priceCents: 1490, allergens: [], imageUrl: media.media.url, sortOrder: 1, active: true, published: false }) });
+    expect(saved.status).toBe(200);
+    expect(savedItems[0]?.imageUrl).toBe(media.media.url);
+
+    const published = await fetch(`${baseUrl}/api/admin/menu/items/pasta-01/publication`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ published: true }) });
+    expect(published.status).toBe(200);
+    await expect(published.json()).resolves.toMatchObject({ item: { itemId: "pasta-01", published: true } });
+
+    const invalidPath = await fetch(`${baseUrl}/api/admin/menu/items/pasta-02`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ categorySlug: "main", name: "Pasta", priceCents: 1490, allergens: [], imageUrl: "/uploads/pasta.png", sortOrder: 1, active: true, published: false }) });
+    expect(invalidPath.status).toBe(400);
   });
 
   it("rejects a request without an authenticated Clerk user", async () => {

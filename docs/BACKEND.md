@@ -160,6 +160,7 @@ Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 - `GET /api/admin/menu/items`, `PUT /api/admin/menu/items/:itemId`: Gerichte mit Name, Beschreibung, `priceCents`, Allergenen, optionaler Bild-URL, Sortierung, Aktiv- und Veröffentlichungsstatus speichern.
 - `GET /api/admin/menu/preview`: aktive Entwurfs- und Veröffentlichungsdaten einschließlich `published`-Status.
 - `PATCH /api/admin/menu/items/:itemId/publication`: explizit veröffentlichen oder Veröffentlichung zurücknehmen; die Aktion wird auditiert.
+- `imageUrl` bei `PUT /api/admin/menu/items/:itemId` akzeptiert ausschließlich interne Medien-URLs im Format `/api/public/media/<24-stellige ObjectId>` oder absolute `https://`-URLs; beliebige relative Pfade und nicht-HTTPS-URLs werden abgelehnt.
 - `POST /api/admin/media`: JSON mit `fileName`, `contentType`, `altText` und Base64-Daten. Erlaubt sind JPEG, PNG und WebP bis 5 MB; Alternativtext ist 1–300 Zeichen lang. Die Binärsignatur wird zusätzlich zum MIME-Typ geprüft.
 - `DELETE /api/admin/media/:id`: löscht GridFS-Datei und Chunks und erzeugt ein Audit-Ereignis.
 
