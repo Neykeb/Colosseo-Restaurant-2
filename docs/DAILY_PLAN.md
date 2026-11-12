@@ -394,8 +394,17 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Prüfungen:** `npm run typecheck`, `npm run lint` und `npm test` erfolgreich; 18 Testdateien und 85/85 Tests bestanden.
 - **Abgrenzung:** Person-B-/UI-Aufgaben wurden bewusst nicht bearbeitet.
 
-## 41. FS6-URL-Vertrag und Medienfluss – 12.11.2026
+## 41. FS6-Person-B-Integration – 12.11.2026
 
-- **Umgesetzt:** `imageUrl` akzeptiert jetzt gezielt interne GridFS-URLs (`/api/public/media/<ObjectId>`) sowie absolute HTTPS-URLs; beliebige Pfade und nicht verschlüsselte externe URLs werden abgelehnt.
-- **Integrationstest:** Upload → Gericht speichern → Gericht veröffentlichen einschließlich Ablehnung eines beliebigen relativen Pfads.
-- **Prüfungen:** Typecheck, Lint und 86/86 Tests erfolgreich.
+- **Zuständigkeit:** Person B hat die responsive Adminoberfläche für Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung, Aktivstatus, Vorschau, Veröffentlichung, Bildauswahl und bestätigte Löschung vorbereitet. Es wurden keine Speisekartendaten erfunden.
+- **Accessibility:** Bildauswahl und Alternativtext sind sichtbar formulargebunden. Pflichtfeldfehler werden markiert, erklärt und fokussiert; wiederholte Veröffentlichungsaktionen nennen das betroffene Gericht. Der Vorschau-Dialog restauriert den Fokus bei jeder Schließart.
+- **Responsive und Motion:** Bei 320 px beziehungsweise 200-%-Zoom stapeln sich Listeneinträge und Aktionen ohne horizontale Zwangsbedienung. Dialogbewegung läuft nur ohne aktivierte reduzierte Bewegung.
+- **API-Prüfung:** Person As Menü-/Medien-API ist integriert. `imageUrl` akzeptiert gezielt interne GridFS-URLs (`/api/public/media/<ObjectId>`) sowie absolute HTTPS-URLs; beliebige relative Pfade und unverschlüsselte externe URLs werden abgelehnt.
+
+## 42. FS6-URL-Vertrag und Medienfluss – 12.11.2026
+
+- **Integrationstest:** Upload → Gericht speichern → Gericht veröffentlichen einschließlich Ablehnung eines beliebigen relativen Pfads ist automatisiert abgesichert.
+- **Prüfungen Person A:** Typecheck, Lint und 86/86 Tests erfolgreich.
+- **Person-B-Regression:** Der zusammengeführte Stand besteht erneut Typecheck, OXLint, 86/86 Tests, Production-Build und `git diff --check`. Der lokale Express-Server startet auf Port `3000`; die Adminoberfläche erreicht die Google-Anmeldung.
+- **Manueller Browser-E2E:** Authentifizierter Bild-Upload, Speichern mit internem Medienpfad, Entwurfsvorschau, Veröffentlichung, öffentlicher Menüabruf, öffentlicher Bildabruf mit unveränderlichem Cache-Header und Zurückziehen wurden erfolgreich geprüft.
+- **Bereinigung verifiziert:** Die synthetische Kategorie `e2e-test`, das Testgericht und das GridFS-Testmedium wurden durch Person A entfernt. Eine read-only Atlas-Abfrage bestätigt, dass alle drei Datensätze nicht mehr existieren.

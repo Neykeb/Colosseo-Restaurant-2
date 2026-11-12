@@ -266,23 +266,24 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
 
-- [ ] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen.
-- [ ] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren.
-- [ ] Sonderöffnungen, Schließungen und Sperrzeiten verwalten.
-- [ ] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren.
-- [ ] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen.
+- [x] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen. Person B ergänzte die geschützte Kalender-API und responsive Adminübersicht mit Zeitraumwahl, Kennzahlen, Listenalternative, Reservierungen, Sperrzeiten, Sondertagen und offenen Veranstaltungsanfragen.
+- [x] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren. Paginierte Suche, zugängliche Detailansicht, atomare Tischumlegung, Statusaktionen und Auditverlauf sind umgesetzt.
+- [x] Sonderöffnungen, Schließungen und Sperrzeiten verwalten. Der responsive Betriebsbereich deckt datierte Schließtage, Sonderöffnungen sowie Restaurant-, Bereichs- und Tischsperren ab.
+- [x] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren. Suche, Filter, Pagination, Detailansicht, Status und interne Notiz sind umgesetzt.
+- [x] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen. Autorisierung, Konflikte, Dialogfokus, Escape, Fokusrückgabe und Atlas-Parallelität sind geprüft; der Abschlusslauf bestand mit 83/83 Tests.
 - [x] **GATE FS5:** operative Verwaltung präsentiert und am 11.11.2026 durch ausdrückliches `GO FS5` abgenommen. `FS6` bleibt bis zu einem separaten GO gesperrt.
 
 ### FS6 – Speisekarte, Öffnungszeiten und Medienverwaltung
 
-**Start:** `GO FS6` am 11.11.2026 ausdrücklich erteilt. Backend-Grundlage für Kategorien und Gerichte ist in Arbeit; öffentliche Veröffentlichung und Medien-Upload bleiben separate Arbeitspakete.
+**Start:** `GO FS6` am 11.11.2026 ausdrücklich erteilt. Person As Backend und Person Bs vorbereitete Adminoberfläche sind in `dev` beziehungsweise im Integrationsbranch vorhanden.
 
-- [-] Versioniertes Backend-Modell, geschützte Admin-API, Vorschau und expliziter Veröffentlichungsworkflow für Kategorien/Gerichte umgesetzt; Uploadregeln, vollständige UI und E2E bleiben offen.
-- [-] MongoDB-GridFS-Medienablage mit 5-MB-/MIME-/Alternativtext- und Dateisignaturprüfung, ownergeschütztem Upload/Löschen, Auditierung und öffentlichem Cache-Endpunkt umgesetzt; UI bleibt offen.
-- [-] Öffentliche Ausgabe regulärer Servicezeiten und datierter Sondertage sowie geschützte Menüvorschau ergänzt; vollständige Pflege-, Veröffentlichungs- und UI-Integration bleibt offen.
-- [ ] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen.
+- [-] Versioniertes Backend-Modell, geschützte Admin-API, Vorschau und expliziter Veröffentlichungsworkflow für Kategorien/Gerichte sind umgesetzt. Person Bs responsive Oberfläche besitzt Lade-, Leer-, Fehler- und Formularzustände; die echte E2E-Abnahme ist noch offen.
+- [-] MongoDB-GridFS-Medienablage mit 5-MB-/MIME-/Alternativtext- und Dateisignaturprüfung, ownergeschütztem Upload/Löschen, Auditierung und öffentlichem Cache-Endpunkt ist umgesetzt. Person Bs UI besitzt sichtbare Datei- und Alternativtextfelder sowie bestätigtes Löschen. Der relative Uploadpfad ist mit der absoluten `imageUrl`-Validierung noch nicht konsistent.
+- [-] Öffentliche Ausgabe regulärer Servicezeiten und datierter Sondertage sowie geschützte Menüvorschau sind ergänzt; die vollständige Admin-Pflege der regulären Öffnungszeiten bleibt offen.
+- [-] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen. API und UI sind vorhanden; echte integrierte Browser- und Fehlerfallprüfung bleibt offen.
+- [-] Tastatur, Fokus, Reduced Motion, 320-px-Reflow und 200-%-Zoom prüfen. Person Bs statische Oberfläche erfüllt Fokusführung, Fokusrückgabe, schmale Stapelung und Motion-Fallback; authentifizierte E2E-Prüfung steht noch aus.
 - [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
-- [ ] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen.
+- [-] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen. Der automatisierte Upload-zu-Gericht-Vertrag einschließlich Veröffentlichung und Ablehnung beliebiger relativer Pfade sowie Typecheck, OXLint, 86/86 Tests und Production-Build sind erfolgreich. Der authentifizierte Browser-E2E wartet auf die Nutzeranmeldung.
 - [ ] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentieren; auf GO für `FS7` warten.
 
 ### FS7 – Datenschutz, Sicherheit, Betrieb und vollständige QA
