@@ -399,4 +399,9 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Zuständigkeit:** Person B hat die responsive Adminoberfläche für Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung, Aktivstatus, Vorschau, Veröffentlichung, Bildauswahl und bestätigte Löschung vorbereitet. Es wurden keine Speisekartendaten erfunden.
 - **Accessibility:** Bildauswahl und Alternativtext sind sichtbar formulargebunden. Pflichtfeldfehler werden markiert, erklärt und fokussiert; wiederholte Veröffentlichungsaktionen nennen das betroffene Gericht. Der Vorschau-Dialog restauriert den Fokus bei jeder Schließart.
 - **Responsive und Motion:** Bei 320 px beziehungsweise 200-%-Zoom stapeln sich Listeneinträge und Aktionen ohne horizontale Zwangsbedienung. Dialogbewegung läuft nur ohne aktivierte reduzierte Bewegung.
-- **API-Prüfung:** Person As Menü-/Medien-API ist inzwischen in `dev` integriert. Der Vertrag ist jedoch noch nicht vollständig konsistent: Der Upload liefert `/api/public/media/:id`, während die Gerichtvalidierung weiterhin ausschließlich absolute URLs akzeptiert. Die echte Upload-zu-Gericht-E2E-Abnahme bleibt bis zur Korrektur dieses Person-A-Vertrags offen.
+- **API-Prüfung:** Person As Menü-/Medien-API ist integriert. `imageUrl` akzeptiert gezielt interne GridFS-URLs (`/api/public/media/<ObjectId>`) sowie absolute HTTPS-URLs; beliebige relative Pfade und unverschlüsselte externe URLs werden abgelehnt.
+
+## 42. FS6-URL-Vertrag und Medienfluss – 12.11.2026
+
+- **Integrationstest:** Upload → Gericht speichern → Gericht veröffentlichen einschließlich Ablehnung eines beliebigen relativen Pfads ist automatisiert abgesichert.
+- **Prüfungen Person A:** Typecheck, Lint und 86/86 Tests erfolgreich. Die nachfolgende Person-B-Regression prüft den zusammengeführten Stand erneut.
