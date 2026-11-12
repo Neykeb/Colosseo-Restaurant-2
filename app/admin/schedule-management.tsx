@@ -1,4 +1,4 @@
-import { CalendarCheck, LockKey, Trash } from "@phosphor-icons/react";
+import { CalendarCheck, Clock, LockKey, Plus, Trash } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type SpecialDay = {
@@ -7,6 +7,14 @@ type SpecialDay = {
   closed: boolean;
   opens?: string;
   closes?: string;
+};
+
+type ServicePeriod = {
+  key: string;
+  weekday: number;
+  startTime: string;
+  endTime: string;
+  active: boolean;
 };
 
 type ReservationBlock = {
@@ -28,6 +36,7 @@ type RestaurantTable = {
 type RequestError = Error & { code?: string };
 
 const dateFormatter = new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+const weekdayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 
 function formatDate(value: string): string {
   return dateFormatter.format(new Date(`${value}T12:00:00`));
@@ -55,13 +64,21 @@ function scopeLabel(block: ReservationBlock, tables: RestaurantTable[]): string 
 }
 
 export function ScheduleManagement({ getToken }: { getToken: () => Promise<string | null> }) {
+  const [servicePeriods, setServicePeriods] = useState<ServicePeriod[]>([]);
   const [specialDays, setSpecialDays] = useState<SpecialDay[]>([]);
   const [blocks, setBlocks] = useState<ReservationBlock[]>([]);
   const [tables, setTables] = useState<RestaurantTable[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [specialState, setSpecialState] = useState<"idle" | "saving">("idle");
+  const [periodState, setPeriodState] = useState<"idle" | "saving">("idle");
   const [blockState, setBlockState] = useState<"idle" | "saving">("idle");
   const [specialMessage, setSpecialMessage] = useState("");
+  const [periodMessage, setPeriodMessage] = useState("");
+  const [periodKey, setPeriodKey] = useState("");
+  const [periodWeekday, setPeriodWeekday] = useState(2);
+  const [periodStart, setPeriodStart] = useState("17:00");
+  const [periodEnd, setPeriodEnd] = useState("21:00");
+  const [periodActive, setPeriodActive] = useState(true);
   const [blockMessage, setBlockMessage] = useState("");
   const [specialDate, setSpecialDate] = useState("");
   const [specialLabel, setSpecialLabel] = useState("");
@@ -81,11 +98,13 @@ export function ScheduleManagement({ getToken }: { getToken: () => Promise<strin
     setState("loading");
     try {
       const token = await getToken();
-      const [dayResult, blockResult, tableResult] = await Promise.all([
+      const [periodResult, dayResult, blockResult, tableResult] = await Promise.all([
+        adminFetch<{ regular: ServicePeriod[] }>("/api/admin/opening-hours", token),
         adminFetch<{ specialDays: SpecialDay[] }>("/api/admin/special-days", token),
         adminFetch<{ blocks: ReservationBlock[] }>("/api/admin/reservation-blocks", token),
         adminFetch<{ tables: RestaurantTable[] }>("/api/admin/tables", token),
       ]);
+      setServicePeriods(periodResult.regular);
       setSpecialDays(dayResult.specialDays);
       setBlocks(blockResult.blocks);
       setTables(tableResult.tables);
@@ -102,6 +121,58 @@ export function ScheduleManagement({ getToken }: { getToken: () => Promise<strin
     else if (blockScope === "area") setScopeKey(areas[0] ?? "");
     else setScopeKey(tables[0]?.key ?? "");
   }, [areas, blockScope, tables]);
+
+  const resetPeriod = () => {
+    setPeriodKey("");
+    setPeriodWeekday(2);
+    setPeriodStart("17:00");
+    setPeriodEnd("21:00");
+    setPeriodActive(true);
+  };
+
+  const editPeriod = (period: ServicePeriod) => {
+    setPeriodKey(period.key);
+    setPeriodWeekday(period.weekday);
+    setPeriodStart(period.startTime);
+    setPeriodEnd(period.endTime);
+    setPeriodActive(period.active);
+    setPeriodMessage("");
+  };
+
+  const savePeriod = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setPeriodState("saving");
+    setPeriodMessage("");
+    try {
+      const token = await getToken();
+      const key = periodKey || `period_${periodWeekday}_${periodStart.replace(":", "")}_${crypto.randomUUID().slice(0, 8)}`;
+      await adminFetch(`/api/admin/opening-hours/${encodeURIComponent(key)}`, token, {
+        method: "PUT",
+        body: JSON.stringify({ weekday: periodWeekday, startTime: periodStart, endTime: periodEnd, active: periodActive }),
+      });
+      await loadData();
+      resetPeriod();
+      setPeriodMessage("Die reguläre Servicezeit wurde gespeichert.");
+    } catch {
+      setPeriodMessage("Die Servicezeit konnte nicht gespeichert werden. Prüfe Wochentag und Zeitraum.");
+    } finally {
+      setPeriodState("idle");
+    }
+  };
+
+  const deletePeriod = async (period: ServicePeriod) => {
+    if (!window.confirm(`${weekdayNames[period.weekday]}, ${period.startTime}–${period.endTime} Uhr wirklich entfernen?`)) return;
+    setPeriodMessage("");
+    try {
+      const token = await getToken();
+      await adminFetch(`/api/admin/opening-hours/${encodeURIComponent(period.key)}`, token, { method: "DELETE" });
+      if (period.key === periodKey) resetPeriod();
+      await loadData();
+      setPeriodMessage("Die reguläre Servicezeit wurde entfernt.");
+    } catch {
+      setPeriodMessage("Die Servicezeit konnte nicht entfernt werden.");
+    }
+  };
 
   const saveSpecialDay = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -171,13 +242,27 @@ export function ScheduleManagement({ getToken }: { getToken: () => Promise<strin
 
   return (
     <section className="admin-availability" id="availability" aria-labelledby="availability-title" aria-busy={state === "loading"}>
-      <div className="admin-section-heading"><div><p className="admin-kicker">Betrieb</p><h2 id="availability-title">Sondertage und Sperrzeiten</h2></div><p>Datierte Abweichungen</p></div>
-      <p className="admin-section-intro">Schließtage und Sonderöffnungen ändern den Betrieb an einem Datum. Sperrzeiten blockieren zusätzlich ausgewählte Zeiten, Bereiche oder Tische.</p>
+      <div className="admin-section-heading"><div><p className="admin-kicker">Betrieb</p><h2 id="availability-title">Öffnungszeiten und Ausnahmen</h2></div><p>Regulärer Betrieb und Abweichungen</p></div>
+      <p className="admin-section-intro">Reguläre Servicezeiten bestimmen die wöchentlich reservierbaren Zeiträume. Sondertage und Sperrzeiten überschreiben oder begrenzen einzelne Termine.</p>
 
       {state === "loading" ? <p className="admin-empty" role="status">Betriebsregeln werden geladen …</p> : null}
       {state === "error" ? <div className="admin-notice" role="alert"><h3>Laden nicht möglich</h3><p>Die Sonderregeln konnten nicht abgerufen werden.</p><button type="button" onClick={() => void loadData()}>Erneut laden</button></div> : null}
 
       {state === "ready" ? <div className="admin-operation-grid">
+        <article className="admin-operation-card admin-operation-card-wide">
+          <div className="admin-operation-title"><Clock aria-hidden="true" /><div><h3>Reguläre Servicezeiten</h3><p>Wiederkehrende Zeitfenster nach Wochentag verwalten.</p></div></div>
+          <form className="admin-operation-form admin-period-form" onSubmit={savePeriod}>
+            <label><span>Wochentag</span><select value={periodWeekday} onChange={(event) => setPeriodWeekday(Number(event.target.value))}>{weekdayNames.map((name, weekday) => <option key={name} value={weekday}>{name}</option>)}</select></label>
+            <div className="admin-time-row"><label><span>Von</span><input type="time" required value={periodStart} onChange={(event) => setPeriodStart(event.target.value)} /></label><label><span>Bis</span><input type="time" required value={periodEnd} onChange={(event) => setPeriodEnd(event.target.value)} /></label></div>
+            <label className="admin-check"><input type="checkbox" checked={periodActive} onChange={(event) => setPeriodActive(event.target.checked)} /> Für Reservierungen aktiv</label>
+            <div className="admin-period-actions"><button className="admin-save-button" disabled={periodState === "saving"} type="submit">{periodState === "saving" ? "Wird gespeichert …" : periodKey ? "Änderung speichern" : "Servicezeit hinzufügen"}</button>{periodKey ? <button className="admin-text-button" type="button" onClick={resetPeriod}><Plus aria-hidden="true" /> Neue Servicezeit</button> : null}</div>
+          </form>
+          <p className="admin-form-message" aria-live="polite">{periodMessage}</p>
+          <div className="admin-operation-list admin-period-list" aria-label="Reguläre Servicezeiten">
+            {servicePeriods.length === 0 ? <p className="admin-compact-empty">Keine regulären Servicezeiten eingetragen.</p> : servicePeriods.map((period) => <div key={period.key}><button className="admin-period-edit" type="button" aria-label={`${weekdayNames[period.weekday]}, ${period.startTime} bis ${period.endTime} Uhr bearbeiten`} onClick={() => editPeriod(period)}><strong>{weekdayNames[period.weekday]}</strong><span>{period.startTime}–{period.endTime} Uhr · {period.active ? "Aktiv" : "Inaktiv"}</span></button><button type="button" aria-label={`${weekdayNames[period.weekday]}, ${period.startTime} bis ${period.endTime} Uhr entfernen`} onClick={() => void deletePeriod(period)}><Trash aria-hidden="true" /></button></div>)}
+          </div>
+        </article>
+
         <article className="admin-operation-card">
           <div className="admin-operation-title"><CalendarCheck aria-hidden="true" /><div><h3>Sondertag</h3><p>Ganztägig schließen oder abweichend öffnen.</p></div></div>
           <form className="admin-operation-form" onSubmit={saveSpecialDay}>

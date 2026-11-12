@@ -1,8 +1,16 @@
 import { Eye, ImageSquare, Plus, Trash, X } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { DevDataToggle, useDataState } from "../components/dev-data-toggle";
+import {
+  oneCaseCategories,
+  oneCaseItems,
+  previewFrom,
+  worstCaseCategories,
+  worstCaseItems,
+} from "./menu-management.fixtures";
 
-type MenuCategory = { slug: string; name: string; sortOrder: number; active: boolean };
-type MenuItem = {
+export type MenuCategory = { slug: string; name: string; sortOrder: number; active: boolean };
+export type MenuItem = {
   itemId: string;
   categorySlug: string;
   name: string;
@@ -14,7 +22,7 @@ type MenuItem = {
   active: boolean;
   published: boolean;
 };
-type PreviewCategory = MenuCategory & { items: MenuItem[] };
+export type PreviewCategory = MenuCategory & { items: MenuItem[] };
 type ItemDraft = Omit<MenuItem, "priceCents" | "allergens"> & { price: string; allergens: string };
 
 const emptyDraft = (categorySlug = ""): ItemDraft => ({
@@ -48,6 +56,8 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 export function MenuManagement({ getToken }: { getToken: () => Promise<string | null> }) {
+  const dataState = useDataState();
+  const fixtureMode = import.meta.env.DEV && dataState !== "demo";
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -73,6 +83,19 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
 
   const load = useCallback(async () => {
     setState("loading");
+    if (fixtureMode) {
+      const fixture = dataState === "worst"
+        ? { categories: worstCaseCategories, items: worstCaseItems }
+        : dataState === "one"
+          ? { categories: oneCaseCategories, items: oneCaseItems }
+          : { categories: [], items: [] };
+      setCategories(fixture.categories);
+      setItems(fixture.items);
+      setSelectedCategory(fixture.categories[0]?.slug || "");
+      setDraft(emptyDraft(fixture.categories[0]?.slug));
+      setState("ready");
+      return;
+    }
     try {
       const [categoryResponse, itemResponse] = await Promise.all([
         authenticatedFetch("/api/admin/menu/categories"),
@@ -88,7 +111,7 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
     } catch {
       setState("error");
     }
-  }, [authenticatedFetch]);
+  }, [authenticatedFetch, dataState, fixtureMode]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -227,6 +250,11 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
 
   async function openPreview() {
     lastFocused.current = document.activeElement as HTMLElement;
+    if (fixtureMode) {
+      setPreview(previewFrom(categories, items));
+      requestAnimationFrame(() => dialogRef.current?.showModal());
+      return;
+    }
     setBusy(true); setMessage("");
     try {
       const response = await authenticatedFetch("/api/admin/menu/preview");
@@ -243,10 +271,12 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
 
   return (
     <section className="admin-menu" id="menu" aria-labelledby="menu-title" aria-busy={state === "loading" || busy}>
+      <DevDataToggle />
       <div className="admin-section-heading">
         <div><p className="admin-kicker">Inhalte</p><h2 id="menu-title">Speisekarte verwalten</h2></div>
         <button className="admin-preview-button" type="button" onClick={() => void openPreview()} disabled={busy || state !== "ready"}><Eye aria-hidden="true" /> Vorschau</button>
       </div>
+      {fixtureMode ? <p className="admin-fixture-note" role="status">Entwicklungsansicht mit lokalen Testdaten. Änderungen sind deaktiviert.</p> : null}
       {state === "loading" ? <p className="admin-empty" role="status">Speisekarte wird geladen …</p> : null}
       {state === "error" ? <div className="admin-notice" role="alert"><h3>Laden fehlgeschlagen</h3><button type="button" onClick={() => void load()}>Erneut laden</button></div> : null}
       {state === "ready" ? <div className="admin-menu-layout">
@@ -254,17 +284,17 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
           <label>Kategorie<select name="menuCategoryFilter" value={selectedCategory} onChange={(event) => { setSelectedCategory(event.target.value); setDraft(emptyDraft(event.target.value)); }}>
             <option value="">Alle Kategorien</option>{categories.map((category) => <option key={category.slug} value={category.slug}>{category.name}{category.active ? "" : " (inaktiv)"}</option>)}
           </select></label>
-          <button className="admin-new-item" type="button" onClick={() => selectItem()}><Plus aria-hidden="true" /> Neues Gericht</button>
+          <button className="admin-new-item" type="button" disabled={fixtureMode} onClick={() => selectItem()}><Plus aria-hidden="true" /> Neues Gericht</button>
           <div className="admin-menu-items">{filteredItems.map((item) => <article key={item.itemId} className={draft.itemId === item.itemId ? "is-selected" : ""}>
             <button type="button" aria-pressed={draft.itemId === item.itemId} onClick={() => selectItem(item)}><span>{item.name}</span><small>{(item.priceCents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" })} · {item.published ? "veröffentlicht" : "Entwurf"}</small></button>
-            <button type="button" aria-label={`${item.published ? "Zurückziehen" : "Veröffentlichen"}: ${item.name}`} disabled={busy || !item.active} onClick={() => void setPublication(item, !item.published)}>{item.published ? "Zurückziehen" : "Veröffentlichen"}</button>
+            <button type="button" aria-label={`${item.published ? "Zurückziehen" : "Veröffentlichen"}: ${item.name}`} disabled={fixtureMode || busy || !item.active} onClick={() => void setPublication(item, !item.published)}>{item.published ? "Zurückziehen" : "Veröffentlichen"}</button>
           </article>)}</div>
           <form className="admin-category-form" onSubmit={(event) => void saveCategory(event)}>
             <h3>Neue Kategorie</h3>
             <label>Technischer Schlüssel<input name="categorySlug" required maxLength={80} value={categoryDraft.slug} onChange={(event) => setCategoryDraft({ ...categoryDraft, slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })} placeholder="z. B. antipasti" /></label>
             <label>Anzeigename<input name="categoryName" required maxLength={160} value={categoryDraft.name} onChange={(event) => setCategoryDraft({ ...categoryDraft, name: event.target.value })} /></label>
             <label>Reihenfolge<input name="categorySortOrder" type="number" min="0" max="10000" value={categoryDraft.sortOrder} onChange={(event) => setCategoryDraft({ ...categoryDraft, sortOrder: Number(event.target.value) })} /></label>
-            <button type="submit" disabled={busy}>Kategorie speichern</button>
+            <button type="submit" disabled={fixtureMode || busy}>Kategorie speichern</button>
           </form>
         </aside>
 
@@ -283,7 +313,7 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
             <div>{draft.imageUrl ? <img src={draft.imageUrl} alt="Vorschau des hochgeladenen Gerichtbilds" /> : <ImageSquare aria-hidden="true" />}</div>
             <div><h4>Gerichtbild</h4><p>JPG, PNG oder WebP, maximal 5 MB. Ein Alternativtext ist Pflicht.</p><div className="admin-media-controls"><label className="admin-upload-button">Bild auswählen<input name="dishImage" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => chooseImage(event.target.files?.[0])} /></label><span>{selectedFile?.name || "Keine neue Datei ausgewählt"}</span><label>Alternativtext<input name="dishImageAlt" maxLength={300} value={imageAltText} onChange={(event) => setImageAltText(event.target.value)} aria-describedby="image-alt-help" /></label><small id="image-alt-help">Beschreibe kurz, was auf dem Bild für das Gericht wichtig ist.</small><button className="admin-upload-start" type="button" onClick={() => void uploadImage()} disabled={busy || !selectedFile}>Bild hochladen</button>{mediaId(draft.imageUrl) ? <button className="admin-remove-media" type="button" onClick={() => void removeImage()} disabled={busy}><Trash aria-hidden="true" /> Bild löschen</button> : null}</div></div>
           </div>
-          <div className="admin-menu-actions"><button className="admin-save-button" type="submit" disabled={busy}>{busy ? "Bitte warten …" : "Gericht speichern"}</button></div>
+          <div className="admin-menu-actions"><button className="admin-save-button" type="submit" disabled={fixtureMode || busy}>{busy ? "Bitte warten …" : "Gericht speichern"}</button></div>
           <p id="menu-form-error" className="admin-form-error" role="alert">{formError}</p>
           <p className="admin-form-message" role="status" aria-live="polite">{message}</p>
         </form>

@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS6` freigegeben; Umsetzung beginnt
-**Letzte Aktualisierung:** 11.11.2026
+**Status:** Full-Stack-Phase `FS7` freigegeben; Person-B-QA begonnen
+**Letzte Aktualisierung:** 12.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -151,6 +151,7 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 11.11.2026 | Gate FS4 / Start FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist freigegeben und darf umgesetzt werden. |
 | 11.11.2026 | Gate FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist abgenommen; `FS6` benötigt ein separates GO. |
 | 11.11.2026 | Gate FS5 / Start FS6 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS6“. FS6 ist freigegeben und darf umgesetzt werden. |
+| 12.11.2026 | Gate FS6 / Start FS7 | Freigegeben | Nach erfolgreichem integriertem Browser-E2E und verifizierter Testdatenbereinigung erteilt der Nutzer ausdrücklich „GO“. FS6 ist abgenommen; FS7 darf schrittweise für Person B beginnen. |
 
 ## Aktuelle Blocker
 
@@ -277,14 +278,14 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 **Start:** `GO FS6` am 11.11.2026 ausdrücklich erteilt. Person As Backend und Person Bs vorbereitete Adminoberfläche sind in `dev` beziehungsweise im Integrationsbranch vorhanden.
 
-- [-] Versioniertes Backend-Modell, geschützte Admin-API, Vorschau und expliziter Veröffentlichungsworkflow für Kategorien/Gerichte sind umgesetzt. Person Bs responsive Oberfläche besitzt Lade-, Leer-, Fehler- und Formularzustände; die echte E2E-Abnahme ist noch offen.
-- [-] MongoDB-GridFS-Medienablage mit 5-MB-/MIME-/Alternativtext- und Dateisignaturprüfung, ownergeschütztem Upload/Löschen, Auditierung und öffentlichem Cache-Endpunkt ist umgesetzt. Person Bs UI besitzt sichtbare Datei- und Alternativtextfelder sowie bestätigtes Löschen. Der relative Uploadpfad ist mit der absoluten `imageUrl`-Validierung noch nicht konsistent.
-- [-] Öffentliche Ausgabe regulärer Servicezeiten und datierter Sondertage sowie geschützte Menüvorschau sind ergänzt; die vollständige Admin-Pflege der regulären Öffnungszeiten bleibt offen.
-- [-] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen. API und UI sind vorhanden; echte integrierte Browser- und Fehlerfallprüfung bleibt offen.
-- [-] Tastatur, Fokus, Reduced Motion, 320-px-Reflow und 200-%-Zoom prüfen. Person Bs statische Oberfläche erfüllt Fokusführung, Fokusrückgabe, schmale Stapelung und Motion-Fallback; authentifizierte E2E-Prüfung steht noch aus.
-- [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
-- [-] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen. Der automatisierte Upload-zu-Gericht-Vertrag einschließlich Veröffentlichung und Ablehnung beliebiger relativer Pfade sowie Typecheck, OXLint, 86/86 Tests und Production-Build sind erfolgreich. Der authentifizierte Browser-E2E wartet auf die Nutzeranmeldung.
-- [ ] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentieren; auf GO für `FS7` warten.
+- [x] Versioniertes Backend-Modell, geschützte Admin-API, Vorschau und expliziter Veröffentlichungsworkflow für Kategorien/Gerichte sind integriert und im authentifizierten Browser-E2E geprüft.
+- [x] MongoDB-GridFS-Medienablage mit 5-MB-/MIME-/Alternativtext- und Dateisignaturprüfung, ownergeschütztem Upload/Löschen, Auditierung und öffentlichem Cache-Endpunkt ist integriert. Der interne Medienpfadvertrag ist konsistent und E2E-geprüft.
+- [x] Öffentliche Ausgabe regulärer Servicezeiten und datierter Sondertage sowie geschützte Verwaltung sind umgesetzt. Reguläre Wochenzeiten lassen sich im Adminbereich laden, hinzufügen, bearbeiten, aktivieren/deaktivieren und bestätigt löschen; Eingaben werden serverseitig validiert und Änderungen auditiert.
+- [x] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen. Upload, Entwurfsvorschau, Veröffentlichung, öffentlicher Abruf und Zurückziehen wurden integriert geprüft.
+- [x] Tastatur, Fokus und Reduced Motion für den FS6-Workflow prüfen. Der erweiterte 320-px-/200-%-Belastungstest wird als FS7-QA fortgeführt und hat einen horizontalen Admin-Reflow-Fehler offengelegt.
+- [x] Bestehende verifizierte Daten kontrolliert beibehalten; es wurden keine Inhalte automatisch umformuliert oder ungeprüft migriert.
+- [x] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen. Automatisierter Vertrag, Typecheck, OXLint, 86/86 Tests, Production-Build und authentifizierter Browser-E2E sind erfolgreich; synthetische FS6-Datensätze wurden anschließend nachweislich entfernt.
+- [x] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentiert und am 12.11.2026 durch ausdrückliches `GO` abgenommen.
 
 ### FS7 – Datenschutz, Sicherheit, Betrieb und vollständige QA
 
@@ -293,7 +294,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [ ] Backup und Wiederherstellung in einer Nicht-Produktionsumgebung nachweislich testen.
 - [ ] Dependency-, Auth-, Autorisierungs-, IDOR-, XSS-, Upload-, CORS-/CSRF- und Log-Leak-Prüfungen durchführen.
 - [ ] Gesamte Regression für öffentliche Website, Admin, API, Datenbank, E-Mails, Accessibility, Mobile und Performance ausführen.
-- [ ] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden.
+- [-] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden. Person B hat eine ausschließlich lokale Entwicklungsumschaltung für Worst Case, Empty und One an der Admin-Menü-Datengrenze ergänzt. Der erste Test weist horizontalen Überlauf bei 320 px/200-%-Reflow, fehlendes explizites Listen-Leerfeedback sowie nicht deckungsgleiche Client-/Servergrenzen für Preis und Allergene nach. Behebung folgt erst nach Präsentation der Befunde.
 - [ ] **GATE FS7:** Abnahmebericht und offene Produktionsrisiken präsentieren; auf GO für `FS8` warten.
 
 ### FS8 – Produktionsmigration und kontrollierter Livegang
