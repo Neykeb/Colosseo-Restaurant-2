@@ -420,3 +420,7 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 - **Prüfungen:** `npm audit --omit=dev` meldet 0 bekannte Schwachstellen; Secret-Tracking bestanden; Typecheck, Lint, 88/88 Tests und Production-Build erfolgreich.
 - **Befund:** Keine neue kritische serverseitige Sicherheitsabweichung im geprüften Umfang. Die offenen FS7-Arbeiten zu Datenschutz-/Auskunftsprozessen, Backup/Wiederherstellung, umfassendem Security-Review und den dokumentierten `break-ui`-Befunden bleiben bestehen.
+
+## 46. FS7-FS6-Autorisierungsregression Person A – 12.11.2026
+
+- **Test:** Alle FS6-Adminrouten werden ohne Clerk-Identität mit `401` und für ein aktives `staff`-Profil mit `403` abgewiesen; der Owner-Schutz bleibt serverseitig.

@@ -280,6 +280,23 @@ describe("Express platform foundation", () => {
     expect(vi.mocked(storeMedia)).not.toHaveBeenCalled();
   });
 
+  it("protects every FS6 administration endpoint with owner authorization", async () => {
+    const unauthenticated = await listen(createApp({ getAuthenticatedUserId: () => null, findAdminProfile: async () => null }));
+    for (const route of ["/api/admin/menu/categories", "/api/admin/menu/items", "/api/admin/menu/preview", "/api/admin/opening-hours"]) {
+      const response = await fetch(`${unauthenticated}${route}`);
+      expect(response.status, route).toBe(401);
+    }
+    expect((await fetch(`${unauthenticated}/api/admin/media/507f1f77bcf86cd799439011`, { method: "DELETE" })).status).toBe(401);
+
+    const staff = { clerkUserId: "user_staff", role: "staff" as const, active: true, displayName: "Staff" };
+    const forbidden = await listen(createApp({ getAuthenticatedUserId: () => staff.clerkUserId, findAdminProfile: async () => staff }));
+    for (const route of ["/api/admin/menu/categories", "/api/admin/menu/items", "/api/admin/menu/preview", "/api/admin/opening-hours"]) {
+      const response = await fetch(`${forbidden}${route}`);
+      expect(response.status, route).toBe(403);
+    }
+    expect((await fetch(`${forbidden}/api/admin/media/507f1f77bcf86cd799439011`, { method: "DELETE" })).status).toBe(403);
+  });
+
   it("protects and validates regular opening-hours administration", async () => {
     const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
     const saved = { key: "fri-evening", weekday: 5, startTime: "17:00", endTime: "21:00", active: true };
