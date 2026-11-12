@@ -39,6 +39,7 @@ describe("reservation domain", () => {
   it("allows only explicit status transitions", () => {
     expect(canTransitionReservationStatus("requested", "confirmed")).toBe(true);
     expect(canTransitionReservationStatus("confirmed", "completed")).toBe(true);
+    expect(canTransitionReservationStatus("confirmed", "seated")).toBe(true);
     expect(canTransitionReservationStatus("completed", "confirmed")).toBe(false);
   });
 });

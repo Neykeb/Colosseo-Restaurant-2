@@ -4,6 +4,7 @@ import { deDE } from "@clerk/localizations/de-DE";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { adminCopy } from "~/content/admin.de";
+import { AdminDashboard } from "./admin-dashboard";
 
 import "./admin.css";
 
@@ -86,6 +87,10 @@ export function AdminPage() {
     return () => controller.abort();
   }, [getToken, isLoaded, isSignedIn]);
 
+  if (isLoaded && isSignedIn && access.status === "authorized") {
+    return <AdminDashboard profile={access.profile} getToken={getToken} userControl={<UserButton />} />;
+  }
+
   return (
     <main className="admin-shell" id="main-content">
       <section className="admin-visual" aria-hidden="true">
@@ -115,16 +120,6 @@ export function AdminPage() {
         {isLoaded && isSignedIn && access.status === "loading" ? <Status {...adminCopy.checking} /> : null}
         {isLoaded && isSignedIn && access.status === "denied" ? <Status {...adminCopy.denied} /> : null}
         {isLoaded && isSignedIn && access.status === "unavailable" ? <Status {...adminCopy.unavailable} /> : null}
-        {isLoaded && isSignedIn && access.status === "authorized" ? (
-          <div className="admin-copy">
-            <p className="admin-kicker">{adminCopy.authorized.kicker}</p>
-            <h1 id="admin-title">{adminCopy.authorized.greeting(access.profile.displayName)}</h1>
-            <p>{adminCopy.authorized.body}</p>
-            <div className="admin-module-list" aria-label={adminCopy.authorized.modulesLabel}>
-              {adminCopy.authorized.modules.map((module) => <span key={module}>{module}</span>)}
-            </div>
-          </div>
-        ) : null}
       </section>
     </main>
   );
