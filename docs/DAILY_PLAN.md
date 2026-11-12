@@ -444,3 +444,22 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Review:** Admin-Routen bleiben serverseitig ownergeschützt; Pfadparameter werden an den Servicegrenzen verwendet und validiert. Fehlerantworten geben keine internen Fehlermeldungen, URIs oder Secrets aus; XSS-Sinks wurden im Anwendungscode nicht gefunden.
 - **Prüfungen:** Typecheck, Lint, 92/92 Tests, Secret-Tracking und Diff-Check erfolgreich.
 - **Offen:** Echte externe Origin-/Browser-CORS-Prüfung, Betriebsmonitoring, Alarmierung, Secret-Rotation und Backup-/Wiederherstellungstest benötigen die jeweilige Infrastruktur beziehungsweise Freigabe.
+
+## 51. FS7-Person-A-Backupprüfung – 12.11.2026
+
+- **Prüfung:** Das Repository kennt die getrennte Atlas-Testdatenbank `colosseo_test` und schützt sie über die Testkonfiguration. Lokale `mongodump`-/`mongorestore`-Werkzeuge sind jedoch nicht installiert; Atlas-Backups sind laut bestätigtem Projektstand derzeit inaktiv.
+- **Ergebnis:** Ein Backup-/Restore-Lauf wurde nicht vorgetäuscht und nicht gestartet. Dafür benötigt Person A eine aktivierte Nicht-Produktions-Backupquelle beziehungsweise ein freigegebenes Backupwerkzeug und ein Restore-Ziel.
+- **Nächster Schritt:** Nach Bereitstellung dieser Infrastruktur Backup in `colosseo_test` wiederherstellen, Daten-/Migrationsstatus prüfen und den Nachweis dokumentieren.
+
+## 52. FS7-Person-A-Backuplauf – 12.11.2026
+
+- **Backup:** `colosseo_test` wurde mit `mongodump` 100.20.1 erfolgreich in ein temporäres gzip-Archiv gesichert. Das Archiv wurde nach dem Testlauf entfernt.
+- **Restore-Blockade:** Der Restore in `colosseo_restore_test` konnte wegen der Atlas-Berechtigung `user is not allowed to do action [listCollections]` nicht verifiziert werden. Der aktuelle Benutzer ist nur für `colosseo` und `colosseo_test` freigegeben.
+- **Sicherheit:** `colosseo_test` wurde nicht überschrieben; es wurden keine Produktionsdaten verändert. Ein Restore in das bestehende Testziel wurde wegen des Risikos nicht versucht.
+- **Offen:** Atlas-Berechtigung für ein separates Restore-Testziel (z. B. `colosseo_restore_test`) oder ein gleichwertiges temporäres Cluster freigeben; danach Restore, Collection-Vergleich und Testzielbereinigung durchführen.
+
+## 53. FS7-Person-A-Gesamtregression – 12.11.2026
+
+- **Umfang:** Backup-/Restore-Nachweis wurde auf Nutzeranweisung übersprungen und bleibt als externer Infrastrukturblocker offen.
+- **Prüfungen:** Typecheck, Lint, Secret-Tracking, 92/92 Tests, Production-Build, `npm audit --omit=dev` mit 0 bekannten Schwachstellen und `git diff --check` erfolgreich.
+- **Ergebnis:** Der lokal ausführbare technische FS7-Regressionsumfang ist bestanden. Der FS7-Gate-Abschluss bleibt wegen Backup/Restore, Betriebsmonitoring, Secret-Rotation und vollständiger externer Origin-/Browserprüfung offen.
