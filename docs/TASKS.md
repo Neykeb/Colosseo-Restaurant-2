@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS5` technisch abgeschlossen; Gate-Präsentation und ausdrückliches `GO` für `FS6` stehen aus
-**Letzte Aktualisierung:** 11.11.2026
+**Status:** Full-Stack-Phase `FS6` in Arbeit; Person-B-Adminoberfläche vorbereitet, Person-A-API ausstehend
+**Letzte Aktualisierung:** 12.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -258,6 +258,8 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 **Integrationsstand 10.11.2026:** Die Merge-Konflikte mit `dev` sind ohne Rücknahme der bestehenden Website-, Admin- und Reservierungsfunktionen aufgelöst. Neue Migrations-, Storno-, Aufbewahrungs- und E-Mail-Verarbeitungsbausteine wurden aufgenommen; `dist/` bleibt aus Git ausgeschlossen. Render ist live und der technische Produktions-E2E ist abgeschlossen. Der Integrationsstand besteht Typecheck, OXLint, 76/76 Tests und Production-Build. Dies ersetzt weder die offenen fachlich/rechtlichen Freigaben noch das Gate `FS4`.
 
+**Migrationsnachprüfung 11.11.2026:** Atlas-SRV und Datenbankverbindung sind erreichbar. Migration `0010_event-inquiries` wurde hinsichtlich ID-Format und bereits vorhandener gleichwertiger Indizes korrigiert, erfolgreich angewendet und per Statuslauf als `applied` bestätigt. Alle Migrationen `0001` bis `0010` sind angewendet; Typecheck, OXLint, 76/76 Tests und Production-Build bleiben erfolgreich.
+
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
 
 - [x] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen. Person B ergänzte am 11.11.2026 die geschützte Kalender-API und eine responsive Adminübersicht mit Zeitraumwahl, Kennzahlen, Listenalternative, Reservierungen, Sperrzeiten, Sondertagen und offenen Veranstaltungsanfragen. Lade-, Leer- und Fehlerzustände sind enthalten; Typecheck, OXLint, 77/77 Tests und Production-Build sind erfolgreich.
@@ -265,14 +267,14 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [x] Sonderöffnungen, Schließungen und Sperrzeiten verwalten. Person B ergänzte am 11.11.2026 einen geschützten, responsiven Betriebsbereich für datierte Schließtage, Sonderöffnungen sowie Restaurant-, Bereichs- und Tischsperren. Die API verlangt für Sonderöffnungen vollständige, aufsteigende Uhrzeiten; operative Sperren verwenden weiterhin den atomaren Reservierungsindex und melden Überschneidungen verständlich. Lade-, Leer-, Erfolgs- und Fehlerzustände sowie 44-px-Bedienziele sind enthalten. Typecheck, OXLint, 79/79 Tests und Production-Build sind erfolgreich.
 - [x] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren. Person B ergänzte am 11.11.2026 eine serverseitig durchsuchbare, nach Status filterbare und in 25er-Seiten paginierte Anfrageverwaltung. Die tastaturbedienbare Detailansicht zeigt Kontakt, Wunschtermin, Anlass, Personenanzahl und Gastnachricht; Status und interne Notiz werden getrennt gespeichert und auditiert. Fokusbindung, Escape, Fokus-Rückgabe, Lade-/Leer-/Fehlerzustände und mobile Tabellenreduktion sind enthalten. Der `break-ui`-Check deckte die zuvor unbegrenzte Listenabfrage als Skalierungsfehler auf; sie wurde durch echte Serverpagination behoben. Typecheck, OXLint, 80/80 Tests und Production-Build sind erfolgreich.
 - [x] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen. Person B prüfte am 11.11.2026 alle FS5-Adminmodule auf vorgeschaltete Clerk-/Owner-Autorisierung sowie Sperrzeit- und Tischzuweisungskonflikte mit strukturierten `401`-/`409`-Antworten. Reservierungs- und Anfragedialoge liegen als echte Portale außerhalb des inerten Dashboards, binden den Fokus, schließen per Escape, stellen den Auslöserfokus wieder her und verändern ihn während eines Speichervorgangs nicht mehr. Ein Tastatur-Sprunglink führt direkt zum Arbeitsbereich. Typecheck, OXLint, 83/83 automatisierte Tests, Production-Build und `git diff --check` sind erfolgreich. Der echte Atlas-Parallellauf bestätigt genau eine erfolgreiche Buchung bei zwei gleichzeitigen Zugriffen sowie die Freigabe aller Tischsperren nach Gaststornierung.
-- [ ] **GATE FS5:** operative Verwaltung präsentieren; auf GO für `FS6` warten.
+- [x] **GATE FS5:** operative Verwaltung präsentiert; ausdrückliches `GO` für `FS6` am 12.11.2026 erhalten.
 
 ### FS6 – Speisekarte, Öffnungszeiten und Medienverwaltung
 
-- [ ] Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung und Aktivstatus verwalten.
-- [ ] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren.
+- [-] Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung und Aktivstatus verwalten. Person B hat die responsive Adminoberfläche mit Formular-, Listen-, Lade-, Leer- und Fehlerzuständen vorbereitet. Die verbindliche Person-A-API muss vor der Funktionsabnahme integriert werden.
+- [-] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren. Person B hat Auswahl, clientseitige Typ-/Größenprüfung, Alternativtextabfrage, Vorschau und bestätigte Löschoberfläche vorbereitet. Speicherung und serverseitige Prüfung bleiben Person As API-Verantwortung.
 - [ ] Reguläre Öffnungszeiten und datierte Abweichungen pflegen.
-- [ ] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen.
+- [-] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen. Person Bs Admin-Vorschau und Publikationsbedienung sind vorbereitet; echte API-Funktion und öffentlicher Fallback sind noch nicht integriert.
 - [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
 - [ ] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen.
 - [ ] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentieren; auf GO für `FS7` warten.

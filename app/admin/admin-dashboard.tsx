@@ -1,8 +1,9 @@
-import { CalendarBlank, CalendarDots, Confetti, LockKey, UsersThree } from "@phosphor-icons/react";
+import { BookOpenText, CalendarBlank, CalendarDots, Confetti, LockKey, UsersThree } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ReservationManagement } from "./reservation-management";
 import { ScheduleManagement } from "./schedule-management";
 import { EventInquiryManagement } from "./event-inquiry-management";
+import { MenuManagement } from "./menu-management";
 
 type AdminProfile = {
   displayName: string;
@@ -152,6 +153,7 @@ export function AdminDashboard({ profile, getToken, userControl }: {
           <a href="#schedule"><CalendarDots aria-hidden="true" /> Kalender</a>
           <a href="#availability"><LockKey aria-hidden="true" /> Betrieb</a>
           <a href="#inquiries"><Confetti aria-hidden="true" /> Anfragen</a>
+          <a href="#menu"><BookOpenText aria-hidden="true" /> Speisekarte</a>
         </nav>
         <a className="admin-site-link" href="/de">Zur Website</a>
       </aside>
@@ -214,6 +216,7 @@ export function AdminDashboard({ profile, getToken, userControl }: {
 
         <ReservationManagement getToken={getToken} />
         <EventInquiryManagement getToken={getToken} />
+        <MenuManagement getToken={getToken} />
       </section>
     </main>
   );

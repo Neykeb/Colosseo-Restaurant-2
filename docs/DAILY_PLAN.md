@@ -1,12 +1,12 @@
 # Tagesplan Full-Stack-Finalprojekt
 
-**Status:** FS5 aktiv; drei operative Person-B-Bausteine umgesetzt, Veranstaltungsanfragen als nächster freizugebender Schritt
+**Status:** FS6 aktiv; Person-B-Menüoberfläche vorbereitet, Person-A-Backend bleibt getrennte Abhängigkeit
 
-**Phase:** `FS5` – Reservierungs-, Kalender- und Anfrageverwaltung
+**Phase:** `FS6` – Speisekarte, Öffnungszeiten und Medienverwaltung
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 11.11.2026
+**Letzte Aktualisierung:** 12.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -273,6 +273,7 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Vorbereitete Entscheidung:** Der technische Fachentwurf schlägt eine tokenbasierte Online-Stornierung bis zwei Stunden vorher sowie 90/180/30/365 Tage für Anonymisierung beziehungsweise Löschung vor. Das ist ausdrücklich keine Rechtsfreigabe. Ohne Restaurant-/Rechtsfreigabe bleiben öffentlicher Storno und automatische Produktionslöschung deaktiviert.
 - **Nur für einen späteren Produktionsbetrieb offen:** eigene verifizierte Resend-Absenderdomain, verbindliche Datenschutz- und Anbieterangaben sowie Regeln für reale Veranstaltungsanfragen. Für den aktuellen Demo-Umfang bleibt nur die ausdrückliche Gate-Abnahme `FS4` offen.
 - **Umfangsentscheidung:** Der Nutzer hat am 11.11.2026 bestätigt, dass die Anwendung ausschließlich ein nicht-produktives Weiterbildungs-/Demoprojekt ist. Eigene Resend-Domain und rechtliche Produktionsprüfung blockieren die Demo-Abnahme daher nicht mehr. Es dürfen weiterhin keine echten Gastdaten verwendet oder beliebige reale Empfänger über den Testabsender angeschrieben werden.
+- **Atlas-/Migrationprüfung:** Der zuvor gemeldete `querySrv ECONNREFUSED` ist am 11.11.2026 nicht mehr reproduzierbar; die SRV-Abfrage liefert alle drei Atlas-Knoten. Anschließend wurden zwei echte Fehler in Migration `0010` behoben: eine ungültige ID-Schreibweise und ein nicht idempotenter Indexaufbau bei bereits gleichwertigem Mongoose-Index. `0010_event-inquiries` ist nun in Atlas angewendet und der Statuslauf meldet alle Migrationen `0001` bis `0010` als `applied`. Typecheck, OXLint, 76/76 Tests und Production-Build sind danach erfolgreich.
 - **Externe Blocker:** Verifizierte Resend-Produktionsdomain sowie fachlich/rechtlich freigegebene Datenschutz-, Aufbewahrungs- und Stornoregeln.
 - **Phasengrenze:** `FS5` beginnt erst nach abgeschlossener FS4-Präsentation, ausdrücklicher Gate-Abnahme und neuem `GO`.
 - **Branch-Integration:** Die Konflikte zwischen `feature/momo` und `dev` wurden vollständig aufgelöst. Die getestete öffentliche Website, mobile Navigation, Reservierungsstrecke und bestehende Admin-Autorisierung blieben maßgeblich; ergänzende Storno-, Aufbewahrungs-, Outbox- und Migrationsbausteine aus `dev` wurden kompatibel übernommen. `dist/` bleibt generiert und unversioniert. Typecheck, OXLint, 76/76 Tests und Production-Build waren anschließend erfolgreich; der Build meldete nur die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL`.
@@ -302,3 +303,11 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Echte Parallelitätsprüfung:** `npm run test:reservation-concurrency` lief erfolgreich gegen die abgesicherte Atlas-Testdatenbank. Von zwei gleichzeitig konkurrierenden Buchungen wurde exakt eine bestätigt und eine mit `NO_AVAILABILITY` abgelehnt; die anschließende Gaststornierung entfernte alle Tischsperren.
 - **Abschlussprüfung:** Typecheck, OXLint, 83/83 automatisierte Tests, Production-Build und `git diff --check` sind erfolgreich. Der Build meldet weiterhin nur bekannte Hinweise zu fremden `use client`-Direktiven; ohne lokale `SITE_URL` werden Canonical-URLs im lokalen Prerender bewusst ausgelassen.
 - **Tagesabschluss Person B:** Sämtliche technisch ausführbaren Person-B-Aufgaben aus `FS5` sind abgeschlossen. Nächster zulässiger Schritt ist die Präsentation und ausdrückliche Abnahme von Gate `FS5`; `FS6` darf erst nach einem neuen `GO` beginnen.
+
+## 23. FS6-Start Person B – 12.11.2026
+
+- **Freigabe:** Der Nutzer hat `FS6` am 12.11.2026 ausdrücklich freigegeben. `FS7` bleibt ohne eigenes GO gesperrt.
+- **Zuständigkeitskorrektur:** Die irrtümlich in Person Bs Branch übernommenen Person-A-FS6-Backend-, Migrations- und Servertest-Commits wurden vollständig durch nachvollziehbare Reverts entfernt. Der aktuelle `dev`-Stand wurde anschließend konfliktfrei integriert.
+- **Person-B-Arbeit:** Responsive Adminoberfläche für Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung, Aktivstatus, Vorschau, Veröffentlichung sowie Bildauswahl und bestätigte Löschung vorbereitet. Sie verwendet ausschließlich die vorgesehenen API-Grenzen und enthält keine erfundenen Speisekartendaten.
+- **Abhängigkeit:** Die Oberfläche kann erst funktional abgenommen werden, wenn Person As Menü-/Medien-API in `dev` vorliegt. Person B implementiert diese Backend-Aufgabe nicht erneut.
+- **Nächster Einstieg Person B:** Nach Integration der Person-A-API echte UI-API-Aufrufe, Tastaturbedienung, schmale Viewports und FS6-E2E prüfen; bis dahin keine Backend-Doppelarbeit beginnen.
