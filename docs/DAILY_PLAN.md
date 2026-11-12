@@ -415,3 +415,8 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 - **Umgesetzt:** Der geschützte Medien-Upload validiert Dateiname, erlaubten MIME-Typ, Alternativtext und Base64-Format/-Größe vor dem Serviceaufruf.
 - **Test:** Fehlerhafte Upload-Payloads werden mit `400 VALIDATION_ERROR` abgewiesen; der Medienservice wird dabei nicht aufgerufen.
+
+## 45. FS7-Sicherheits- und Regressionsprüfung Person A – 12.11.2026
+
+- **Prüfungen:** `npm audit --omit=dev` meldet 0 bekannte Schwachstellen; Secret-Tracking bestanden; Typecheck, Lint, 88/88 Tests und Production-Build erfolgreich.
+- **Befund:** Keine neue kritische serverseitige Sicherheitsabweichung im geprüften Umfang. Die offenen FS7-Arbeiten zu Datenschutz-/Auskunftsprozessen, Backup/Wiederherstellung, umfassendem Security-Review und den dokumentierten `break-ui`-Befunden bleiben bestehen.
