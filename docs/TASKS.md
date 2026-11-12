@@ -273,6 +273,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 - [-] Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung und Aktivstatus verwalten. Person B hat die responsive Adminoberfläche mit Formular-, Listen-, Lade-, Leer- und Fehlerzuständen vorbereitet. Die verbindliche Person-A-API muss vor der Funktionsabnahme integriert werden.
 - [-] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren. Person B hat Auswahl, clientseitige Typ-/Größenprüfung, Alternativtextabfrage, Vorschau und bestätigte Löschoberfläche vorbereitet. Speicherung und serverseitige Prüfung bleiben Person As API-Verantwortung.
+  - `BLOCKIERT 12.11.2026`: Person As Uploadantwort verwendet eine relative Medien-URL, während die Gerichtvalidierung derzeit ausschließlich absolute URLs akzeptiert. Person A muss den API-Vertrag vor der UI-Integration angleichen.
 - [ ] Reguläre Öffnungszeiten und datierte Abweichungen pflegen.
 - [-] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen. Person Bs Admin-Vorschau und Publikationsbedienung sind vorbereitet; echte API-Funktion und öffentlicher Fallback sind noch nicht integriert.
 - [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
