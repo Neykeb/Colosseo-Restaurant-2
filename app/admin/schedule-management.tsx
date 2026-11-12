@@ -98,16 +98,17 @@ export function ScheduleManagement({ getToken }: { getToken: () => Promise<strin
     setState("loading");
     try {
       const token = await getToken();
-      const [periodResult, dayResult, blockResult, tableResult] = await Promise.all([
+      const [periodResult, dayResult, blockResult, tableResult] = await Promise.allSettled([
         adminFetch<{ regular: ServicePeriod[] }>("/api/admin/opening-hours", token),
         adminFetch<{ specialDays: SpecialDay[] }>("/api/admin/special-days", token),
         adminFetch<{ blocks: ReservationBlock[] }>("/api/admin/reservation-blocks", token),
         adminFetch<{ tables: RestaurantTable[] }>("/api/admin/tables", token),
       ]);
-      setServicePeriods(periodResult.regular);
-      setSpecialDays(dayResult.specialDays);
-      setBlocks(blockResult.blocks);
-      setTables(tableResult.tables);
+      if (periodResult.status === "rejected") throw periodResult.reason;
+      setServicePeriods(periodResult.value.regular);
+      setSpecialDays(dayResult.status === "fulfilled" ? dayResult.value.specialDays : []);
+      setBlocks(blockResult.status === "fulfilled" ? blockResult.value.blocks : []);
+      setTables(tableResult.status === "fulfilled" ? tableResult.value.tables : []);
       setState("ready");
     } catch {
       setState("error");
