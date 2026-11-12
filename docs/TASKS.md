@@ -271,11 +271,12 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 ### FS6 – Speisekarte, Öffnungszeiten und Medienverwaltung
 
-- [-] Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung und Aktivstatus verwalten. Person B hat die responsive Adminoberfläche mit Formular-, Listen-, Lade-, Leer- und Fehlerzuständen vorbereitet. Die verbindliche Person-A-API muss vor der Funktionsabnahme integriert werden.
-- [-] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren. Person B hat Auswahl, clientseitige Typ-/Größenprüfung, Alternativtextabfrage, Vorschau und bestätigte Löschoberfläche vorbereitet. Speicherung und serverseitige Prüfung bleiben Person As API-Verantwortung.
+- [-] Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung und Aktivstatus verwalten. Person B hat die responsive Adminoberfläche mit Formular-, Listen-, Lade-, Leer- und Fehlerzuständen vorbereitet. Pflichtfeldfehler besitzen sichtbare Hinweise, `aria-invalid` und Fokusführung; wiederholte Aktionen haben kontextbezogene zugängliche Namen. Die verbindliche Person-A-API muss vor der Funktionsabnahme integriert werden.
+- [-] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren. Person B hat eine sichtbare Bildauswahl, clientseitige Typ-/Größenprüfung, ein beschriftetes Alternativtextfeld, Vorschau und bestätigte Löschoberfläche vorbereitet. Speicherung und serverseitige Prüfung bleiben Person As API-Verantwortung.
   - `BLOCKIERT 12.11.2026`: Person As Uploadantwort verwendet eine relative Medien-URL, während die Gerichtvalidierung derzeit ausschließlich absolute URLs akzeptiert. Person A muss den API-Vertrag vor der UI-Integration angleichen.
 - [ ] Reguläre Öffnungszeiten und datierte Abweichungen pflegen.
 - [-] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen. Person Bs Admin-Vorschau und Publikationsbedienung sind vorbereitet; echte API-Funktion und öffentlicher Fallback sind noch nicht integriert.
+- [-] Tastatur, Fokus, Reduced Motion, 320-px-Reflow und 200-%-Zoom prüfen. Person Bs statische Oberfläche bindet und restauriert Dialogfokus, fokussiert fehlerhafte Felder, stapelt Aktionen auf schmalen Ansichten und bewegt Dialoge nur ohne Reduced Motion. Die authentifizierte Browser- und E2E-Abnahme bleibt bis zur Person-A-API blockiert.
 - [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
 - [ ] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen.
 - [ ] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentieren; auf GO für `FS7` warten.

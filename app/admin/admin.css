@@ -394,13 +394,19 @@
 .admin-media-field h4 { margin: 0; font-family: "Instrument Serif", Georgia, serif; font-size: 1.8rem; font-weight: 400; }
 .admin-media-field p { margin: 0.45rem 0 1rem; color: #6a6056; font-size: 0.82rem; line-height: 1.5; }
 .admin-upload-button input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.admin-media-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; }
+.admin-media-controls > span { min-width: 0; overflow-wrap: anywhere; color: #6a6056; font-size: 0.78rem; }
+.admin-media-controls > label:not(.admin-upload-button) { display: grid; width: 100%; gap: 0.45rem; color: #5d554c; font-size: 0.74rem; font-weight: 650; }
+.admin-media-controls > label:not(.admin-upload-button) input { width: 100%; min-height: 2.75rem; border: 1px solid rgb(33 29 24 / 28%); padding: 0.65rem 0.75rem; color: #211d18; background: #fffaf2; font: 400 0.9rem/1.35 "Geist Variable", sans-serif; }
+.admin-media-controls small { width: 100%; color: #6a6056; line-height: 1.45; }
+.admin-upload-start { min-height: 2.75rem; border: 1px solid #211d18; padding: 0.7rem 1rem; color: #fffaf2; background: #211d18; font: 650 0.82rem/1 "Geist Variable", sans-serif; cursor: pointer; }
 .admin-remove-media { margin-left: 0.5rem; border-color: #8e4036; color: #8e4036; }
 .admin-menu-actions { display: flex; justify-content: flex-end; border-top: 1px solid rgb(33 29 24 / 18%); margin-top: 1.5rem; padding-top: 1.5rem; }
+.admin-form-error { min-height: 1.5rem; margin: 1rem 0 0; color: #8e4036; font-size: 0.82rem; font-weight: 650; }
 .admin-menu :focus-visible { outline: 3px solid #a94b3f; outline-offset: 3px; }
 
 .admin-menu-preview { width: min(62rem, calc(100% - 2rem)); max-height: calc(100svh - 2rem); border: 0; padding: clamp(1.25rem, 4vw, 3rem); color: #211d18; background: #eee7da; box-shadow: 0 2rem 6rem rgb(20 15 12 / 36%); }
 .admin-menu-preview::backdrop { background: rgb(20 15 12 / 68%); }
-.admin-menu-preview[open] { animation: admin-preview-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 .admin-menu-preview > h2 { margin: 0 0 2rem; font-family: "Instrument Serif", Georgia, serif; font-size: clamp(3.5rem, 8vw, 7rem); font-weight: 400; line-height: 0.9; }
 .admin-menu-preview > section { margin-top: 2.5rem; }
 .admin-menu-preview > section > h3 { border-bottom: 1px solid rgb(33 29 24 / 24%); padding-bottom: 0.65rem; font: 650 0.75rem/1 "Geist Variable", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; }
@@ -412,6 +418,10 @@
 .admin-menu-preview article small { color: #8e4036; font-size: 0.7rem; font-weight: 650; text-transform: uppercase; }
 .admin-menu-preview article strong { font-family: "Instrument Serif", Georgia, serif; font-size: 1.35rem; font-weight: 400; white-space: nowrap; }
 @keyframes admin-preview-enter { from { opacity: 0; transform: translateY(1.5rem) scale(0.985); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .admin-menu-preview[open] { animation: admin-preview-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+}
 
 @keyframes admin-backdrop-enter { from { opacity: 0; } }
 @keyframes admin-panel-enter { from { transform: translateX(2rem); opacity: 0; } }
@@ -603,6 +613,10 @@
   .admin-media-field { grid-template-columns: 1fr; }
   .admin-media-field > div:first-child { width: min(100%, 13rem); }
   .admin-remove-media { margin: 0.5rem 0 0; }
+  .admin-menu-items article { grid-template-columns: 1fr; align-items: stretch; }
+  .admin-menu-items article > button:last-child { min-height: 2.75rem; border-top: 1px solid rgb(33 29 24 / 14%); border-left: 0; }
+  .admin-menu-editor-heading { flex-direction: column; }
+  .admin-menu-form-grid fieldset { flex-wrap: wrap; }
   .admin-menu-preview article,
   .admin-menu-preview article:not(:has(img)) { grid-template-columns: 4rem minmax(0, 1fr); }
   .admin-menu-preview article:not(:has(img)) { grid-template-columns: minmax(0, 1fr); }
@@ -616,5 +630,4 @@
   .admin-primary { transition: none; }
   .admin-detail-backdrop,
   .admin-detail { animation: none; }
-  .admin-menu-preview[open] { animation: none; }
 }
