@@ -55,6 +55,9 @@ describe("Express platform foundation", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("x-correlation-id")).toBe("integration-test-42");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(response.headers.get("x-frame-options")).toBe("DENY");
+    expect(response.headers.get("referrer-policy")).toBe("strict-origin-when-cross-origin");
     await expect(response.json()).resolves.toEqual({ status: "ok", correlationId: "integration-test-42" });
   });
 
