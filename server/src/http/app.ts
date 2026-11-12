@@ -275,6 +275,13 @@ export function createApp(options: CreateAppOptions = {}) {
       response.json({ reservation });
     } catch (error) { next(error); }
   });
+  app.post("/api/admin/reservations/:publicId/anonymize", ...adminGuard, async (request, response, next) => {
+    try {
+      const reservation = await reservationAdmin.anonymizeReservation(request.params.publicId as string, response.locals.adminProfile.clerkUserId);
+      if (!reservation) { response.status(404).json({ error: { code: "RESERVATION_NOT_FOUND_OR_ANONYMIZED", message: "The reservation was not found or is already anonymized.", correlationId: response.locals.correlationId } }); return; }
+      response.json({ reservation });
+    } catch (error) { next(error); }
+  });
 
   app.get("/api/admin/reservations/:publicId/history", ...adminGuard, async (request, response, next) => {
     try { response.json({ events: await reservationAdmin.reservationHistory(request.params.publicId as string) }); } catch (error) { next(error); }

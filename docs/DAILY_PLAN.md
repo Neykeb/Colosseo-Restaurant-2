@@ -428,3 +428,7 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 ## 47. FS7-Aufbewahrungsverhalten Person A – 12.11.2026
 
 - **Test:** Abgelaufene Reservierungen werden anonymisiert; zugehörige Locks und Tischzuweisungen werden entfernt; gesendete Outbox- und alte Audit-Ereignisse werden anhand der dokumentierten Fristen bereinigt.
+
+## 48. FS7-einfache manuelle Datenschutzaktion – 12.11.2026
+
+- **Umgesetzt:** Ownergeschützter Endpunkt `POST /api/admin/reservations/:publicId/anonymize` ergänzt. Ein öffentliches Export-/Löschportal bleibt bewusst außerhalb des einfachen Demo-Umfangs.

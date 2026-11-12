@@ -297,6 +297,16 @@ describe("Express platform foundation", () => {
     expect((await fetch(`${forbidden}/api/admin/media/507f1f77bcf86cd799439011`, { method: "DELETE" })).status).toBe(403);
   });
 
+  it("allows an owner to manually anonymize a reservation", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const anonymized = { publicId: "COL-1234567890", guest: { name: "ANONYMIZED" }, status: "completed" };
+    const reservationAdminService = { anonymizeReservation: async () => anonymized };
+    const baseUrl = await listen(createApp({ getAuthenticatedUserId: () => owner.clerkUserId, findAdminProfile: async () => owner, reservationAdminService: reservationAdminService as never }));
+    const response = await fetch(`${baseUrl}/api/admin/reservations/COL-1234567890/anonymize`, { method: "POST" });
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ reservation: anonymized });
+  });
+
   it("protects and validates regular opening-hours administration", async () => {
     const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
     const saved = { key: "fri-evening", weekday: 5, startTime: "17:00", endTime: "21:00", active: true };
