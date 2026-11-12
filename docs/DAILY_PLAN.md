@@ -406,4 +406,5 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Integrationstest:** Upload → Gericht speichern → Gericht veröffentlichen einschließlich Ablehnung eines beliebigen relativen Pfads ist automatisiert abgesichert.
 - **Prüfungen Person A:** Typecheck, Lint und 86/86 Tests erfolgreich.
 - **Person-B-Regression:** Der zusammengeführte Stand besteht erneut Typecheck, OXLint, 86/86 Tests, Production-Build und `git diff --check`. Der lokale Express-Server startet auf Port `3000`; die Adminoberfläche erreicht die Google-Anmeldung.
-- **Manueller Browser-E2E:** Der authentifizierte Upload-, Speicher-, Vorschau-, Veröffentlichungs- und Löschfluss wartet ausschließlich auf die Nutzeranmeldung im geöffneten Clerk-/Google-Dialog. Er wird bis dahin nicht als manuell bestanden markiert.
+- **Manueller Browser-E2E:** Authentifizierter Bild-Upload, Speichern mit internem Medienpfad, Entwurfsvorschau, Veröffentlichung, öffentlicher Menüabruf, öffentlicher Bildabruf mit unveränderlichem Cache-Header und Zurückziehen wurden erfolgreich geprüft.
+- **Bereinigung verifiziert:** Die synthetische Kategorie `e2e-test`, das Testgericht und das GridFS-Testmedium wurden durch Person A entfernt. Eine read-only Atlas-Abfrage bestätigt, dass alle drei Datensätze nicht mehr existieren.
