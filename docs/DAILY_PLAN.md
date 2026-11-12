@@ -437,3 +437,10 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Umgesetzt:** `CLERK_AUTHORIZED_PARTIES` akzeptiert jetzt sowohl JSON-Arrays aus dotenv-Konfigurationen als auch Kommalisten; Anführungszeichen werden bei der Fallback-Form bereinigt. Ein Regressionstest deckt das JSON-Format ab.
 - **Prüfungen:** Typecheck, Lint, 92/92 Tests, Secret-Tracking und `npm audit --omit=dev` mit 0 bekannten Schwachstellen erfolgreich.
 - **Offen:** Betriebsseitige Secret-Rotation, produktives Monitoring/Alarmierung und Backup-/Wiederherstellungstest benötigen weiterhin externe Infrastruktur- beziehungsweise Betriebsfreigaben. Der nächste lokal ausführbare Person-A-Schritt ist der umfassende IDOR-/XSS-/CORS-/CSRF-/Log-Leak-Review.
+
+## 50. FS7-Person-A-Security-Grenzen – 12.11.2026
+
+- **Umgesetzt:** Die Express-App setzt Sicherheitsheader gegen MIME-Sniffing, Framing und übermäßige Referrer-Weitergabe. Schreibende Requests mit `Origin` werden gegen die konfigurierte Clerk-Allowlist geprüft und bei unbekannter Herkunft mit `403 CSRF_ORIGIN_INVALID` abgewiesen.
+- **Review:** Admin-Routen bleiben serverseitig ownergeschützt; Pfadparameter werden an den Servicegrenzen verwendet und validiert. Fehlerantworten geben keine internen Fehlermeldungen, URIs oder Secrets aus; XSS-Sinks wurden im Anwendungscode nicht gefunden.
+- **Prüfungen:** Typecheck, Lint, 92/92 Tests, Secret-Tracking und Diff-Check erfolgreich.
+- **Offen:** Echte externe Origin-/Browser-CORS-Prüfung, Betriebsmonitoring, Alarmierung, Secret-Rotation und Backup-/Wiederherstellungstest benötigen die jeweilige Infrastruktur beziehungsweise Freigabe.

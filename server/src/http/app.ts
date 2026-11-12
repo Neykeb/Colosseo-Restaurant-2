@@ -123,6 +123,23 @@ const correlationIdMiddleware: RequestHandler = (request, response, next) => {
   next();
 };
 
+const securityHeadersMiddleware: RequestHandler = (_request, response, next) => {
+  response.setHeader("x-content-type-options", "nosniff");
+  response.setHeader("x-frame-options", "DENY");
+  response.setHeader("referrer-policy", "strict-origin-when-cross-origin");
+  next();
+};
+
+function createOriginGuard(authorizedParties: string[] = []): RequestHandler {
+  const allowed = new Set(authorizedParties);
+  return (request, response, next) => {
+    if (["GET", "HEAD", "OPTIONS"].includes(request.method)) { next(); return; }
+    const origin = request.header("origin");
+    if (!origin || allowed.has(origin)) { next(); return; }
+    response.status(403).json({ error: { code: "CSRF_ORIGIN_INVALID", message: "The request origin is not allowed.", correlationId: response.locals.correlationId } });
+  };
+}
+
 const notFoundHandler: RequestHandler = (request, response) => {
   response.status(404).json({
     error: {
@@ -160,6 +177,8 @@ export function createApp(options: CreateAppOptions = {}) {
       }];
 
   app.disable("x-powered-by");
+  app.use(securityHeadersMiddleware);
+  app.use(createOriginGuard(options.clerk?.authorizedParties));
   if (options.clerk) {
     app.use(clerkMiddleware({
       secretKey: options.clerk.secretKey,
