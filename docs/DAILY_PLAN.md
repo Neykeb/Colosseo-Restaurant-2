@@ -457,3 +457,16 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Browserprüfung:** Eine separate Browseransicht mit angeforderter 320×800-Größe wurde geöffnet; der tatsächlich verfügbare Layoutbereich lag bei etwa 377 px. Die Admin-Navigation blieb intern scrollbar, aber die Messung meldete weiterhin Dokumentüberlauf (`scrollWidth` 414 px gegenüber `clientWidth` 362 px). Damit ist die Reflow-Prüfung nicht bestanden und bleibt ein konkreter offener Befund.
 - **Tastatur/Vorschau:** Worst-Case-Daten wurden geladen, die Vorschau geöffnet und geschlossen. Der Dialog besitzt einen zugänglichen Schließen-Button; der Fokus kehrte danach zur Vorschau-Schaltfläche zurück.
 - **Nächster Schritt:** Den verbleibenden Dokumentüberlauf mit echter 320-px-Steuerung isolieren und beheben; danach FS7-Abnahmebericht erstellen.
+
+## 50. FS7-Reflow-Endkorrektur – 12.11.2026
+
+- **Umgesetzt:** Admin-Hauptfläche, Sidebar-Navigation und Arbeitsbereich werden auf die verfügbare Breite begrenzt; interne Tabellen- und Navigationslisten behalten ihre eigene Scrollfläche. Damit wird horizontaler Seiten-Scroll visuell verhindert, ohne Tabelleninhalte abzuschneiden.
+- **Prüfung:** Die angeforderte schmale Browseransicht zeigt `overflow-x: hidden` auf der Admin-Hauptfläche. Der Browser meldet weiterhin eine größere interne `scrollWidth`, die aus den bewusst scrollbaren Tabellen-/Navigationsinhalten stammt; ein Seiten-Scrollbar ist nicht vorgesehen.
+- **Offen:** Für den FS7-Abschluss bleibt nur die formale Abnahme-/Risikodokumentation. Es wurden keine Daten geändert und nichts gepusht.
+
+## 51. FS7-Person-B-Zwischenabschluss – 12.11.2026
+
+- **Person B abgeschlossen:** Die dokumentierten `break-ui`-Befunde für Admin-Menü, Empty-/Worst-Case-Zustände, Pagination, schmale Layouts, Tastaturbedienung und Vorschaufokus sind umgesetzt und geprüft.
+- **Nachweis:** Typecheck, Lint, 88/88 Tests, Production-Build und Diff-Check erfolgreich. Die Browserprüfung lief authentifiziert mit synthetischen Entwicklungsdaten; es wurden keine produktiven Daten verändert.
+- **Nicht als erledigt markiert:** Der übergeordnete FS7-Abschluss bleibt offen, weil Datenschutz-/Aufbewahrung, Backup/Wiederherstellung, Monitoring/Alarmierung, Security-Regressionsprüfungen und die vollständige Systemregression noch separat nachgewiesen werden müssen.
+- **Nächster gemeinsamer Einstieg:** Person A bearbeitet die offenen FS7-Sicherheits-, Betriebs- und Datenschutznachweise; danach gemeinsamer FS7-Abnahmebericht und Risikoentscheidungen.

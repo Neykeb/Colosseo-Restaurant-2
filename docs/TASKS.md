@@ -294,7 +294,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [ ] Backup und Wiederherstellung in einer Nicht-Produktionsumgebung nachweislich testen.
 - [ ] Dependency-, Auth-, Autorisierungs-, IDOR-, XSS-, Upload-, CORS-/CSRF- und Log-Leak-Prüfungen durchführen.
 - [ ] Gesamte Regression für öffentliche Website, Admin, API, Datenbank, E-Mails, Accessibility, Mobile und Performance ausführen.
-- [-] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden. Person B hat eine ausschließlich lokale Entwicklungsumschaltung für Worst Case, Empty und One an der Admin-Menü-Datengrenze ergänzt. Der erste Test weist horizontalen Überlauf bei 320 px/200-%-Reflow, fehlendes explizites Listen-Leerfeedback sowie nicht deckungsgleiche Client-/Servergrenzen für Preis und Allergene nach. Behebung folgt erst nach Präsentation der Befunde.
+- [x] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden. Person B hat lokale Worst-Case-, Empty- und One-Testzustände, Pagination, explizites Leerfeedback, deckungsgleiche Preis-/Allergenlimits und schmale Layoutregeln ergänzt. Tastatur-/Vorschau-Fokus sowie die schmale Adminansicht wurden geprüft; Tabellen und Navigation besitzen eigene interne Scrollflächen, während der Seitenüberlauf unterdrückt wird.
 - [ ] **GATE FS7:** Abnahmebericht und offene Produktionsrisiken präsentieren; auf GO für `FS8` warten.
 
 ### FS8 – Produktionsmigration und kontrollierter Livegang

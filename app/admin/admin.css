@@ -1,3 +1,7 @@
+.admin-dashboard {
+  overflow-x: hidden;
+}
+
 .admin-shell,
 .admin-configuration,
 .admin-dashboard {
@@ -19,7 +23,9 @@
   grid-template-columns: 15rem minmax(0, 1fr);
   min-height: 100svh;
   min-width: 0;
-  overflow-x: clip;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .admin-sidebar {
@@ -55,6 +61,7 @@
   gap: 0.35rem;
   margin-top: 4rem;
   min-width: 0;
+  max-width: 100%;
 }
 
 .admin-sidebar nav a,
@@ -77,7 +84,8 @@
 .admin-workspace {
   width: min(100%, 92rem);
   min-width: 0;
-  overflow-x: clip;
+  max-width: 100%;
+  overflow-x: hidden;
   margin: 0 auto;
   padding: clamp(1.5rem, 4vw, 4.5rem);
 }
