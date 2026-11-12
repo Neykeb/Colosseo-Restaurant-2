@@ -1,12 +1,12 @@
 # Tagesplan Full-Stack-Finalprojekt
 
-**Status:** FS7 freigegeben; Person-B-QA und `break-ui`-Prüfung begonnen
+**Status:** FS4 technisch umgesetzt; Person-B-Aufgaben vom 10.11. einschließlich Render-E2E abgeschlossen, externe Freigaben und Gate-Abnahme offen
 
-**Phase:** `FS7` – Datenschutz, Sicherheit, Betrieb und vollständige QA
+**Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 12.11.2026
+**Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -394,33 +394,13 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Prüfungen:** `npm run typecheck`, `npm run lint` und `npm test` erfolgreich; 18 Testdateien und 85/85 Tests bestanden.
 - **Abgrenzung:** Person-B-/UI-Aufgaben wurden bewusst nicht bearbeitet.
 
-## 41. FS6-Person-B-Integration – 12.11.2026
+## 41. FS6-URL-Vertrag und Medienfluss – 12.11.2026
 
-- **Zuständigkeit:** Person B hat die responsive Adminoberfläche für Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung, Aktivstatus, Vorschau, Veröffentlichung, Bildauswahl und bestätigte Löschung vorbereitet. Es wurden keine Speisekartendaten erfunden.
-- **Accessibility:** Bildauswahl und Alternativtext sind sichtbar formulargebunden. Pflichtfeldfehler werden markiert, erklärt und fokussiert; wiederholte Veröffentlichungsaktionen nennen das betroffene Gericht. Der Vorschau-Dialog restauriert den Fokus bei jeder Schließart.
-- **Responsive und Motion:** Bei 320 px beziehungsweise 200-%-Zoom stapeln sich Listeneinträge und Aktionen ohne horizontale Zwangsbedienung. Dialogbewegung läuft nur ohne aktivierte reduzierte Bewegung.
-- **API-Prüfung:** Person As Menü-/Medien-API ist integriert. `imageUrl` akzeptiert gezielt interne GridFS-URLs (`/api/public/media/<ObjectId>`) sowie absolute HTTPS-URLs; beliebige relative Pfade und unverschlüsselte externe URLs werden abgelehnt.
+- **Umgesetzt:** `imageUrl` akzeptiert jetzt gezielt interne GridFS-URLs (`/api/public/media/<ObjectId>`) sowie absolute HTTPS-URLs; beliebige Pfade und nicht verschlüsselte externe URLs werden abgelehnt.
+- **Integrationstest:** Upload → Gericht speichern → Gericht veröffentlichen einschließlich Ablehnung eines beliebigen relativen Pfads.
+- **Prüfungen:** Typecheck, Lint und 86/86 Tests erfolgreich.
 
-## 42. FS6-URL-Vertrag und Medienfluss – 12.11.2026
+## 42. FS6-reguläre Öffnungszeitenverwaltung – 12.11.2026
 
-- **Integrationstest:** Upload → Gericht speichern → Gericht veröffentlichen einschließlich Ablehnung eines beliebigen relativen Pfads ist automatisiert abgesichert.
-- **Prüfungen Person A:** Typecheck, Lint und 86/86 Tests erfolgreich.
-- **Person-B-Regression:** Der zusammengeführte Stand besteht erneut Typecheck, OXLint, 86/86 Tests, Production-Build und `git diff --check`. Der lokale Express-Server startet auf Port `3000`; die Adminoberfläche erreicht die Google-Anmeldung.
-- **Manueller Browser-E2E:** Authentifizierter Bild-Upload, Speichern mit internem Medienpfad, Entwurfsvorschau, Veröffentlichung, öffentlicher Menüabruf, öffentlicher Bildabruf mit unveränderlichem Cache-Header und Zurückziehen wurden erfolgreich geprüft.
-- **Bereinigung verifiziert:** Die synthetische Kategorie `e2e-test`, das Testgericht und das GridFS-Testmedium wurden durch Person A entfernt. Eine read-only Atlas-Abfrage bestätigt, dass alle drei Datensätze nicht mehr existieren.
-## 43. FS7-Start und erster `break-ui`-Durchlauf Person B – 12.11.2026
-
-- **Gate:** Der Nutzer hat FS6 nach dem integrierten E2E ausdrücklich abgenommen und `GO` für den schrittweisen Start von FS7 erteilt.
-- **Abgrenzung:** Bearbeitet wird ausschließlich Person Bs Frontend-, Accessibility- und Integrations-QA. Person-As Security-, Datenschutz- und Betriebsimplementierung wurde nicht vorgezogen.
-- **Testgrenze:** Die Admin-Menüverwaltung besitzt im Entwicklungsmodus über `?data=worst`, `?data=empty` und `?data=one` lokale, schema-nahe Testzustände. Sie lösen keine API-Schreibzugriffe aus und erscheinen nicht im Production-Build.
-- **Verifizierte Befunde:** Bei effektiv 320 px sowie einem 200-%-ähnlichen Reflow weitet die Adminoberfläche ihre einspaltige Grid-Spur auf die Min-Content-Breite aus und erzeugt horizontalen Überlauf. Der leere Menülisten-Zustand besitzt keine eigene Erklärung. Preis und Allergene erlauben clientseitig Werte, die erst durch die strengeren Servergrenzen abgelehnt werden. Menü- und Vorschaudaten werden ohne Pagination geladen; hochgeladene Alternativtexte werden nicht bis in die Menüvorschau transportiert.
-- **Prüfungen:** Typecheck und OXLint erfolgreich; 86/86 Tests erfolgreich; Production-Build erfolgreich. Die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL` bleiben unverändert.
-- **Nächster Schritt Person B:** Befunde präsentieren und auf ein neues `GO` zur priorisierten Behebung warten. Erst anschließend vollständige Reflow-, Tastatur- und Vorschau-Regressionsprüfung durchführen.
-
-## 44. Nachgezogene FS6-Öffnungszeitenverwaltung – 12.11.2026
-
-- **Verifizierte Lücke:** Reguläre Wochenzeiten waren zuvor ausschließlich über die öffentliche Lese-API verfügbar. Der Adminbereich verwaltete nur datierte Sondertage und Sperrzeiten; ein geschützter Schreibvertrag fehlte.
-- **Umgesetzt:** Ownergeschützte Endpunkte zum Laden, Speichern und Löschen regulärer Servicezeiten, serverseitige Wochentags-/Zeitbereichsvalidierung, Auditereignisse sowie eine responsive Adminoberfläche zum Hinzufügen, Bearbeiten, Aktivieren/Deaktivieren und bestätigt Löschen.
-- **Abgrenzung:** Bestehende Wochenzeiten, Sondertage und Sperrzeiten wurden nicht verändert. Die Oberfläche lädt ausschließlich die vorhandenen Daten aus MongoDB und erfindet keine Restaurantzeiten.
-- **Prüfungen:** Typecheck und OXLint erfolgreich; 87/87 Tests erfolgreich; Production-Build erfolgreich. Die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL` bleiben unverändert.
-- **Nächster Schritt:** Authentifizierter Browser-E2E für eine temporäre Servicezeit mit anschließender Bereinigung; danach zu den bereits präsentierten FS7-`break-ui`-Befunden zurückkehren.
+- **Umgesetzt:** Ownergeschützte Admin-API und Admin-Formular für reguläre wöchentliche Öffnungszeiten ergänzt; Sondertage und Sperrzeiten bleiben separat bestehen.
+- **Validierung:** Wochentag, Schlüssel, Uhrzeiten und aufsteigender Zeitbereich werden serverseitig geprüft; Änderungen werden auditiert.

@@ -305,7 +305,6 @@ export function createApp(options: CreateAppOptions = {}) {
       response.status(204).end();
     } catch (error) { next(error); }
   });
-
   app.get("/api/admin/event-inquiries", ...adminGuard, async (_request, response, next) => { try { response.json({ inquiries: await reservationAdmin.listEventInquiries() }); } catch (error) { next(error); } });
   app.post("/api/admin/event-inquiries", ...adminGuard, async (request, response, next) => {
     const input = eventInquirySchema.safeParse(request.body);
