@@ -275,14 +275,14 @@ describe("Express platform foundation", () => {
     const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
     const saved = { key: "fri-evening", weekday: 5, startTime: "17:00", endTime: "21:00", active: true };
     const reservationAdminService = {
-      listOpeningHours: async () => [saved],
-      saveOpeningHour: async () => saved,
-      deleteOpeningHour: async (key: string) => key === saved.key ? saved : null,
+      listServicePeriods: async () => [saved],
+      saveServicePeriod: async () => saved,
+      deleteServicePeriod: async (key: string) => key === saved.key ? saved : null,
     };
     const baseUrl = await listen(createApp({ getAuthenticatedUserId: () => owner.clerkUserId, findAdminProfile: async () => owner, reservationAdminService: reservationAdminService as never }));
     const listed = await fetch(`${baseUrl}/api/admin/opening-hours`);
     expect(listed.status).toBe(200);
-    await expect(listed.json()).resolves.toEqual({ openingHours: [saved] });
+    await expect(listed.json()).resolves.toEqual({ regular: [saved] });
     const invalid = await fetch(`${baseUrl}/api/admin/opening-hours/fri-evening`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ weekday: 5, startTime: "21:00", endTime: "17:00", active: true }) });
     expect(invalid.status).toBe(400);
     const updated = await fetch(`${baseUrl}/api/admin/opening-hours/fri-evening`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(saved) });

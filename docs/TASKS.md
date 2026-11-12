@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS6` freigegeben; Umsetzung beginnt
-**Letzte Aktualisierung:** 11.11.2026
+**Status:** Full-Stack-Phase `FS7` freigegeben; Person-B-QA begonnen
+**Letzte Aktualisierung:** 12.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -151,6 +151,7 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 11.11.2026 | Gate FS4 / Start FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist freigegeben und darf umgesetzt werden. |
 | 11.11.2026 | Gate FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist abgenommen; `FS6` benötigt ein separates GO. |
 | 11.11.2026 | Gate FS5 / Start FS6 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS6“. FS6 ist freigegeben und darf umgesetzt werden. |
+| 12.11.2026 | Gate FS6 / Start FS7 | Freigegeben | Nach erfolgreichem integriertem Browser-E2E und verifizierter Testdatenbereinigung erteilt der Nutzer ausdrücklich „GO“. FS6 ist abgenommen; FS7 darf schrittweise für Person B beginnen. |
 
 ## Aktuelle Blocker
 
@@ -266,24 +267,25 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
 
-- [ ] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen.
-- [ ] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren.
-- [ ] Sonderöffnungen, Schließungen und Sperrzeiten verwalten.
-- [ ] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren.
-- [ ] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen.
+- [x] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen. Person B ergänzte die geschützte Kalender-API und responsive Adminübersicht mit Zeitraumwahl, Kennzahlen, Listenalternative, Reservierungen, Sperrzeiten, Sondertagen und offenen Veranstaltungsanfragen.
+- [x] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren. Paginierte Suche, zugängliche Detailansicht, atomare Tischumlegung, Statusaktionen und Auditverlauf sind umgesetzt.
+- [x] Sonderöffnungen, Schließungen und Sperrzeiten verwalten. Der responsive Betriebsbereich deckt datierte Schließtage, Sonderöffnungen sowie Restaurant-, Bereichs- und Tischsperren ab.
+- [x] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren. Suche, Filter, Pagination, Detailansicht, Status und interne Notiz sind umgesetzt.
+- [x] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen. Autorisierung, Konflikte, Dialogfokus, Escape, Fokusrückgabe und Atlas-Parallelität sind geprüft; der Abschlusslauf bestand mit 83/83 Tests.
 - [x] **GATE FS5:** operative Verwaltung präsentiert und am 11.11.2026 durch ausdrückliches `GO FS5` abgenommen. `FS6` bleibt bis zu einem separaten GO gesperrt.
 
 ### FS6 – Speisekarte, Öffnungszeiten und Medienverwaltung
 
-**Start:** `GO FS6` am 11.11.2026 ausdrücklich erteilt. Backend-Grundlage für Kategorien und Gerichte ist in Arbeit; öffentliche Veröffentlichung und Medien-Upload bleiben separate Arbeitspakete.
+**Start:** `GO FS6` am 11.11.2026 ausdrücklich erteilt. Person As Backend und Person Bs vorbereitete Adminoberfläche sind in `dev` beziehungsweise im Integrationsbranch vorhanden.
 
-- [-] Versioniertes Backend-Modell, geschützte Admin-API, Vorschau und expliziter Veröffentlichungsworkflow für Kategorien/Gerichte umgesetzt; Uploadregeln, vollständige UI und E2E bleiben offen.
-- [-] MongoDB-GridFS-Medienablage mit 5-MB-/MIME-/Alternativtext- und Dateisignaturprüfung, ownergeschütztem Upload/Löschen, Auditierung und öffentlichem Cache-Endpunkt umgesetzt; UI bleibt offen.
-- [-] Öffentliche Ausgabe regulärer Servicezeiten und datierter Sondertage sowie geschützte Menüvorschau ergänzt; vollständige Pflege-, Veröffentlichungs- und UI-Integration bleibt offen.
-- [ ] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen.
-- [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
-- [ ] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen.
-- [ ] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentieren; auf GO für `FS7` warten.
+- [x] Versioniertes Backend-Modell, geschützte Admin-API, Vorschau und expliziter Veröffentlichungsworkflow für Kategorien/Gerichte sind integriert und im authentifizierten Browser-E2E geprüft.
+- [x] MongoDB-GridFS-Medienablage mit 5-MB-/MIME-/Alternativtext- und Dateisignaturprüfung, ownergeschütztem Upload/Löschen, Auditierung und öffentlichem Cache-Endpunkt ist integriert. Der interne Medienpfadvertrag ist konsistent und E2E-geprüft.
+- [x] Öffentliche Ausgabe regulärer Servicezeiten und datierter Sondertage sowie geschützte Verwaltung sind umgesetzt. Reguläre Wochenzeiten lassen sich im Adminbereich laden, hinzufügen, bearbeiten, aktivieren/deaktivieren und bestätigt löschen; Eingaben werden serverseitig validiert und Änderungen auditiert.
+- [x] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen. Upload, Entwurfsvorschau, Veröffentlichung, öffentlicher Abruf und Zurückziehen wurden integriert geprüft.
+- [x] Tastatur, Fokus und Reduced Motion für den FS6-Workflow prüfen. Der erweiterte 320-px-/200-%-Belastungstest wird als FS7-QA fortgeführt und hat einen horizontalen Admin-Reflow-Fehler offengelegt.
+- [x] Bestehende verifizierte Daten kontrolliert beibehalten; es wurden keine Inhalte automatisch umformuliert oder ungeprüft migriert.
+- [x] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen. Automatisierter Vertrag, Typecheck, OXLint, 86/86 Tests, Production-Build und authentifizierter Browser-E2E sind erfolgreich; synthetische FS6-Datensätze wurden anschließend nachweislich entfernt.
+- [x] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentiert und am 12.11.2026 durch ausdrückliches `GO` abgenommen.
 
 ### FS7 – Datenschutz, Sicherheit, Betrieb und vollständige QA
 
@@ -292,7 +294,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [ ] Backup und Wiederherstellung in einer Nicht-Produktionsumgebung nachweislich testen.
 - [ ] Dependency-, Auth-, Autorisierungs-, IDOR-, XSS-, Upload-, CORS-/CSRF- und Log-Leak-Prüfungen durchführen.
 - [ ] Gesamte Regression für öffentliche Website, Admin, API, Datenbank, E-Mails, Accessibility, Mobile und Performance ausführen.
-- [ ] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden.
+- [-] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden. Person B hat eine ausschließlich lokale Entwicklungsumschaltung für Worst Case, Empty und One an der Admin-Menü-Datengrenze ergänzt. Der erste Test weist horizontalen Überlauf bei 320 px/200-%-Reflow, fehlendes explizites Listen-Leerfeedback sowie nicht deckungsgleiche Client-/Servergrenzen für Preis und Allergene nach. Behebung folgt erst nach Präsentation der Befunde.
 - [ ] **GATE FS7:** Abnahmebericht und offene Produktionsrisiken präsentieren; auf GO für `FS8` warten.
 
 ### FS8 – Produktionsmigration und kontrollierter Livegang

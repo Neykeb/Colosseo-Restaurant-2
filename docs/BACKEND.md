@@ -1,8 +1,8 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS6` freigegeben; Backend-Grundlagen für Menü, Öffnungszeiten und Medien umgesetzt; UI-/E2E-Abnahme offen
+**Status:** Full-Stack-Phase `FS7` freigegeben; FS6-Menü-, Medien- und Öffnungszeitenverwaltung integriert
 
-**Phase:** `FS6` – Speisekarte, Öffnungszeiten und Medienverwaltung
+**Phase:** `FS7` – Datenschutz, Sicherheit, Betrieb und vollständige QA
 
 **Letzte Aktualisierung:** 11.11.2026
 
@@ -18,7 +18,7 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 - Der Atlas-Benutzer besitzt am 03.11.2026 verifiziert ausschließlich datenbankspezifisches `readWrite` für `colosseo` und `colosseo_test`. Entwicklungsverbindung, Testverbindung und Test-Migrationslauf sind damit erfolgreich.
 - Vom Nutzer bestätigter Atlas-Betriebsstand: MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`), Replica Set mit drei Nodes, Backups derzeit inaktiv, keine verknüpften App Services und ein vorhandener Search-Index. Render soll später möglichst regionsnah betrieben werden; Backups bleiben vor einem realen Produktionsbetrieb zu klären.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.
-- Aktuelle Phase: `FS6`. Menü-, Öffnungszeiten- und Medien-Backend sind als Demo-Grundlage implementiert; öffentliche Menüs zeigen nur aktive/veröffentlichte Inhalte. Die Admin-Oberfläche und E2E-Abnahme sind offen.
+- Aktuelle Phase: `FS7`. Menü-, Medien- und reguläre Öffnungszeitenverwaltung sind geschützt integriert; öffentliche Menüs zeigen nur aktive/veröffentlichte Inhalte. Der priorisierte QA- und Sicherheitsabschluss läuft.
 - Die reine Reservierungslogik, öffentliche Config-/Verfügbarkeits-/Buchungsendpunkte, idempotente Bestätigung, Rate-Limit, atomare Tisch-Zeit-Sperren sowie geschützte Admin-Endpunkte für manuelle Buchungen und Sperrzeiten sind implementiert. Migrationen `0005` und `0006` sind in `colosseo_test` und `colosseo` angewendet.
 - Die Express-/TypeScript-Grundlage einschließlich statischer Produktionsauslieferung ist implementiert. Entwicklungs- und Produktionsprozess, Healthcheck, API-404 sowie die drei vorgerenderten Sprachseiten wurden am 05.11.2026 über echte lokale Listener geprüft.
 - Der gemeinsame React-/Express-Web-Service ist per Render-Blueprint in Frankfurt live. Reproduzierbarer Build, idempotente Migration vor dem Serverstart, `/api/health`, MongoDB Atlas, Clerk, Resend-Konfiguration und `SITE_URL` sind in der Render-Umgebung aktiv; Secrets bleiben ausschließlich dort gespeichert.
@@ -152,6 +152,7 @@ Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 
 - `GET /api/public/menu`: liefert aktive Kategorien mit aktiven und `published: true` gesetzten Gerichten. Preise sind Minor Units (`priceCents`); interne MongoDB-IDs und Zeitstempel werden nicht ausgegeben.
 - `GET /api/public/opening-hours`: liefert aktive reguläre Servicezeiten sowie datierte Sondertage mit `closed`, `opens` und `closes`.
+- `GET /api/admin/opening-hours`, `PUT /api/admin/opening-hours/:key` und `DELETE /api/admin/opening-hours/:key`: ownergeschützte Verwaltung der regulären Wochenzeiten mit Validierung und Auditlog.
 - `GET /api/public/media/:id`: liefert ein GridFS-Medium mit `Content-Type` aus den serverseitig gespeicherten Metadaten und unveränderlichem Cache-Header.
 
 ### Geschützte Owner-Endpunkte

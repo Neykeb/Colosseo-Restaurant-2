@@ -87,12 +87,12 @@ export function ScheduleManagement({ getToken }: { getToken: () => Promise<strin
         adminFetch<{ specialDays: SpecialDay[] }>("/api/admin/special-days", token),
         adminFetch<{ blocks: ReservationBlock[] }>("/api/admin/reservation-blocks", token),
         adminFetch<{ tables: RestaurantTable[] }>("/api/admin/tables", token),
-        adminFetch<{ openingHours: OpeningHour[] }>("/api/admin/opening-hours", token),
+        adminFetch<{ regular: OpeningHour[] }>("/api/admin/opening-hours", token),
       ]);
       setSpecialDays(dayResult.specialDays);
       setBlocks(blockResult.blocks);
       setTables(tableResult.tables);
-      setOpeningHours(hoursResult.openingHours);
+      setOpeningHours(hoursResult.regular);
       setState("ready");
     } catch {
       setState("error");
