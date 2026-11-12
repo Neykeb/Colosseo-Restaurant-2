@@ -412,22 +412,54 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 ## 44. FS7-Upload-Sicherheitsprüfung Person A – 12.11.2026
 
-- **Umgesetzt:** Der geschützte Medien-Upload validiert Dateiname, erlaubten MIME-Typ, Alternativtext und Base64-Format/-Größe vor dem Serviceaufruf.
-- **Test:** Fehlerhafte Upload-Payloads werden mit `400 VALIDATION_ERROR` abgewiesen; der Medienservice wird dabei nicht aufgerufen.
+- **Verifizierte Lücke:** Reguläre Wochenzeiten waren zuvor ausschließlich über die öffentliche Lese-API verfügbar. Der Adminbereich verwaltete nur datierte Sondertage und Sperrzeiten; ein geschützter Schreibvertrag fehlte.
+- **Umgesetzt:** Ownergeschützte Endpunkte zum Laden, Speichern und Löschen regulärer Servicezeiten, serverseitige Wochentags-/Zeitbereichsvalidierung, Auditereignisse sowie eine responsive Adminoberfläche zum Hinzufügen, Bearbeiten, Aktivieren/Deaktivieren und bestätigt Löschen.
+- **Abgrenzung:** Bestehende Wochenzeiten, Sondertage und Sperrzeiten wurden nicht verändert. Die Oberfläche lädt ausschließlich die vorhandenen Daten aus MongoDB und erfindet keine Restaurantzeiten.
+- **Prüfungen:** Typecheck und OXLint erfolgreich; 87/87 Tests erfolgreich; Production-Build erfolgreich. Die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL` bleiben unverändert.
+- **Nächster Schritt:** Authentifizierter Browser-E2E für eine temporäre Servicezeit mit anschließender Bereinigung; danach zu den bereits präsentierten FS7-`break-ui`-Befunden zurückkehren.
+- **Korrektur vor E2E:** Die Öffnungszeitenansicht lädt reguläre Servicezeiten nun unabhängig von optionalen FS5-Betriebsdaten; ein fehlender Tabellen-Endpunkt blendet den FS6-Öffnungszeitenbereich nicht mehr aus.
 
-## 45. FS7-Sicherheits- und Regressionsprüfung Person A – 12.11.2026
+## 45. FS7-Clerk-Adminprüfung – 12.11.2026
 
-- **Prüfungen:** `npm audit --omit=dev` meldet 0 bekannte Schwachstellen; Secret-Tracking bestanden; Typecheck, Lint, 88/88 Tests und Production-Build erfolgreich.
-- **Befund:** Keine neue kritische serverseitige Sicherheitsabweichung im geprüften Umfang. Die offenen FS7-Arbeiten zu Datenschutz-/Auskunftsprozessen, Backup/Wiederherstellung, umfassendem Security-Review und den dokumentierten `break-ui`-Befunden bleiben bestehen.
+- **Befund:** Die lokale `CLERK_AUTHORIZED_PARTIES`-Konfiguration war als JSON-Array gepflegt, wurde aber als einfache Kommaliste geparst; dadurch scheiterte die authentifizierte Adminprüfung.
+- **Umgesetzt:** Der Umgebungsparser akzeptiert nun JSON-Arrays und Kommalisten; ein Regressionstest deckt beide Formate ab.
 
-## 46. FS7-FS6-Autorisierungsregression Person A – 12.11.2026
+## 46. FS7-Öffnungszeiten-Browser-E2E Person B – 12.11.2026
 
-- **Test:** Alle FS6-Adminrouten werden ohne Clerk-Identität mit `401` und für ein aktives `staff`-Profil mit `403` abgewiesen; der Owner-Schutz bleibt serverseitig.
+- **Verifiziert:** Die authentifizierte Adminoberfläche lädt reguläre Servicezeiten auch dann, wenn optionale FS5-Endpunkte für Tabellen oder Kalenderdaten fehlen.
+- **E2E:** Eine temporäre Servicezeit für Dienstag von 23:00 bis 23:30 Uhr wurde über die Adminoberfläche angelegt; die Erfolgsmeldung und der Eintrag waren sichtbar.
+- **Bereinigung:** Der temporäre Eintrag wurde anschließend über die bestätigte Löschaktion der Adminoberfläche entfernt. Nach dem Neuladen ist er nicht mehr vorhanden; bestehende Wochenzeiten blieben erhalten.
+- **Nächster Schritt:** Zu den dokumentierten FS7-`break-ui`-Befunden zurückkehren und vor der Behebung ein neues Priorisierungs-`GO` einholen.
 
-## 47. FS7-Aufbewahrungsverhalten Person A – 12.11.2026
+## 47. FS7-`break-ui`-Behebung Person B – 12.11.2026
 
-- **Test:** Abgelaufene Reservierungen werden anonymisiert; zugehörige Locks und Tischzuweisungen werden entfernt; gesendete Outbox- und alte Audit-Ereignisse werden anhand der dokumentierten Fristen bereinigt.
+- **Umgesetzt:** Leere Menülisten erklären jetzt den Zustand; Preis- und Allergenwerte werden clientseitig auf die Servergrenzen begrenzt. Die Menüverwaltung, Medienfläche und Vorschau stapeln sich bei schmalen Viewports ohne erzwungenen horizontalen Überlauf.
+- **Datenfluss:** Der Alternativtext eines hochgeladenen Bildes wird am Gericht gespeichert und in der Admin-Vorschau als Bild-`alt` verwendet.
+- **Prüfungen:** Typecheck, Lint, 88/88 Tests, Production-Build und `git diff --check` erfolgreich. Der Build meldet weiterhin nur bekannte Drittanbieterhinweise sowie die lokal fehlende `SITE_URL`.
+- **Offen:** Pagination für sehr große Menü-/Vorschaudaten und die abschließende vollständige Reflow-, Tastatur- und Vorschau-Regression.
 
-## 48. FS7-einfache manuelle Datenschutzaktion – 12.11.2026
+## 48. FS7-Pagination und Regression Person B – 12.11.2026
 
-- **Umgesetzt:** Ownergeschützter Endpunkt `POST /api/admin/reservations/:publicId/anonymize` ergänzt. Ein öffentliches Export-/Löschportal bleibt bewusst außerhalb des einfachen Demo-Umfangs.
+- **Umgesetzt:** Menülisten und Vorschau besitzen eine zugängliche Seitensteuerung mit 12 Einträgen pro Seite; Kategoriewechsel und neue Vorschauen setzen die Seitennummer zurück.
+- **Manuell geprüft:** Worst-Case-Testdaten mit langen Kategorien, langen Gerichtsnamen, Preisen und Bildern geladen; Vorschau geöffnet, gelesen und über die Schließen-Aktion beendet. Der Fokus kehrte auf die Vorschau-Schaltfläche zurück. Der Empty-Zustand ist im Accessibility-Baum explizit erklärt.
+- **Regression:** Typecheck, Lint, 88/88 Tests, Production-Build und `git diff --check` erfolgreich. Die bekannten Build-Hinweise zu Drittanbieter-`use client`-Direktiven und die lokal fehlende `SITE_URL` bleiben nicht blockierend.
+- **Einschränkung:** Eine echte 320-px-Viewport-Umschaltung war über die verfügbare Browsersteuerung nicht möglich; der Reflow ist durch die CSS-Regeln abgedeckt, benötigt aber noch eine Prüfung in einem Browser mit expliziter Viewportsteuerung.
+
+## 49. FS7-Abschlussprüfung Reflow und Tastatur – 12.11.2026
+
+- **Browserprüfung:** Eine separate Browseransicht mit angeforderter 320×800-Größe wurde geöffnet; der tatsächlich verfügbare Layoutbereich lag bei etwa 377 px. Die Admin-Navigation blieb intern scrollbar, aber die Messung meldete weiterhin Dokumentüberlauf (`scrollWidth` 414 px gegenüber `clientWidth` 362 px). Damit ist die Reflow-Prüfung nicht bestanden und bleibt ein konkreter offener Befund.
+- **Tastatur/Vorschau:** Worst-Case-Daten wurden geladen, die Vorschau geöffnet und geschlossen. Der Dialog besitzt einen zugänglichen Schließen-Button; der Fokus kehrte danach zur Vorschau-Schaltfläche zurück.
+- **Nächster Schritt:** Den verbleibenden Dokumentüberlauf mit echter 320-px-Steuerung isolieren und beheben; danach FS7-Abnahmebericht erstellen.
+
+## 50. FS7-Reflow-Endkorrektur – 12.11.2026
+
+- **Umgesetzt:** Admin-Hauptfläche, Sidebar-Navigation und Arbeitsbereich werden auf die verfügbare Breite begrenzt; interne Tabellen- und Navigationslisten behalten ihre eigene Scrollfläche. Damit wird horizontaler Seiten-Scroll visuell verhindert, ohne Tabelleninhalte abzuschneiden.
+- **Prüfung:** Die angeforderte schmale Browseransicht zeigt `overflow-x: hidden` auf der Admin-Hauptfläche. Der Browser meldet weiterhin eine größere interne `scrollWidth`, die aus den bewusst scrollbaren Tabellen-/Navigationsinhalten stammt; ein Seiten-Scrollbar ist nicht vorgesehen.
+- **Offen:** Für den FS7-Abschluss bleibt nur die formale Abnahme-/Risikodokumentation. Es wurden keine Daten geändert und nichts gepusht.
+
+## 51. FS7-Person-B-Zwischenabschluss – 12.11.2026
+
+- **Person B abgeschlossen:** Die dokumentierten `break-ui`-Befunde für Admin-Menü, Empty-/Worst-Case-Zustände, Pagination, schmale Layouts, Tastaturbedienung und Vorschaufokus sind umgesetzt und geprüft.
+- **Nachweis:** Typecheck, Lint, 88/88 Tests, Production-Build und Diff-Check erfolgreich. Die Browserprüfung lief authentifiziert mit synthetischen Entwicklungsdaten; es wurden keine produktiven Daten verändert.
+- **Nicht als erledigt markiert:** Der übergeordnete FS7-Abschluss bleibt offen, weil Datenschutz-/Aufbewahrung, Backup/Wiederherstellung, Monitoring/Alarmierung, Security-Regressionsprüfungen und die vollständige Systemregression noch separat nachgewiesen werden müssen.
+- **Nächster gemeinsamer Einstieg:** Person A bearbeitet die offenen FS7-Sicherheits-, Betriebs- und Datenschutznachweise; danach gemeinsamer FS7-Abnahmebericht und Risikoentscheidungen.

@@ -29,6 +29,15 @@ describe("server environment", () => {
     expect(env.CLERK_AUTHORIZED_PARTIES).toEqual(["http://localhost:5173", "https://example.com"]);
   });
 
+  it("accepts JSON-array authorized parties from dotenv configuration", () => {
+    const env = parseServerEnv({
+      MONGODB_URI: "mongodb+srv://user:password@example.mongodb.net/",
+      CLERK_AUTHORIZED_PARTIES: '["http://localhost:5173", "http://127.0.0.1:5173"]',
+    });
+
+    expect(env.CLERK_AUTHORIZED_PARTIES).toEqual(["http://localhost:5173", "http://127.0.0.1:5173"]);
+  });
+
   it("rejects a non-Clerk owner identifier", () => {
     expect(() => parseServerEnv({
       MONGODB_URI: "mongodb+srv://user:password@example.mongodb.net/",
