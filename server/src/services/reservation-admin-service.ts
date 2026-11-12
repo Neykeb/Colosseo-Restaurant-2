@@ -54,6 +54,22 @@ export class ReservationAdminService {
     return AuditEventModel.find({ target: publicId, action: { $regex: /^reservation\./ } }).sort({ createdAt: -1 }).lean().exec();
   }
 
+  async listServicePeriods() {
+    return ServicePeriodModel.find().sort({ weekday: 1, startTime: 1, key: 1 }).select({ _id: 0, key: 1, weekday: 1, startTime: 1, endTime: 1, active: 1 }).lean().exec();
+  }
+
+  async saveServicePeriod(input: { key: string; weekday: number; startTime: string; endTime: string; active: boolean }, actorId: string) {
+    const period = await ServicePeriodModel.findOneAndUpdate({ key: input.key }, { $set: input }, { upsert: true, returnDocument: "after", runValidators: true }).select({ _id: 0, key: 1, weekday: 1, startTime: 1, endTime: 1, active: 1 }).lean().exec();
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "service_period.saved", target: input.key, metadata: { weekday: input.weekday, active: input.active } });
+    return period;
+  }
+
+  async deleteServicePeriod(key: string, actorId: string) {
+    const period = await ServicePeriodModel.findOneAndDelete({ key }).select({ _id: 0, key: 1, weekday: 1, startTime: 1, endTime: 1, active: 1 }).lean().exec();
+    if (period) await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "service_period.deleted", target: key, metadata: {} });
+    return period;
+  }
+
   async listSpecialDays() { return SpecialDayModel.find().sort({ date: 1 }).lean().exec(); }
 
   async saveSpecialDay(input: { date: string; label: string; closed: boolean; opens?: string; closes?: string }, actorId: string) {

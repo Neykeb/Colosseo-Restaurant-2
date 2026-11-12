@@ -286,6 +286,13 @@
 
 .admin-operation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: 2rem; background: rgb(33 29 24 / 16%); }
 .admin-operation-card { min-width: 0; padding: clamp(1.25rem, 3vw, 2.25rem); background: #f8f2e8; }
+.admin-operation-card-wide { grid-column: 1 / -1; }
+.admin-period-form { display: grid; grid-template-columns: minmax(11rem, 1fr) minmax(16rem, 1.5fr) minmax(12rem, 1fr); align-items: end; gap: 0.75rem; }
+.admin-period-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; grid-column: 1 / -1; }
+.admin-period-actions .admin-save-button { margin: 0; }
+.admin-period-actions .admin-text-button { display: inline-flex; align-items: center; gap: 0.4rem; }
+.admin-period-actions svg { width: 1rem; height: 1rem; }
+.admin-period-list .admin-period-edit { display: grid; width: 100%; height: auto; min-height: 4.5rem; place-items: initial; border: 0; padding: 0.75rem 0; color: #211d18; text-align: left; }
 .admin-operation-title { display: flex; align-items: flex-start; gap: 1rem; }
 .admin-operation-title > svg { width: 1.4rem; height: 1.4rem; flex: 0 0 auto; color: #8e4036; }
 .admin-operation-title h3 { margin: 0; font-family: "Instrument Serif", Georgia, serif; font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: 400; line-height: 1; }
@@ -344,6 +351,7 @@
 .admin-note-field textarea { min-height: 9rem; resize: vertical; line-height: 1.5; }
 
 .admin-menu { margin-top: clamp(4rem, 8vw, 8rem); scroll-margin-top: 2rem; }
+.admin-fixture-note { margin: 1rem 0 0; border-left: 3px solid #8e4036; padding: 0.55rem 0.75rem; color: #5d554c; font-size: 0.8rem; }
 .admin-preview-button,
 .admin-new-item,
 .admin-category-form button,
@@ -579,6 +587,9 @@
   .admin-filterbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-filterbar label:first-child { grid-column: 1 / -1; }
   .admin-operation-grid { grid-template-columns: 1fr; }
+  .admin-operation-card-wide { grid-column: auto; }
+  .admin-period-form { grid-template-columns: 1fr; }
+  .admin-period-actions { grid-column: auto; }
   .admin-inquiry-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-inquiry-filters label:first-child { grid-column: 1 / -1; }
   .admin-menu-layout { grid-template-columns: 1fr; }
