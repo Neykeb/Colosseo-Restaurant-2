@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import mongoose from "mongoose";
 import { canTransitionEventInquiryStatus, canTransitionReservationStatus, lockSlotStarts, parseDate, timeToMinutes, type EventInquiryStatus, type ReservationRules, type ReservationStatus } from "../domain/reservation-domain";
-import { AuditEventModel, EventInquiryModel, MenuCategoryModel, MenuItemModel, ReservationBlockModel, ReservationLockModel, ReservationModel, ServicePeriodModel, SettingModel, SpecialDayModel, TableModel } from "../models/core";
+import { AuditEventModel, EventInquiryModel, MenuCategoryModel, MenuItemModel, ReservationBlockModel, ReservationLockModel, ReservationModel, ServicePeriodModel, SettingModel, SpecialDayModel, TableAssignmentModel, TableModel } from "../models/core";
 import { ReservationLockConflictError } from "../repositories/reservation-repository";
 
 export interface ReservationBlockInput {
@@ -40,6 +40,19 @@ export class ReservationAdminService {
     return ReservationModel.findOne({ publicId }).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec();
   }
 
+  async anonymizeReservation(publicId: string, actorId: string) {
+    const reservation = await ReservationModel.findOneAndUpdate(
+      { publicId, "guest.name": { $ne: "ANONYMIZED" } },
+      { $set: { guest: { name: "ANONYMIZED" } }, $unset: { internalNote: "", cancellationTokenHash: "" } },
+      { returnDocument: "after" },
+    ).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec();
+    if (!reservation) return null;
+    await ReservationLockModel.deleteMany({ reservationPublicId: publicId });
+    await TableAssignmentModel.deleteMany({ reservationPublicId: publicId });
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation.anonymized", target: publicId, metadata: {} });
+    return reservation;
+  }
+
   async updateStatus(publicId: string, status: ReservationStatus, actorId: string) {
     const current = await ReservationModel.findOne({ publicId }).select({ status: 1 }).lean().exec();
     if (!current) return null;
@@ -54,19 +67,15 @@ export class ReservationAdminService {
     return AuditEventModel.find({ target: publicId, action: { $regex: /^reservation\./ } }).sort({ createdAt: -1 }).lean().exec();
   }
 
-  async listServicePeriods() {
-    return ServicePeriodModel.find().sort({ weekday: 1, startTime: 1, key: 1 }).select({ _id: 0, key: 1, weekday: 1, startTime: 1, endTime: 1, active: 1 }).lean().exec();
-  }
-
+  async listServicePeriods() { return ServicePeriodModel.find().sort({ weekday: 1, startTime: 1, key: 1 }).select({ _id: 0, key: 1, weekday: 1, startTime: 1, endTime: 1, active: 1 }).lean().exec(); }
   async saveServicePeriod(input: { key: string; weekday: number; startTime: string; endTime: string; active: boolean }, actorId: string) {
-    const period = await ServicePeriodModel.findOneAndUpdate({ key: input.key }, { $set: input }, { upsert: true, returnDocument: "after", runValidators: true }).select({ _id: 0, key: 1, weekday: 1, startTime: 1, endTime: 1, active: 1 }).lean().exec();
-    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "service_period.saved", target: input.key, metadata: { weekday: input.weekday, active: input.active } });
+    const period = await ServicePeriodModel.findOneAndUpdate({ key: input.key }, { $set: input }, { upsert: true, returnDocument: "after", runValidators: true }).lean().exec();
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "opening_hour.saved", target: input.key, metadata: { weekday: input.weekday, active: input.active } });
     return period;
   }
-
   async deleteServicePeriod(key: string, actorId: string) {
-    const period = await ServicePeriodModel.findOneAndDelete({ key }).select({ _id: 0, key: 1, weekday: 1, startTime: 1, endTime: 1, active: 1 }).lean().exec();
-    if (period) await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "service_period.deleted", target: key, metadata: {} });
+    const period = await ServicePeriodModel.findOneAndDelete({ key }).lean().exec();
+    if (period) await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "opening_hour.deleted", target: key, metadata: {} });
     return period;
   }
 

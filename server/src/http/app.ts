@@ -269,6 +269,13 @@ export function createApp(options: CreateAppOptions = {}) {
       response.json({ reservation });
     } catch (error) { next(error); }
   });
+  app.post("/api/admin/reservations/:publicId/anonymize", ...adminGuard, async (request, response, next) => {
+    try {
+      const reservation = await reservationAdmin.anonymizeReservation(request.params.publicId as string, response.locals.adminProfile.clerkUserId);
+      if (!reservation) { response.status(404).json({ error: { code: "RESERVATION_NOT_FOUND_OR_ANONYMIZED", message: "The reservation was not found or is already anonymized.", correlationId: response.locals.correlationId } }); return; }
+      response.json({ reservation });
+    } catch (error) { next(error); }
+  });
 
   app.get("/api/admin/reservations/:publicId/history", ...adminGuard, async (request, response, next) => {
     try { response.json({ events: await reservationAdmin.reservationHistory(request.params.publicId as string) }); } catch (error) { next(error); }
@@ -305,7 +312,6 @@ export function createApp(options: CreateAppOptions = {}) {
       response.status(204).end();
     } catch (error) { next(error); }
   });
-
   app.get("/api/admin/event-inquiries", ...adminGuard, async (_request, response, next) => { try { response.json({ inquiries: await reservationAdmin.listEventInquiries() }); } catch (error) { next(error); } });
   app.post("/api/admin/event-inquiries", ...adminGuard, async (request, response, next) => {
     const input = eventInquirySchema.safeParse(request.body);
@@ -347,7 +353,9 @@ export function createApp(options: CreateAppOptions = {}) {
     } catch (error) { next(error); }
   });
   app.post("/api/admin/media", ...adminGuard, async (request, response, next) => {
-    try { response.status(201).json({ media: await storeMedia(request.body) }); } catch (error) { next(error); }
+    const input = mediaUploadSchema.safeParse(request.body);
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.status(201).json({ media: await storeMedia(input.data) }); } catch (error) { next(error); }
   });
   app.delete("/api/admin/media/:id", ...adminGuard, async (request, response, next) => {
     try {

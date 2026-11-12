@@ -201,7 +201,7 @@ describe("Express platform foundation", () => {
     const baseUrl = await listen(createApp({
       getAuthenticatedUserId: () => owner.clerkUserId,
       findAdminProfile: async () => owner,
-      reservationAdminService: reservationAdminService as never,
+      reservationAdminService,
     }));
     const created = await fetch(`${baseUrl}/api/admin/reservation-blocks`, {
       method: "POST",
@@ -212,46 +212,6 @@ describe("Express platform foundation", () => {
     await expect(created.json()).resolves.toEqual({ block: { blockId: "BLK-1234567890", date: "2026-11-10", startTime: "17:00", endTime: "19:00", scope: "restaurant", scopeKey: null, tableCount: 8 } });
     const deleted = await fetch(`${baseUrl}/api/admin/reservation-blocks/BLK-1234567890`, { method: "DELETE" });
     expect(deleted.status).toBe(204);
-  });
-
-  it("protects and validates regular opening-hours administration", async () => {
-    const deniedBaseUrl = await listen(createApp());
-    expect((await fetch(`${deniedBaseUrl}/api/admin/opening-hours`)).status).toBe(503);
-
-    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
-    const regular = [{ key: "tuesday-dinner", weekday: 2, startTime: "17:00", endTime: "21:00", active: true }];
-    const reservationAdminService = {
-      listServicePeriods: async () => regular,
-      saveServicePeriod: async (input: (typeof regular)[number]) => input,
-      deleteServicePeriod: async (key: string) => regular.find((period) => period.key === key) ?? null,
-    };
-    const baseUrl = await listen(createApp({
-      getAuthenticatedUserId: () => owner.clerkUserId,
-      findAdminProfile: async () => owner,
-      reservationAdminService: reservationAdminService as never,
-    }));
-
-    const listed = await fetch(`${baseUrl}/api/admin/opening-hours`);
-    expect(listed.status).toBe(200);
-    await expect(listed.json()).resolves.toEqual({ regular });
-
-    const invalid = await fetch(`${baseUrl}/api/admin/opening-hours/tuesday-dinner`, {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ weekday: 2, startTime: "21:00", endTime: "17:00", active: true }),
-    });
-    expect(invalid.status).toBe(400);
-
-    const saved = await fetch(`${baseUrl}/api/admin/opening-hours/tuesday-dinner`, {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ weekday: 2, startTime: "17:00", endTime: "21:00", active: true }),
-    });
-    expect(saved.status).toBe(200);
-    await expect(saved.json()).resolves.toEqual({ period: regular[0] });
-
-    expect((await fetch(`${baseUrl}/api/admin/opening-hours/tuesday-dinner`, { method: "DELETE" })).status).toBe(204);
-    expect((await fetch(`${baseUrl}/api/admin/opening-hours/missing`, { method: "DELETE" })).status).toBe(404);
   });
 
   it("validates and protects event inquiry administration", async () => {
@@ -309,6 +269,61 @@ describe("Express platform foundation", () => {
 
     const invalidPath = await fetch(`${baseUrl}/api/admin/menu/items/pasta-02`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ categorySlug: "main", name: "Pasta", priceCents: 1490, allergens: [], imageUrl: "/uploads/pasta.png", sortOrder: 1, active: true, published: false }) });
     expect(invalidPath.status).toBe(400);
+  });
+
+  it("rejects malformed media upload payloads at the API boundary", async () => {
+    vi.clearAllMocks();
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const baseUrl = await listen(createApp({ getAuthenticatedUserId: () => owner.clerkUserId, findAdminProfile: async () => owner }));
+    const response = await fetch(`${baseUrl}/api/admin/media`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fileName: "image.png", contentType: "image/png", altText: "Bild", dataBase64: "not base64!" }) });
+    expect(response.status).toBe(400);
+    expect(vi.mocked(storeMedia)).not.toHaveBeenCalled();
+  });
+
+  it("protects every FS6 administration endpoint with owner authorization", async () => {
+    const unauthenticated = await listen(createApp({ getAuthenticatedUserId: () => null, findAdminProfile: async () => null }));
+    for (const route of ["/api/admin/menu/categories", "/api/admin/menu/items", "/api/admin/menu/preview", "/api/admin/opening-hours"]) {
+      const response = await fetch(`${unauthenticated}${route}`);
+      expect(response.status, route).toBe(401);
+    }
+    expect((await fetch(`${unauthenticated}/api/admin/media/507f1f77bcf86cd799439011`, { method: "DELETE" })).status).toBe(401);
+
+    const staff = { clerkUserId: "user_staff", role: "staff" as const, active: true, displayName: "Staff" };
+    const forbidden = await listen(createApp({ getAuthenticatedUserId: () => staff.clerkUserId, findAdminProfile: async () => staff }));
+    for (const route of ["/api/admin/menu/categories", "/api/admin/menu/items", "/api/admin/menu/preview", "/api/admin/opening-hours"]) {
+      const response = await fetch(`${forbidden}${route}`);
+      expect(response.status, route).toBe(403);
+    }
+    expect((await fetch(`${forbidden}/api/admin/media/507f1f77bcf86cd799439011`, { method: "DELETE" })).status).toBe(403);
+  });
+
+  it("allows an owner to manually anonymize a reservation", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const anonymized = { publicId: "COL-1234567890", guest: { name: "ANONYMIZED" }, status: "completed" };
+    const reservationAdminService = { anonymizeReservation: async () => anonymized };
+    const baseUrl = await listen(createApp({ getAuthenticatedUserId: () => owner.clerkUserId, findAdminProfile: async () => owner, reservationAdminService: reservationAdminService as never }));
+    const response = await fetch(`${baseUrl}/api/admin/reservations/COL-1234567890/anonymize`, { method: "POST" });
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ reservation: anonymized });
+  });
+  it("protects and validates regular opening-hours administration", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const saved = { key: "fri-evening", weekday: 5, startTime: "17:00", endTime: "21:00", active: true };
+    const reservationAdminService = {
+      listServicePeriods: async () => [saved],
+      saveServicePeriod: async () => saved,
+      deleteServicePeriod: async (key: string) => key === saved.key ? saved : null,
+    };
+    const baseUrl = await listen(createApp({ getAuthenticatedUserId: () => owner.clerkUserId, findAdminProfile: async () => owner, reservationAdminService: reservationAdminService as never }));
+    const listed = await fetch(`${baseUrl}/api/admin/opening-hours`);
+    expect(listed.status).toBe(200);
+    await expect(listed.json()).resolves.toEqual({ regular: [saved] });
+    const invalid = await fetch(`${baseUrl}/api/admin/opening-hours/fri-evening`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ weekday: 5, startTime: "21:00", endTime: "17:00", active: true }) });
+    expect(invalid.status).toBe(400);
+    const updated = await fetch(`${baseUrl}/api/admin/opening-hours/fri-evening`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(saved) });
+    expect(updated.status).toBe(200);
+    const deleted = await fetch(`${baseUrl}/api/admin/opening-hours/fri-evening`, { method: "DELETE" });
+    expect(deleted.status).toBe(204);
   });
 
   it("rejects a request without an authenticated Clerk user", async () => {

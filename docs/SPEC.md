@@ -572,6 +572,7 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 - `/api/admin/menu/categories`, `/api/admin/menu/items`, `/api/admin/menu/preview` und `/api/admin/menu/items/:itemId/publication` – ownergeschützte Kategorien, Gerichte, Vorschau und explizites Publizieren.
 - `/api/admin/media` – ownergeschützter JSON-Upload und Löschung über MongoDB GridFS; JPEG/PNG/WebP, maximal 5 MB, Alternativtext verpflichtend, Binärsignatur serverseitig geprüft.
 - Menübilder akzeptieren als `imageUrl` nur `/api/public/media/<24-stellige ObjectId>` oder absolute `https://`-URLs; beliebige relative Pfade und nicht-HTTPS-URLs sind ungültig.
+- `/api/admin/opening-hours` – ownergeschützte Pflege regulärer wöchentlicher Servicezeiten; Zeitbereiche müssen serverseitig gültig und aufsteigend sein.
 - `/api/admin/opening-hours` – reguläre und datierte Abweichungen.
 - `/api/admin/inquiries` – Eingang, Status und interne Bearbeitung.
 
