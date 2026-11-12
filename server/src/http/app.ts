@@ -74,7 +74,7 @@ const menuImageUrlSchema = z.string().trim().max(2_000).refine((value) => {
     return false;
   }
 }, "Image URL must be an internal media URL or an absolute HTTPS URL.");
-const menuItemSchema = z.object({ itemId: z.string().trim().min(1).max(100), categorySlug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), description: z.string().trim().max(2_000).optional(), priceCents: z.number().int().min(0).max(100_000), allergens: z.array(z.string().trim().min(1).max(80)).max(50), imageUrl: menuImageUrlSchema.optional(), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean(), published: z.boolean() });
+const menuItemSchema = z.object({ itemId: z.string().trim().min(1).max(100), categorySlug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), description: z.string().trim().max(2_000).optional(), priceCents: z.number().int().min(0).max(100_000), allergens: z.array(z.string().trim().min(1).max(80)).max(50), imageUrl: menuImageUrlSchema.optional(), imageAltText: z.string().trim().min(1).max(300).optional(), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean(), published: z.boolean() });
 
 function sendValidationError(response: express.Response, details: unknown): void {
   response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "The request data is invalid.", details, correlationId: response.locals.correlationId } });

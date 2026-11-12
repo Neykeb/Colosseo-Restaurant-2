@@ -18,6 +18,7 @@ export type MenuItem = {
   priceCents: number;
   allergens: string[];
   imageUrl?: string;
+  imageAltText?: string;
   sortOrder: number;
   active: boolean;
   published: boolean;
@@ -33,6 +34,7 @@ const emptyDraft = (categorySlug = ""): ItemDraft => ({
   price: "",
   allergens: "",
   imageUrl: undefined,
+  imageAltText: undefined,
   sortOrder: 0,
   active: true,
   published: false,
@@ -143,6 +145,7 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
   async function saveItem(event?: React.FormEvent) {
     event?.preventDefault();
     const price = Number(draft.price.replace(",", "."));
+    const allergens = draft.allergens.split(",").map((value) => value.trim()).filter(Boolean);
     setFormError("");
     if (!draft.name.trim()) {
       setFormError("Bitte einen Namen für das Gericht eintragen.");
@@ -154,9 +157,13 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
       categoryRef.current?.focus();
       return;
     }
-    if (!Number.isFinite(price) || price < 0) {
-      setFormError("Bitte einen gültigen, nicht negativen Preis eintragen.");
+    if (!Number.isFinite(price) || price < 0 || price > 1000) {
+      setFormError("Bitte einen Preis zwischen 0,00 € und 1.000,00 € eintragen.");
       priceRef.current?.focus();
+      return;
+    }
+    if (allergens.length > 50 || allergens.some((allergen) => allergen.length > 80)) {
+      setFormError("Bitte höchstens 50 Allergene mit jeweils maximal 80 Zeichen eintragen.");
       return;
     }
     const itemId = draft.itemId || `dish_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -167,8 +174,9 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
         name: draft.name.trim(),
         description: draft.description?.trim() || undefined,
         priceCents: Math.round(price * 100),
-        allergens: draft.allergens.split(",").map((value) => value.trim()).filter(Boolean),
+        allergens,
         imageUrl: draft.imageUrl || undefined,
+        imageAltText: draft.imageAltText || undefined,
         sortOrder: draft.sortOrder,
         active: draft.active,
         published: draft.published,
@@ -217,7 +225,7 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
       const response = await authenticatedFetch("/api/admin/media", { method: "POST", body: JSON.stringify({ fileName: selectedFile.name, contentType: selectedFile.type, altText, dataBase64: await fileToBase64(selectedFile) }) });
       if (!response.ok) throw new Error();
       const body = await response.json() as { media: { url: string } };
-      setDraft((current) => ({ ...current, imageUrl: body.media.url }));
+      setDraft((current) => ({ ...current, imageUrl: body.media.url, imageAltText: altText }));
       setSelectedFile(null);
       setImageAltText("");
       setMessage("Bild hochgeladen. Speichere jetzt das Gericht.");
@@ -235,7 +243,7 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
         const response = await authenticatedFetch(`/api/admin/menu/items/${encodeURIComponent(draft.itemId)}`, { method: "PUT", body: JSON.stringify({
           categorySlug: draft.categorySlug, name: draft.name.trim(), description: draft.description?.trim() || undefined,
           priceCents: Math.round(price * 100), allergens: draft.allergens.split(",").map((value) => value.trim()).filter(Boolean),
-          sortOrder: draft.sortOrder, active: draft.active, published: draft.published,
+          sortOrder: draft.sortOrder, active: draft.active, published: draft.published, imageAltText: draft.imageAltText,
         }) });
         if (!response.ok) throw new Error();
       }
@@ -285,7 +293,7 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
             <option value="">Alle Kategorien</option>{categories.map((category) => <option key={category.slug} value={category.slug}>{category.name}{category.active ? "" : " (inaktiv)"}</option>)}
           </select></label>
           <button className="admin-new-item" type="button" disabled={fixtureMode} onClick={() => selectItem()}><Plus aria-hidden="true" /> Neues Gericht</button>
-          <div className="admin-menu-items">{filteredItems.map((item) => <article key={item.itemId} className={draft.itemId === item.itemId ? "is-selected" : ""}>
+          <div className="admin-menu-items">{filteredItems.length === 0 ? <p className="admin-compact-empty">Keine Gerichte in dieser Kategorie. Lege ein Gericht an oder wähle eine andere Kategorie.</p> : filteredItems.map((item) => <article key={item.itemId} className={draft.itemId === item.itemId ? "is-selected" : ""}>
             <button type="button" aria-pressed={draft.itemId === item.itemId} onClick={() => selectItem(item)}><span>{item.name}</span><small>{(item.priceCents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" })} · {item.published ? "veröffentlicht" : "Entwurf"}</small></button>
             <button type="button" aria-label={`${item.published ? "Zurückziehen" : "Veröffentlichen"}: ${item.name}`} disabled={fixtureMode || busy || !item.active} onClick={() => void setPublication(item, !item.published)}>{item.published ? "Zurückziehen" : "Veröffentlichen"}</button>
           </article>)}</div>
@@ -322,7 +330,7 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
       <dialog className="admin-menu-preview" ref={dialogRef} onCancel={(event) => { event.preventDefault(); closePreview(); }} onClose={() => { setPreview(null); lastFocused.current?.focus(); }} aria-labelledby="menu-preview-title">
         <button className="admin-detail-close" type="button" onClick={closePreview} aria-label="Vorschau schließen"><X aria-hidden="true" /></button>
         <p className="admin-kicker">Nicht öffentliche Vorschau</p><h2 id="menu-preview-title">Speisekarte</h2>
-        {preview?.length ? preview.map((category) => <section key={category.slug}><h3>{category.name}</h3>{category.items.length ? category.items.map((item) => <article key={item.itemId}>{item.imageUrl ? <img src={item.imageUrl} alt="" /> : null}<div><h4>{item.name}</h4>{item.description ? <p>{item.description}</p> : null}<small>{item.published ? "Veröffentlicht" : "Entwurf"}</small></div><strong>{(item.priceCents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" })}</strong></article>) : <p>Keine aktiven Gerichte.</p>}</section>) : <p>Keine Vorschauinhalte vorhanden.</p>}
+        {preview?.length ? preview.map((category) => <section key={category.slug}><h3>{category.name}</h3>{category.items.length ? category.items.map((item) => <article key={item.itemId}>{item.imageUrl ? <img src={item.imageUrl} alt={item.imageAltText || "Gerichtbild ohne Alternativtext"} /> : null}<div><h4>{item.name}</h4>{item.description ? <p>{item.description}</p> : null}<small>{item.published ? "Veröffentlicht" : "Entwurf"}</small></div><strong>{(item.priceCents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" })}</strong></article>) : <p>Keine aktiven Gerichte.</p>}</section>) : <p>Keine Vorschauinhalte vorhanden.</p>}
       </dialog>
     </section>
   );

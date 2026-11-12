@@ -437,3 +437,10 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **E2E:** Eine temporäre Servicezeit für Dienstag von 23:00 bis 23:30 Uhr wurde über die Adminoberfläche angelegt; die Erfolgsmeldung und der Eintrag waren sichtbar.
 - **Bereinigung:** Der temporäre Eintrag wurde anschließend über die bestätigte Löschaktion der Adminoberfläche entfernt. Nach dem Neuladen ist er nicht mehr vorhanden; bestehende Wochenzeiten blieben erhalten.
 - **Nächster Schritt:** Zu den dokumentierten FS7-`break-ui`-Befunden zurückkehren und vor der Behebung ein neues Priorisierungs-`GO` einholen.
+
+## 47. FS7-`break-ui`-Behebung Person B – 12.11.2026
+
+- **Umgesetzt:** Leere Menülisten erklären jetzt den Zustand; Preis- und Allergenwerte werden clientseitig auf die Servergrenzen begrenzt. Die Menüverwaltung, Medienfläche und Vorschau stapeln sich bei schmalen Viewports ohne erzwungenen horizontalen Überlauf.
+- **Datenfluss:** Der Alternativtext eines hochgeladenen Bildes wird am Gericht gespeichert und in der Admin-Vorschau als Bild-`alt` verwendet.
+- **Prüfungen:** Typecheck, Lint, 88/88 Tests, Production-Build und `git diff --check` erfolgreich. Der Build meldet weiterhin nur bekannte Drittanbieterhinweise sowie die lokal fehlende `SITE_URL`.
+- **Offen:** Pagination für sehr große Menü-/Vorschaudaten und die abschließende vollständige Reflow-, Tastatur- und Vorschau-Regression.

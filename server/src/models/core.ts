@@ -75,7 +75,7 @@ const eventInquirySchema = new Schema({ inquiryId: { type: String, required: tru
 eventInquirySchema.index({ status: 1, requestedDate: 1 });
 eventInquirySchema.index({ email: 1 });
 const menuCategorySchema = new Schema({ slug: { type: String, required: true, unique: true }, name: { type: String, required: true }, sortOrder: { type: Number, required: true, min: 0 }, active: { type: Boolean, required: true, default: true } }, { timestamps });
-const menuItemSchema = new Schema({ itemId: { type: String, required: true, unique: true }, categorySlug: { type: String, required: true }, name: { type: String, required: true }, description: String, priceCents: { type: Number, required: true, min: 0 }, allergens: { type: [String], required: true, default: [] }, imageUrl: String, sortOrder: { type: Number, required: true, min: 0 }, active: { type: Boolean, required: true, default: true }, published: { type: Boolean, required: true, default: false } }, { timestamps });
+const menuItemSchema = new Schema({ itemId: { type: String, required: true, unique: true }, categorySlug: { type: String, required: true }, name: { type: String, required: true }, description: String, priceCents: { type: Number, required: true, min: 0 }, allergens: { type: [String], required: true, default: [] }, imageUrl: String, imageAltText: { type: String, trim: true, maxlength: 300 }, sortOrder: { type: Number, required: true, min: 0 }, active: { type: Boolean, required: true, default: true }, published: { type: Boolean, required: true, default: false } }, { timestamps });
 menuItemSchema.index({ categorySlug: 1, active: 1, sortOrder: 1 });
 
 export type Setting = InferSchemaType<typeof settingSchema>;

@@ -613,6 +613,15 @@
   .admin-inquiry-filters,
   .admin-detail-edit-row { grid-template-columns: 1fr; }
   .admin-inquiry-filters label:first-child { grid-column: auto; }
+  .admin-menu-form-grid { grid-template-columns: 1fr; }
+  .admin-menu-items article { grid-template-columns: 1fr; }
+  .admin-menu-items article > button:last-child { border-top: 1px solid rgb(33 29 24 / 14%); border-left: 0; text-align: center; }
+  .admin-media-field { grid-template-columns: 1fr; }
+  .admin-media-field > div:first-child { width: min(10rem, 100%); }
+  .admin-menu-preview article,
+  .admin-menu-preview article:not(:has(img)) { grid-template-columns: 1fr auto; }
+  .admin-menu-preview article img { grid-row: 1 / span 2; }
+  .admin-menu-preview article strong { grid-column: 2; }
   .admin-inquiry-table th:nth-child(2),
   .admin-inquiry-table td:nth-child(2),
   .admin-inquiry-table th:nth-child(4),
