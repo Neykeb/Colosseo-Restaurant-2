@@ -271,6 +271,41 @@ describe("Express platform foundation", () => {
     expect(invalidPath.status).toBe(400);
   });
 
+  it("rejects malformed media upload payloads at the API boundary", async () => {
+    vi.clearAllMocks();
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const baseUrl = await listen(createApp({ getAuthenticatedUserId: () => owner.clerkUserId, findAdminProfile: async () => owner }));
+    const response = await fetch(`${baseUrl}/api/admin/media`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fileName: "image.png", contentType: "image/png", altText: "Bild", dataBase64: "not base64!" }) });
+    expect(response.status).toBe(400);
+    expect(vi.mocked(storeMedia)).not.toHaveBeenCalled();
+  });
+
+  it("protects every FS6 administration endpoint with owner authorization", async () => {
+    const unauthenticated = await listen(createApp({ getAuthenticatedUserId: () => null, findAdminProfile: async () => null }));
+    for (const route of ["/api/admin/menu/categories", "/api/admin/menu/items", "/api/admin/menu/preview", "/api/admin/opening-hours"]) {
+      const response = await fetch(`${unauthenticated}${route}`);
+      expect(response.status, route).toBe(401);
+    }
+    expect((await fetch(`${unauthenticated}/api/admin/media/507f1f77bcf86cd799439011`, { method: "DELETE" })).status).toBe(401);
+
+    const staff = { clerkUserId: "user_staff", role: "staff" as const, active: true, displayName: "Staff" };
+    const forbidden = await listen(createApp({ getAuthenticatedUserId: () => staff.clerkUserId, findAdminProfile: async () => staff }));
+    for (const route of ["/api/admin/menu/categories", "/api/admin/menu/items", "/api/admin/menu/preview", "/api/admin/opening-hours"]) {
+      const response = await fetch(`${forbidden}${route}`);
+      expect(response.status, route).toBe(403);
+    }
+    expect((await fetch(`${forbidden}/api/admin/media/507f1f77bcf86cd799439011`, { method: "DELETE" })).status).toBe(403);
+  });
+
+  it("allows an owner to manually anonymize a reservation", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const anonymized = { publicId: "COL-1234567890", guest: { name: "ANONYMIZED" }, status: "completed" };
+    const reservationAdminService = { anonymizeReservation: async () => anonymized };
+    const baseUrl = await listen(createApp({ getAuthenticatedUserId: () => owner.clerkUserId, findAdminProfile: async () => owner, reservationAdminService: reservationAdminService as never }));
+    const response = await fetch(`${baseUrl}/api/admin/reservations/COL-1234567890/anonymize`, { method: "POST" });
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ reservation: anonymized });
+  });
   it("protects and validates regular opening-hours administration", async () => {
     const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
     const saved = { key: "fri-evening", weekday: 5, startTime: "17:00", endTime: "21:00", active: true };

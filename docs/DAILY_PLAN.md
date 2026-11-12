@@ -404,3 +404,30 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 - **Umgesetzt:** Ownergeschützte Admin-API und Admin-Formular für reguläre wöchentliche Öffnungszeiten ergänzt; Sondertage und Sperrzeiten bleiben separat bestehen.
 - **Validierung:** Wochentag, Schlüssel, Uhrzeiten und aufsteigender Zeitbereich werden serverseitig geprüft; Änderungen werden auditiert.
+## 43. FS7-Start Person A – 12.11.2026
+
+- **Gate:** Der Nutzer erteilt ausdrücklich `GO FS7`.
+- **Person A als nächster Einstieg:** Datenschutz-/Aufbewahrungsbestand, serverseitige Auth-/Autorisierungsgrenzen, Upload-/IDOR-/Log-Leak-Prüfungen und die technische Gesamtrückmeldung gegen die freigegebenen Anforderungen prüfen.
+- **Abgrenzung:** Produktionsbetrieb, echte Geschäftsdaten und nicht spezifizierte Aufbewahrungs- oder Auskunftsregeln bleiben bis zur fachlichen Freigabe offen. Person-B-`break-ui`-Befunde werden separat bearbeitet.
+
+## 44. FS7-Upload-Sicherheitsprüfung Person A – 12.11.2026
+
+- **Umgesetzt:** Der geschützte Medien-Upload validiert Dateiname, erlaubten MIME-Typ, Alternativtext und Base64-Format/-Größe vor dem Serviceaufruf.
+- **Test:** Fehlerhafte Upload-Payloads werden mit `400 VALIDATION_ERROR` abgewiesen; der Medienservice wird dabei nicht aufgerufen.
+
+## 45. FS7-Sicherheits- und Regressionsprüfung Person A – 12.11.2026
+
+- **Prüfungen:** `npm audit --omit=dev` meldet 0 bekannte Schwachstellen; Secret-Tracking bestanden; Typecheck, Lint, 88/88 Tests und Production-Build erfolgreich.
+- **Befund:** Keine neue kritische serverseitige Sicherheitsabweichung im geprüften Umfang. Die offenen FS7-Arbeiten zu Datenschutz-/Auskunftsprozessen, Backup/Wiederherstellung, umfassendem Security-Review und den dokumentierten `break-ui`-Befunden bleiben bestehen.
+
+## 46. FS7-FS6-Autorisierungsregression Person A – 12.11.2026
+
+- **Test:** Alle FS6-Adminrouten werden ohne Clerk-Identität mit `401` und für ein aktives `staff`-Profil mit `403` abgewiesen; der Owner-Schutz bleibt serverseitig.
+
+## 47. FS7-Aufbewahrungsverhalten Person A – 12.11.2026
+
+- **Test:** Abgelaufene Reservierungen werden anonymisiert; zugehörige Locks und Tischzuweisungen werden entfernt; gesendete Outbox- und alte Audit-Ereignisse werden anhand der dokumentierten Fristen bereinigt.
+
+## 48. FS7-einfache manuelle Datenschutzaktion – 12.11.2026
+
+- **Umgesetzt:** Ownergeschützter Endpunkt `POST /api/admin/reservations/:publicId/anonymize` ergänzt. Ein öffentliches Export-/Löschportal bleibt bewusst außerhalb des einfachen Demo-Umfangs.

@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import mongoose from "mongoose";
 import { canTransitionEventInquiryStatus, canTransitionReservationStatus, lockSlotStarts, parseDate, timeToMinutes, type EventInquiryStatus, type ReservationRules, type ReservationStatus } from "../domain/reservation-domain";
-import { AuditEventModel, EventInquiryModel, MenuCategoryModel, MenuItemModel, ReservationBlockModel, ReservationLockModel, ReservationModel, ServicePeriodModel, SettingModel, SpecialDayModel, TableModel } from "../models/core";
+import { AuditEventModel, EventInquiryModel, MenuCategoryModel, MenuItemModel, ReservationBlockModel, ReservationLockModel, ReservationModel, ServicePeriodModel, SettingModel, SpecialDayModel, TableAssignmentModel, TableModel } from "../models/core";
 import { ReservationLockConflictError } from "../repositories/reservation-repository";
 
 export interface ReservationBlockInput {
@@ -38,6 +38,19 @@ export class ReservationAdminService {
 
   async getReservation(publicId: string) {
     return ReservationModel.findOne({ publicId }).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec();
+  }
+
+  async anonymizeReservation(publicId: string, actorId: string) {
+    const reservation = await ReservationModel.findOneAndUpdate(
+      { publicId, "guest.name": { $ne: "ANONYMIZED" } },
+      { $set: { guest: { name: "ANONYMIZED" } }, $unset: { internalNote: "", cancellationTokenHash: "" } },
+      { returnDocument: "after" },
+    ).select({ cancellationTokenHash: 0, idempotencyKey: 0 }).lean().exec();
+    if (!reservation) return null;
+    await ReservationLockModel.deleteMany({ reservationPublicId: publicId });
+    await TableAssignmentModel.deleteMany({ reservationPublicId: publicId });
+    await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "reservation.anonymized", target: publicId, metadata: {} });
+    return reservation;
   }
 
   async updateStatus(publicId: string, status: ReservationStatus, actorId: string) {
