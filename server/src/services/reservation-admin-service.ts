@@ -116,14 +116,14 @@ export class ReservationAdminService {
   async getPublishedMenu() {
     const [categories, items] = await Promise.all([
       MenuCategoryModel.find({ active: true }).sort({ sortOrder: 1, slug: 1 }).select({ _id: 0, slug: 1, name: 1, sortOrder: 1 }).lean().exec(),
-      MenuItemModel.find({ active: true, published: true }).sort({ categorySlug: 1, sortOrder: 1, itemId: 1 }).select({ _id: 0, itemId: 1, categorySlug: 1, name: 1, description: 1, priceCents: 1, allergens: 1, imageUrl: 1, sortOrder: 1 }).lean().exec(),
+      MenuItemModel.find({ active: true, published: true }).sort({ categorySlug: 1, sortOrder: 1, itemId: 1 }).select({ _id: 0, itemId: 1, categorySlug: 1, name: 1, description: 1, priceCents: 1, allergens: 1, imageUrl: 1, imageAltText: 1, sortOrder: 1 }).lean().exec(),
     ]);
     return categories.map((category) => ({ ...category, items: items.filter((item) => item.categorySlug === category.slug) }));
   }
   async getMenuPreview() {
     const [categories, items] = await Promise.all([
       MenuCategoryModel.find({ active: true }).sort({ sortOrder: 1, slug: 1 }).select({ _id: 0, slug: 1, name: 1, sortOrder: 1, active: 1 }).lean().exec(),
-      MenuItemModel.find({ active: true }).sort({ categorySlug: 1, sortOrder: 1, itemId: 1 }).select({ _id: 0, itemId: 1, categorySlug: 1, name: 1, description: 1, priceCents: 1, allergens: 1, imageUrl: 1, sortOrder: 1, active: 1, published: 1 }).lean().exec(),
+      MenuItemModel.find({ active: true }).sort({ categorySlug: 1, sortOrder: 1, itemId: 1 }).select({ _id: 0, itemId: 1, categorySlug: 1, name: 1, description: 1, priceCents: 1, allergens: 1, imageUrl: 1, imageAltText: 1, sortOrder: 1, active: 1, published: 1 }).lean().exec(),
     ]);
     return categories.map((category) => ({ ...category, items: items.filter((item) => item.categorySlug === category.slug) }));
   }
@@ -139,7 +139,7 @@ export class ReservationAdminService {
     await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "menu_category.saved", target: input.slug, metadata: { active: input.active } });
     return category;
   }
-  async saveMenuItem(input: { itemId: string; categorySlug: string; name: string; description?: string; priceCents: number; allergens: string[]; imageUrl?: string; sortOrder: number; active: boolean; published: boolean }, actorId: string) {
+  async saveMenuItem(input: { itemId: string; categorySlug: string; name: string; description?: string; priceCents: number; allergens: string[]; imageUrl?: string; imageAltText?: string; sortOrder: number; active: boolean; published: boolean }, actorId: string) {
     const item = await MenuItemModel.findOneAndUpdate({ itemId: input.itemId }, { $set: input }, { upsert: true, returnDocument: "after", runValidators: true }).lean().exec();
     await AuditEventModel.create({ eventId: `evt_${randomUUID().replaceAll("-", "")}`, actorId, action: "menu_item.saved", target: input.itemId, metadata: { categorySlug: input.categorySlug, active: input.active, published: input.published } });
     return item;

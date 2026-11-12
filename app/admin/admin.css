@@ -1,3 +1,7 @@
+.admin-dashboard {
+  overflow-x: hidden;
+}
+
 .admin-shell,
 .admin-configuration,
 .admin-dashboard {
@@ -18,6 +22,10 @@
   display: grid;
   grid-template-columns: 15rem minmax(0, 1fr);
   min-height: 100svh;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .admin-sidebar {
@@ -30,6 +38,7 @@
   padding: 2rem 1.25rem;
   background: #211d18;
   color: #fffaf2;
+  min-width: 0;
 }
 
 .admin-wordmark {
@@ -51,6 +60,8 @@
   display: grid;
   gap: 0.35rem;
   margin-top: 4rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .admin-sidebar nav a,
@@ -72,6 +83,9 @@
 
 .admin-workspace {
   width: min(100%, 92rem);
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   margin: 0 auto;
   padding: clamp(1.5rem, 4vw, 4.5rem);
 }
@@ -293,6 +307,7 @@
 .admin-period-actions .admin-text-button { display: inline-flex; align-items: center; gap: 0.4rem; }
 .admin-period-actions svg { width: 1rem; height: 1rem; }
 .admin-period-list .admin-period-edit { display: grid; width: 100%; height: auto; min-height: 4.5rem; place-items: initial; border: 0; padding: 0.75rem 0; color: #211d18; text-align: left; }
+.admin-period-list > div { min-width: 0; }
 .admin-operation-title { display: flex; align-items: flex-start; gap: 1rem; }
 .admin-operation-title > svg { width: 1.4rem; height: 1.4rem; flex: 0 0 auto; color: #8e4036; }
 .admin-operation-title h3 { margin: 0; font-family: "Instrument Serif", Georgia, serif; font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: 400; line-height: 1; }
@@ -572,8 +587,8 @@
   .admin-access { min-height: 66svh; }
   .admin-copy h1 { font-size: clamp(3rem, 15vw, 5.5rem); }
   .admin-dashboard { grid-template-columns: 1fr; }
-  .admin-sidebar { position: static; height: auto; padding: 1.15rem; }
-  .admin-sidebar nav { display: flex; overflow-x: auto; margin-top: 1.5rem; }
+  .admin-sidebar { position: static; height: auto; padding: 1.15rem; overflow: hidden; }
+  .admin-sidebar nav { display: flex; width: 100%; overflow-x: auto; margin-top: 1.5rem; }
   .admin-sidebar nav a { flex: 0 0 auto; }
   .admin-site-link { position: absolute; top: 1rem; right: 1rem; min-height: 2.75rem; border: 0; padding-inline: 0.5rem; }
   .admin-workspace { padding: 1.25rem; }
@@ -613,6 +628,17 @@
   .admin-inquiry-filters,
   .admin-detail-edit-row { grid-template-columns: 1fr; }
   .admin-inquiry-filters label:first-child { grid-column: auto; }
+  .admin-menu-form-grid { grid-template-columns: 1fr; }
+  .admin-menu-items article { grid-template-columns: 1fr; }
+  .admin-menu-items article > button:last-child { border-top: 1px solid rgb(33 29 24 / 14%); border-left: 0; text-align: center; }
+  .admin-media-field { grid-template-columns: 1fr; }
+  .admin-media-field > div:first-child { width: min(10rem, 100%); }
+  .admin-period-list > div { flex-wrap: wrap; }
+  .admin-period-list .admin-period-edit { width: min(calc(100% - 3.5rem), 100%); overflow-wrap: anywhere; }
+  .admin-menu-preview article,
+  .admin-menu-preview article:not(:has(img)) { grid-template-columns: 1fr auto; }
+  .admin-menu-preview article img { grid-row: 1 / span 2; }
+  .admin-menu-preview article strong { grid-column: 2; }
   .admin-inquiry-table th:nth-child(2),
   .admin-inquiry-table td:nth-child(2),
   .admin-inquiry-table th:nth-child(4),
