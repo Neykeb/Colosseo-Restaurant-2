@@ -283,7 +283,7 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [-] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen. API und UI sind vorhanden; echte integrierte Browser- und Fehlerfallprüfung bleibt offen.
 - [-] Tastatur, Fokus, Reduced Motion, 320-px-Reflow und 200-%-Zoom prüfen. Person Bs statische Oberfläche erfüllt Fokusführung, Fokusrückgabe, schmale Stapelung und Motion-Fallback; authentifizierte E2E-Prüfung steht noch aus.
 - [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
-- [ ] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen.
+- [-] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen. Der automatisierte Upload-zu-Gericht-Vertrag einschließlich Veröffentlichung und Ablehnung beliebiger relativer Pfade sowie Typecheck, OXLint, 86/86 Tests und Production-Build sind erfolgreich. Der authentifizierte Browser-E2E wartet auf die Nutzeranmeldung.
 - [ ] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentieren; auf GO für `FS7` warten.
 
 ### FS7 – Datenschutz, Sicherheit, Betrieb und vollständige QA

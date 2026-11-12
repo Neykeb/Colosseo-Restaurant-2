@@ -404,4 +404,6 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 ## 42. FS6-URL-Vertrag und Medienfluss – 12.11.2026
 
 - **Integrationstest:** Upload → Gericht speichern → Gericht veröffentlichen einschließlich Ablehnung eines beliebigen relativen Pfads ist automatisiert abgesichert.
-- **Prüfungen Person A:** Typecheck, Lint und 86/86 Tests erfolgreich. Die nachfolgende Person-B-Regression prüft den zusammengeführten Stand erneut.
+- **Prüfungen Person A:** Typecheck, Lint und 86/86 Tests erfolgreich.
+- **Person-B-Regression:** Der zusammengeführte Stand besteht erneut Typecheck, OXLint, 86/86 Tests, Production-Build und `git diff --check`. Der lokale Express-Server startet auf Port `3000`; die Adminoberfläche erreicht die Google-Anmeldung.
+- **Manueller Browser-E2E:** Der authentifizierte Upload-, Speicher-, Vorschau-, Veröffentlichungs- und Löschfluss wartet ausschließlich auf die Nutzeranmeldung im geöffneten Clerk-/Google-Dialog. Er wird bis dahin nicht als manuell bestanden markiert.
