@@ -404,7 +404,6 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 - **Umgesetzt:** Ownergeschützte Admin-API und Admin-Formular für reguläre wöchentliche Öffnungszeiten ergänzt; Sondertage und Sperrzeiten bleiben separat bestehen.
 - **Validierung:** Wochentag, Schlüssel, Uhrzeiten und aufsteigender Zeitbereich werden serverseitig geprüft; Änderungen werden auditiert.
-
 ## 43. FS7-Start Person A – 12.11.2026
 
 - **Gate:** Der Nutzer erteilt ausdrücklich `GO FS7`.

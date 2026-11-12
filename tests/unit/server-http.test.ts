@@ -306,7 +306,6 @@ describe("Express platform foundation", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ reservation: anonymized });
   });
-
   it("protects and validates regular opening-hours administration", async () => {
     const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
     const saved = { key: "fri-evening", weekday: 5, startTime: "17:00", endTime: "21:00", active: true };
