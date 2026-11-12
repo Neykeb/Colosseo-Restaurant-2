@@ -163,6 +163,7 @@ Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 - `imageUrl` bei `PUT /api/admin/menu/items/:itemId` akzeptiert ausschließlich interne Medien-URLs im Format `/api/public/media/<24-stellige ObjectId>` oder absolute `https://`-URLs; beliebige relative Pfade und nicht-HTTPS-URLs werden abgelehnt.
 - `POST /api/admin/media`: JSON mit `fileName`, `contentType`, `altText` und Base64-Daten. Erlaubt sind JPEG, PNG und WebP bis 5 MB; Alternativtext ist 1–300 Zeichen lang. Die Binärsignatur wird zusätzlich zum MIME-Typ geprüft.
 - `DELETE /api/admin/media/:id`: löscht GridFS-Datei und Chunks und erzeugt ein Audit-Ereignis.
+- `GET /api/admin/opening-hours`, `PUT /api/admin/opening-hours/:key`, `DELETE /api/admin/opening-hours/:key`: ownergeschützte Pflege regulärer wöchentlicher Servicezeiten mit Wochentag, Uhrzeitbereich und Aktivstatus.
 
 Fehlercodes der Medien-API sind `MEDIA_TYPE_NOT_ALLOWED`, `MEDIA_ALT_TEXT_INVALID`, `MEDIA_SIZE_INVALID`, `MEDIA_SIGNATURE_INVALID` und `MEDIA_NOT_FOUND`. Alle Admin-Endpunkte sind ownergeschützt; der Client darf diese Prüfung nicht ersetzen.
 

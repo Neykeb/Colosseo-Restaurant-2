@@ -399,3 +399,8 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Umgesetzt:** `imageUrl` akzeptiert jetzt gezielt interne GridFS-URLs (`/api/public/media/<ObjectId>`) sowie absolute HTTPS-URLs; beliebige Pfade und nicht verschlüsselte externe URLs werden abgelehnt.
 - **Integrationstest:** Upload → Gericht speichern → Gericht veröffentlichen einschließlich Ablehnung eines beliebigen relativen Pfads.
 - **Prüfungen:** Typecheck, Lint und 86/86 Tests erfolgreich.
+
+## 42. FS6-reguläre Öffnungszeitenverwaltung – 12.11.2026
+
+- **Umgesetzt:** Ownergeschützte Admin-API und Admin-Formular für reguläre wöchentliche Öffnungszeiten ergänzt; Sondertage und Sperrzeiten bleiben separat bestehen.
+- **Validierung:** Wochentag, Schlüssel, Uhrzeiten und aufsteigender Zeitbereich werden serverseitig geprüft; Änderungen werden auditiert.

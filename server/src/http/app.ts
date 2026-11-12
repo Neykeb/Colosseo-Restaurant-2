@@ -55,6 +55,7 @@ const reservationBlockSchema = z.object({
 const reservationStatusSchema = z.enum(["requested", "pending", "confirmed", "cancelled", "declined", "seated", "completed", "no_show"]);
 const reservationListSchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), status: reservationStatusSchema.optional(), q: z.string().trim().max(120).optional(), page: z.coerce.number().int().min(1).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() });
 const specialDaySchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), label: z.string().trim().min(1).max(160), closed: z.boolean(), opens: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(), closes: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional() });
+const openingHourSchema = z.object({ key: z.string().trim().regex(/^[a-z0-9-]{1,80}$/), weekday: z.number().int().min(0).max(6), startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/), endTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/), active: z.boolean() }).refine(({ startTime, endTime }) => startTime < endTime, { path: ["endTime"], message: "End time must be later than start time." });
 const eventInquirySchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254), phone: z.string().trim().min(5).max(40).optional(), eventType: z.string().trim().min(1).max(80), requestedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), partySize: z.number().int().min(1).max(500), message: z.string().trim().min(1).max(2_000) });
 const eventInquiryStatusSchema = z.enum(["new", "in_review", "accepted", "declined", "closed"]);
 const menuCategorySchema = z.object({ slug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean() });
@@ -281,6 +282,15 @@ export function createApp(options: CreateAppOptions = {}) {
       if (!day) { response.status(404).json({ error: { code: "SPECIAL_DAY_NOT_FOUND", message: "The special day was not found.", correlationId: response.locals.correlationId } }); return; }
       response.status(204).end();
     } catch (error) { next(error); }
+  });
+  app.get("/api/admin/opening-hours", ...adminGuard, async (_request, response, next) => { try { response.json({ openingHours: await reservationAdmin.listOpeningHours() }); } catch (error) { next(error); } });
+  app.put("/api/admin/opening-hours/:key", ...adminGuard, async (request, response, next) => {
+    const input = openingHourSchema.safeParse({ ...request.body, key: request.params.key });
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.json({ openingHour: await reservationAdmin.saveOpeningHour(input.data, response.locals.adminProfile.clerkUserId) }); } catch (error) { next(error); }
+  });
+  app.delete("/api/admin/opening-hours/:key", ...adminGuard, async (request, response, next) => {
+    try { const period = await reservationAdmin.deleteOpeningHour(request.params.key as string, response.locals.adminProfile.clerkUserId); if (!period) { response.status(404).json({ error: { code: "OPENING_HOUR_NOT_FOUND" } }); return; } response.status(204).end(); } catch (error) { next(error); }
   });
 
   app.get("/api/admin/event-inquiries", ...adminGuard, async (_request, response, next) => { try { response.json({ inquiries: await reservationAdmin.listEventInquiries() }); } catch (error) { next(error); } });

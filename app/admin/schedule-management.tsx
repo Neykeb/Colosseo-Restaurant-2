@@ -8,6 +8,7 @@ type SpecialDay = {
   opens?: string;
   closes?: string;
 };
+type OpeningHour = { key: string; weekday: number; startTime: string; endTime: string; active: boolean };
 
 type ReservationBlock = {
   blockId: string;
@@ -56,6 +57,7 @@ function scopeLabel(block: ReservationBlock, tables: RestaurantTable[]): string 
 
 export function ScheduleManagement({ getToken }: { getToken: () => Promise<string | null> }) {
   const [specialDays, setSpecialDays] = useState<SpecialDay[]>([]);
+  const [openingHours, setOpeningHours] = useState<OpeningHour[]>([]);
   const [blocks, setBlocks] = useState<ReservationBlock[]>([]);
   const [tables, setTables] = useState<RestaurantTable[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
@@ -81,14 +83,16 @@ export function ScheduleManagement({ getToken }: { getToken: () => Promise<strin
     setState("loading");
     try {
       const token = await getToken();
-      const [dayResult, blockResult, tableResult] = await Promise.all([
+      const [dayResult, blockResult, tableResult, hoursResult] = await Promise.all([
         adminFetch<{ specialDays: SpecialDay[] }>("/api/admin/special-days", token),
         adminFetch<{ blocks: ReservationBlock[] }>("/api/admin/reservation-blocks", token),
         adminFetch<{ tables: RestaurantTable[] }>("/api/admin/tables", token),
+        adminFetch<{ openingHours: OpeningHour[] }>("/api/admin/opening-hours", token),
       ]);
       setSpecialDays(dayResult.specialDays);
       setBlocks(blockResult.blocks);
       setTables(tableResult.tables);
+      setOpeningHours(hoursResult.openingHours);
       setState("ready");
     } catch {
       setState("error");
@@ -135,6 +139,24 @@ export function ScheduleManagement({ getToken }: { getToken: () => Promise<strin
     }
   };
 
+  const saveOpeningHour = async (hour: OpeningHour) => {
+    try {
+      const token = await getToken();
+      await adminFetch(`/api/admin/opening-hours/${encodeURIComponent(hour.key)}`, token, { method: "PUT", body: JSON.stringify(hour) });
+      setSpecialMessage("Öffnungszeit gespeichert.");
+      await loadData();
+    } catch { setSpecialMessage("Die Öffnungszeit konnte nicht gespeichert werden."); }
+  };
+
+  const deleteOpeningHour = async (key: string) => {
+    try {
+      const token = await getToken();
+      await adminFetch(`/api/admin/opening-hours/${encodeURIComponent(key)}`, token, { method: "DELETE" });
+      setSpecialMessage("Öffnungszeit entfernt.");
+      await loadData();
+    } catch { setSpecialMessage("Die Öffnungszeit konnte nicht entfernt werden."); }
+  };
+
   const saveBlock = async (event: React.FormEvent) => {
     event.preventDefault();
     setBlockState("saving");
@@ -178,6 +200,18 @@ export function ScheduleManagement({ getToken }: { getToken: () => Promise<strin
       {state === "error" ? <div className="admin-notice" role="alert"><h3>Laden nicht möglich</h3><p>Die Sonderregeln konnten nicht abgerufen werden.</p><button type="button" onClick={() => void loadData()}>Erneut laden</button></div> : null}
 
       {state === "ready" ? <div className="admin-operation-grid">
+        <article className="admin-operation-card">
+          <div className="admin-operation-title"><CalendarCheck aria-hidden="true" /><div><h3>Reguläre Öffnungszeiten</h3><p>Wöchentliche Servicezeiten verwalten.</p></div></div>
+          <div className="admin-operation-list" aria-label="Reguläre Öffnungszeiten">
+            {openingHours.length === 0 ? <p className="admin-compact-empty">Keine Öffnungszeiten eingetragen.</p> : openingHours.map((hour) => <div key={hour.key}><div><strong>{["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"][hour.weekday]}</strong><span>{hour.startTime}–{hour.endTime} Uhr{hour.active ? "" : " · inaktiv"}</span></div><button type="button" aria-label={`${hour.key} entfernen`} onClick={() => void deleteOpeningHour(hour.key)}><Trash aria-hidden="true" /></button></div>)}
+          </div>
+          <form className="admin-operation-form" onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); void saveOpeningHour({ key: String(form.get("key")), weekday: Number(form.get("weekday")), startTime: String(form.get("startTime")), endTime: String(form.get("endTime")), active: true }); }}>
+            <label><span>Schlüssel</span><input name="key" required pattern="[a-z0-9-]{1,80}" placeholder="z. B. fri-evening" /></label>
+            <label><span>Wochentag</span><select name="weekday" defaultValue="5">{["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"].map((day, index) => <option key={day} value={index}>{day}</option>)}</select></label>
+            <div className="admin-time-row"><label><span>Von</span><input name="startTime" type="time" required defaultValue="17:00" /></label><label><span>Bis</span><input name="endTime" type="time" required defaultValue="21:00" /></label></div>
+            <button className="admin-save-button" type="submit">Öffnungszeit speichern</button>
+          </form>
+        </article>
         <article className="admin-operation-card">
           <div className="admin-operation-title"><CalendarCheck aria-hidden="true" /><div><h3>Sondertag</h3><p>Ganztägig schließen oder abweichend öffnen.</p></div></div>
           <form className="admin-operation-form" onSubmit={saveSpecialDay}>
