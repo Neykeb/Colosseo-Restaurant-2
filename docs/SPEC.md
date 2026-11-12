@@ -1,7 +1,7 @@
 # Funktionale und technische Spezifikation
 
-**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS6` in Arbeit
-**Letzte Aktualisierung:** 12.11.2026
+**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS5` in Arbeit
+**Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. `FS1` wurde am 02.11.2026 ausdrücklich freigegeben; spätere Full-Stack-Phasen bleiben bis zu ihrem jeweiligen Gate gesperrt.
 
@@ -439,7 +439,7 @@ Weiter ausgeschlossen bleiben Online-Essensbestellung, Warenkorb und Zahlungsabw
 | ODM und Strukturmigrationen | Mongoose sowie eingecheckte, idempotente Migrationsskripte | MongoDB-native Schemas, Modelle, Validierung, Indizes und Transaktionen mit offizieller TypeScript-Unterstützung. |
 | Admin-Authentifizierung | Clerk mit OAuth über `@clerk/react` und `@clerk/express` | Clerk übernimmt Identität, OAuth-Ablauf und Sessionprüfung. Anbieter und zugelassene Identitäten bleiben zu konfigurieren. |
 | Autorisierung | eigene MongoDB-basierte Rollenprüfung mit `owner` und `staff` | Jede geschützte Route prüft zusätzlich zur Clerk-Session ein aktives Adminprofil und die erforderliche Rolle serverseitig. Exakte Rechte-Matrix bleibt `OFFEN`. |
-| Bilder | MongoDB GridFS für den freigegebenen Demo-/Weiterbildungsumfang | Render-Web-Service-Dateien sind flüchtig. GridFS hält Binärdaten dauerhaft in Atlas; Uploads sind auf JPG, PNG und WebP bis 5 MB begrenzt, signaturgeprüft und benötigen Alternativtext. Ein späterer realer Hochlastbetrieb muss diese Entscheidung neu bewerten. |
+| Bilder | externer Objektspeicher `OFFEN`; MongoDB speichert nur Metadaten und URLs | Render-Web-Service-Dateien sind flüchtig. Uploadanbieter und Rechteprüfung werden vor `FS6` festgelegt. |
 | E-Mail | `BESTÄTIGT 09.11.2026`: Resend über eine eigene serverseitige Mail-Service-Schicht und Outbox | Idempotenter Transaktionsversand; Restaurantempfänger vorläufig `mohammad.amiri@dci-student.org`, Absenderdomain `OFFEN`. |
 
 Render unterstützt Node-/Express-Web-Services und erwartet die Bindung an den bereitgestellten `PORT`. Das Dateisystem des Web Service ist flüchtig; dauerhafte Fachdaten liegen in MongoDB Atlas. Der Atlas-Connection-String bleibt ein Render-Secret. Ein kostenloser Render-Web-Service kann nach Inaktivität schlafen; dies wird für das Finalprojekt akzeptiert, aber nicht als Produktionsziel eines realen Reservierungsbetriebs bewertet.
@@ -558,7 +558,7 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 - `GET /api/reservations/availability?date=…&partySize=…` – implementiert; verfügbare Startzeiten ohne interne Tischdetails.
 - `POST /api/reservations` – implementiert; atomare Reservierungsanfrage, serverseitige Validierung, Rate-Limit und wiederholbare Übermittlung über `Idempotency-Key`.
 - `POST /api/public/reservations/:reference/cancel` – nur mit sicherem, zeitlich begrenztem Gast-Token; genaue Stornoregel `OFFEN`.
-- `GET /api/public/menu` und `GET /api/public/opening-hours` – in `FS6` implementierte Leseendpunkte; liefern ausschließlich aktive veröffentlichte Menüpunkte beziehungsweise aktive Zeitregeln. Die öffentliche React-Anbindung mit statischem Fallback bleibt bis zur kontrollierten Datenmigration deaktiviert.
+- `GET /api/public/menu` und `GET /api/public/opening-hours` – ausschließlich veröffentlichte Inhalte.
 - `POST /api/public/inquiries` – Veranstaltung anfragen; Felder und Empfänger `OFFEN`.
 
 ### Geschützt
@@ -572,8 +572,7 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 - `GET /api/admin/calendar?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` – implementiert in `FS5`; liefert für einen auf 31 Tage begrenzten Zeitraum Reservierungen, Veranstaltungsanfragen, aktive Sperrzeiten und Sondertage. Zugriff nur für serverseitig autorisierte Owner.
 - `GET /api/admin/event-inquiries`, `GET /api/admin/event-inquiries/:inquiryId`, `PATCH /api/admin/event-inquiries/:inquiryId/status` und `PATCH /api/admin/event-inquiries/:inquiryId/note` – in `FS5` implementiert; serverseitig paginierte und filterbare Liste, Detail, Bearbeitungsstatus und ausschließlich intern sichtbare Notiz. Ungültige IDs, Statuswerte und Notizen werden an der API-Grenze abgewiesen.
 - `/api/admin/tables` und `/api/admin/settings` – Kapazität und Buchungsregeln.
-- `GET|PUT /api/admin/menu/categories`, `GET|PUT /api/admin/menu/items`, `GET /api/admin/menu/preview` und `PATCH /api/admin/menu/items/:itemId/publication` – in `FS6` implementiert; Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Bilder, Sortierung, Aktivstatus, Vorschau und explizite Veröffentlichung.
-- `POST /api/admin/media` und `DELETE /api/admin/media/:id` – in `FS6` implementiert; GridFS-Upload mit Typ-, Größe-, Dateisignatur- und Alternativtextprüfung sowie bestätigte Löschung. Öffentliche Medien werden über `GET /api/public/media/:id` ausgeliefert.
+- `/api/admin/menu` – Kategorien, Gerichte, Preise, Beschreibungen, Bilder, Sortierung und Veröffentlichung.
 - `/api/admin/opening-hours` – reguläre und datierte Abweichungen.
 
 Fehler verwenden stabile maschinenlesbare Codes, eine sichere Nutzermeldung und eine serverseitige Korrelations-ID. Personenbezogene Details erscheinen nicht in URLs oder Logs.

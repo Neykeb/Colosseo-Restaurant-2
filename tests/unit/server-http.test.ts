@@ -430,31 +430,6 @@ describe("Express platform foundation", () => {
     expect(body.error.code).toBe("TABLE_NOT_AVAILABLE");
   });
 
-  it("accepts a stored GridFS media URL when an owner saves a menu item", async () => {
-    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
-    let savedImageUrl: string | undefined;
-    const reservationAdminService = {
-      saveMenuItem: async (input: { imageUrl?: string }) => {
-        savedImageUrl = input.imageUrl;
-        return input;
-      },
-    };
-    const baseUrl = await listen(createApp({
-      getAuthenticatedUserId: () => owner.clerkUserId,
-      findAdminProfile: async () => owner,
-      reservationAdminService: reservationAdminService as unknown as Partial<ReservationAdminService>,
-    }));
-    const imageUrl = "/api/public/media/507f1f77bcf86cd799439011";
-    const response = await fetch(`${baseUrl}/api/admin/menu/items/dish_caprese`, {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ categorySlug: "antipasti", name: "Mozzarella Caprese", priceCents: 1050, allergens: [], imageUrl, sortOrder: 0, active: true, published: false }),
-    });
-
-    expect(response.status).toBe(200);
-    expect(savedImageUrl).toBe(imageUrl);
-  });
-
   it("serves client-only routes and marks unknown HTML routes as not found in production mode", async () => {
     const directory = await mkdtemp(join(tmpdir(), "colosseo-static-"));
     await writeFile(join(directory, "index.html"), "<!doctype html><title>Colosseo test shell</title>");

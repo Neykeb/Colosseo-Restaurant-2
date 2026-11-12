@@ -72,11 +72,7 @@ const eventInquiryStatusSchema = z.enum(["new", "in_review", "accepted", "declin
 const eventInquiryIdSchema = z.string().regex(/^inq_[a-f0-9]{32}$/);
 const eventInquiryListSchema = z.object({ status: eventInquiryStatusSchema.optional(), q: z.string().trim().max(120).optional(), page: z.coerce.number().int().min(1).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() });
 const menuCategorySchema = z.object({ slug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean() });
-const menuImageUrlSchema = z.union([
-  z.string().url().max(2_000),
-  z.string().regex(/^\/api\/public\/media\/[a-f\d]{24}$/i).max(2_000),
-]);
-const menuItemSchema = z.object({ itemId: z.string().trim().min(1).max(100), categorySlug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), description: z.string().trim().max(2_000).optional(), priceCents: z.number().int().min(0).max(100_000), allergens: z.array(z.string().trim().min(1).max(80)).max(50), imageUrl: menuImageUrlSchema.optional(), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean(), published: z.boolean() });
+const menuItemSchema = z.object({ itemId: z.string().trim().min(1).max(100), categorySlug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), description: z.string().trim().max(2_000).optional(), priceCents: z.number().int().min(0).max(100_000), allergens: z.array(z.string().trim().min(1).max(80)).max(50), imageUrl: z.string().url().max(2_000).optional(), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean(), published: z.boolean() });
 
 function sendValidationError(response: express.Response, details: unknown): void {
   response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "The request data is invalid.", details, correlationId: response.locals.correlationId } });
