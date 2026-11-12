@@ -410,3 +410,8 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Gate:** Der Nutzer erteilt ausdrücklich `GO FS7`.
 - **Person A als nächster Einstieg:** Datenschutz-/Aufbewahrungsbestand, serverseitige Auth-/Autorisierungsgrenzen, Upload-/IDOR-/Log-Leak-Prüfungen und die technische Gesamtrückmeldung gegen die freigegebenen Anforderungen prüfen.
 - **Abgrenzung:** Produktionsbetrieb, echte Geschäftsdaten und nicht spezifizierte Aufbewahrungs- oder Auskunftsregeln bleiben bis zur fachlichen Freigabe offen. Person-B-`break-ui`-Befunde werden separat bearbeitet.
+
+## 44. FS7-Upload-Sicherheitsprüfung Person A – 12.11.2026
+
+- **Umgesetzt:** Der geschützte Medien-Upload validiert Dateiname, erlaubten MIME-Typ, Alternativtext und Base64-Format/-Größe vor dem Serviceaufruf.
+- **Test:** Fehlerhafte Upload-Payloads werden mit `400 VALIDATION_ERROR` abgewiesen; der Medienservice wird dabei nicht aufgerufen.

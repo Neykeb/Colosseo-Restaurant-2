@@ -271,6 +271,15 @@ describe("Express platform foundation", () => {
     expect(invalidPath.status).toBe(400);
   });
 
+  it("rejects malformed media upload payloads at the API boundary", async () => {
+    vi.clearAllMocks();
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const baseUrl = await listen(createApp({ getAuthenticatedUserId: () => owner.clerkUserId, findAdminProfile: async () => owner }));
+    const response = await fetch(`${baseUrl}/api/admin/media`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fileName: "image.png", contentType: "image/png", altText: "Bild", dataBase64: "not base64!" }) });
+    expect(response.status).toBe(400);
+    expect(vi.mocked(storeMedia)).not.toHaveBeenCalled();
+  });
+
   it("protects and validates regular opening-hours administration", async () => {
     const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
     const saved = { key: "fri-evening", weekday: 5, startTime: "17:00", endTime: "21:00", active: true };

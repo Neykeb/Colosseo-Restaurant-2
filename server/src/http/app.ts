@@ -74,6 +74,12 @@ const menuImageUrlSchema = z.string().trim().max(2_000).refine((value) => {
     return false;
   }
 }, "Image URL must be an internal media URL or an absolute HTTPS URL.");
+const mediaUploadSchema = z.object({
+  fileName: z.string().trim().min(1).max(255),
+  contentType: z.enum(["image/jpeg", "image/png", "image/webp"]),
+  altText: z.string().trim().min(1).max(300),
+  dataBase64: z.string().regex(/^[A-Za-z0-9+/]*={0,2}$/).max(7_000_000),
+});
 const menuItemSchema = z.object({ itemId: z.string().trim().min(1).max(100), categorySlug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), description: z.string().trim().max(2_000).optional(), priceCents: z.number().int().min(0).max(100_000), allergens: z.array(z.string().trim().min(1).max(80)).max(50), imageUrl: menuImageUrlSchema.optional(), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean(), published: z.boolean() });
 
 function sendValidationError(response: express.Response, details: unknown): void {
@@ -346,7 +352,9 @@ export function createApp(options: CreateAppOptions = {}) {
     } catch (error) { next(error); }
   });
   app.post("/api/admin/media", ...adminGuard, async (request, response, next) => {
-    try { response.status(201).json({ media: await storeMedia(request.body) }); } catch (error) { next(error); }
+    const input = mediaUploadSchema.safeParse(request.body);
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try { response.status(201).json({ media: await storeMedia(input.data) }); } catch (error) { next(error); }
   });
   app.delete("/api/admin/media/:id", ...adminGuard, async (request, response, next) => {
     try {
