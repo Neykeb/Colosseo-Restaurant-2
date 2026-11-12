@@ -393,3 +393,9 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Umgesetzt:** dedizierte Unit-Tests für GridFS-MIME-Prüfung, Alternativtextpflicht, Binärsignatur und 5-MB-Grenze ergänzt.
 - **Prüfungen:** `npm run typecheck`, `npm run lint` und `npm test` erfolgreich; 18 Testdateien und 85/85 Tests bestanden.
 - **Abgrenzung:** Person-B-/UI-Aufgaben wurden bewusst nicht bearbeitet.
+
+## 41. FS6-URL-Vertrag und Medienfluss – 12.11.2026
+
+- **Umgesetzt:** `imageUrl` akzeptiert jetzt gezielt interne GridFS-URLs (`/api/public/media/<ObjectId>`) sowie absolute HTTPS-URLs; beliebige Pfade und nicht verschlüsselte externe URLs werden abgelehnt.
+- **Integrationstest:** Upload → Gericht speichern → Gericht veröffentlichen einschließlich Ablehnung eines beliebigen relativen Pfads.
+- **Prüfungen:** Typecheck, Lint und 86/86 Tests erfolgreich.

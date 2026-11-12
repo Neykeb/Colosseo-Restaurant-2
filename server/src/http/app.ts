@@ -58,7 +58,16 @@ const specialDaySchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/
 const eventInquirySchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254), phone: z.string().trim().min(5).max(40).optional(), eventType: z.string().trim().min(1).max(80), requestedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), partySize: z.number().int().min(1).max(500), message: z.string().trim().min(1).max(2_000) });
 const eventInquiryStatusSchema = z.enum(["new", "in_review", "accepted", "declined", "closed"]);
 const menuCategorySchema = z.object({ slug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean() });
-const menuItemSchema = z.object({ itemId: z.string().trim().min(1).max(100), categorySlug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), description: z.string().trim().max(2_000).optional(), priceCents: z.number().int().min(0).max(100_000), allergens: z.array(z.string().trim().min(1).max(80)).max(50), imageUrl: z.string().url().max(2_000).optional(), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean(), published: z.boolean() });
+const menuImageUrlSchema = z.string().trim().max(2_000).refine((value) => {
+  if (/^\/api\/public\/media\/[a-f\d]{24}$/.test(value)) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}, "Image URL must be an internal media URL or an absolute HTTPS URL.");
+const menuItemSchema = z.object({ itemId: z.string().trim().min(1).max(100), categorySlug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), description: z.string().trim().max(2_000).optional(), priceCents: z.number().int().min(0).max(100_000), allergens: z.array(z.string().trim().min(1).max(80)).max(50), imageUrl: menuImageUrlSchema.optional(), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean(), published: z.boolean() });
 
 function sendValidationError(response: express.Response, details: unknown): void {
   response.status(400).json({ error: { code: "VALIDATION_ERROR", message: "The request data is invalid.", details, correlationId: response.locals.correlationId } });
