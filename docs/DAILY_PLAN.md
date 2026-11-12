@@ -444,3 +444,10 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Datenfluss:** Der Alternativtext eines hochgeladenen Bildes wird am Gericht gespeichert und in der Admin-Vorschau als Bild-`alt` verwendet.
 - **Prüfungen:** Typecheck, Lint, 88/88 Tests, Production-Build und `git diff --check` erfolgreich. Der Build meldet weiterhin nur bekannte Drittanbieterhinweise sowie die lokal fehlende `SITE_URL`.
 - **Offen:** Pagination für sehr große Menü-/Vorschaudaten und die abschließende vollständige Reflow-, Tastatur- und Vorschau-Regression.
+
+## 48. FS7-Pagination und Regression Person B – 12.11.2026
+
+- **Umgesetzt:** Menülisten und Vorschau besitzen eine zugängliche Seitensteuerung mit 12 Einträgen pro Seite; Kategoriewechsel und neue Vorschauen setzen die Seitennummer zurück.
+- **Manuell geprüft:** Worst-Case-Testdaten mit langen Kategorien, langen Gerichtsnamen, Preisen und Bildern geladen; Vorschau geöffnet, gelesen und über die Schließen-Aktion beendet. Der Fokus kehrte auf die Vorschau-Schaltfläche zurück. Der Empty-Zustand ist im Accessibility-Baum explizit erklärt.
+- **Regression:** Typecheck, Lint, 88/88 Tests, Production-Build und `git diff --check` erfolgreich. Die bekannten Build-Hinweise zu Drittanbieter-`use client`-Direktiven und die lokal fehlende `SITE_URL` bleiben nicht blockierend.
+- **Einschränkung:** Eine echte 320-px-Viewport-Umschaltung war über die verfügbare Browsersteuerung nicht möglich; der Reflow ist durch die CSS-Regeln abgedeckt, benötigt aber noch eine Prüfung in einem Browser mit expliziter Viewportsteuerung.

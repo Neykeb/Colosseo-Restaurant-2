@@ -25,6 +25,7 @@ export type MenuItem = {
 };
 export type PreviewCategory = MenuCategory & { items: MenuItem[] };
 type ItemDraft = Omit<MenuItem, "priceCents" | "allergens"> & { price: string; allergens: string };
+const MENU_PAGE_SIZE = 12;
 
 const emptyDraft = (categorySlug = ""): ItemDraft => ({
   itemId: "",
@@ -72,6 +73,8 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imageAltText, setImageAltText] = useState("");
   const [formError, setFormError] = useState("");
+  const [menuPage, setMenuPage] = useState(1);
+  const [previewPage, setPreviewPage] = useState(1);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const lastFocused = useRef<HTMLElement | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -94,6 +97,7 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
       setCategories(fixture.categories);
       setItems(fixture.items);
       setSelectedCategory(fixture.categories[0]?.slug || "");
+      setMenuPage(1);
       setDraft(emptyDraft(fixture.categories[0]?.slug));
       setState("ready");
       return;
@@ -109,6 +113,7 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
       setCategories(categoryBody.categories);
       setItems(itemBody.items);
       setSelectedCategory((current) => current || categoryBody.categories[0]?.slug || "");
+      setMenuPage(1);
       setState("ready");
     } catch {
       setState("error");
@@ -118,6 +123,8 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
   useEffect(() => { void load(); }, [load]);
 
   const filteredItems = useMemo(() => items.filter((item) => !selectedCategory || item.categorySlug === selectedCategory), [items, selectedCategory]);
+  const menuPageCount = Math.max(1, Math.ceil(filteredItems.length / MENU_PAGE_SIZE));
+  const visibleItems = filteredItems.slice((menuPage - 1) * MENU_PAGE_SIZE, menuPage * MENU_PAGE_SIZE);
 
   function selectItem(item?: MenuItem) {
     setDraft(item ? toDraft(item) : emptyDraft(selectedCategory || categories[0]?.slug));
@@ -258,6 +265,7 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
 
   async function openPreview() {
     lastFocused.current = document.activeElement as HTMLElement;
+    setPreviewPage(1);
     if (fixtureMode) {
       setPreview(previewFrom(categories, items));
       requestAnimationFrame(() => dialogRef.current?.showModal());
@@ -289,14 +297,15 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
       {state === "error" ? <div className="admin-notice" role="alert"><h3>Laden fehlgeschlagen</h3><button type="button" onClick={() => void load()}>Erneut laden</button></div> : null}
       {state === "ready" ? <div className="admin-menu-layout">
         <aside className="admin-menu-index" aria-label="Kategorien und Gerichte">
-          <label>Kategorie<select name="menuCategoryFilter" value={selectedCategory} onChange={(event) => { setSelectedCategory(event.target.value); setDraft(emptyDraft(event.target.value)); }}>
+          <label>Kategorie<select name="menuCategoryFilter" value={selectedCategory} onChange={(event) => { setSelectedCategory(event.target.value); setMenuPage(1); setDraft(emptyDraft(event.target.value)); }}>
             <option value="">Alle Kategorien</option>{categories.map((category) => <option key={category.slug} value={category.slug}>{category.name}{category.active ? "" : " (inaktiv)"}</option>)}
           </select></label>
           <button className="admin-new-item" type="button" disabled={fixtureMode} onClick={() => selectItem()}><Plus aria-hidden="true" /> Neues Gericht</button>
-          <div className="admin-menu-items">{filteredItems.length === 0 ? <p className="admin-compact-empty">Keine Gerichte in dieser Kategorie. Lege ein Gericht an oder wähle eine andere Kategorie.</p> : filteredItems.map((item) => <article key={item.itemId} className={draft.itemId === item.itemId ? "is-selected" : ""}>
+          <div className="admin-menu-items">{filteredItems.length === 0 ? <p className="admin-compact-empty">Keine Gerichte in dieser Kategorie. Lege ein Gericht an oder wähle eine andere Kategorie.</p> : visibleItems.map((item) => <article key={item.itemId} className={draft.itemId === item.itemId ? "is-selected" : ""}>
             <button type="button" aria-pressed={draft.itemId === item.itemId} onClick={() => selectItem(item)}><span>{item.name}</span><small>{(item.priceCents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" })} · {item.published ? "veröffentlicht" : "Entwurf"}</small></button>
             <button type="button" aria-label={`${item.published ? "Zurückziehen" : "Veröffentlichen"}: ${item.name}`} disabled={fixtureMode || busy || !item.active} onClick={() => void setPublication(item, !item.published)}>{item.published ? "Zurückziehen" : "Veröffentlichen"}</button>
           </article>)}</div>
+          {menuPageCount > 1 ? <nav className="admin-pagination" aria-label="Menüseiten"><button type="button" disabled={menuPage === 1} onClick={() => setMenuPage((page) => page - 1)}>Zurück</button><span>Seite {menuPage} von {menuPageCount}</span><button type="button" disabled={menuPage === menuPageCount} onClick={() => setMenuPage((page) => page + 1)}>Weiter</button></nav> : null}
           <form className="admin-category-form" onSubmit={(event) => void saveCategory(event)}>
             <h3>Neue Kategorie</h3>
             <label>Technischer Schlüssel<input name="categorySlug" required maxLength={80} value={categoryDraft.slug} onChange={(event) => setCategoryDraft({ ...categoryDraft, slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })} placeholder="z. B. antipasti" /></label>
@@ -330,7 +339,8 @@ export function MenuManagement({ getToken }: { getToken: () => Promise<string | 
       <dialog className="admin-menu-preview" ref={dialogRef} onCancel={(event) => { event.preventDefault(); closePreview(); }} onClose={() => { setPreview(null); lastFocused.current?.focus(); }} aria-labelledby="menu-preview-title">
         <button className="admin-detail-close" type="button" onClick={closePreview} aria-label="Vorschau schließen"><X aria-hidden="true" /></button>
         <p className="admin-kicker">Nicht öffentliche Vorschau</p><h2 id="menu-preview-title">Speisekarte</h2>
-        {preview?.length ? preview.map((category) => <section key={category.slug}><h3>{category.name}</h3>{category.items.length ? category.items.map((item) => <article key={item.itemId}>{item.imageUrl ? <img src={item.imageUrl} alt={item.imageAltText || "Gerichtbild ohne Alternativtext"} /> : null}<div><h4>{item.name}</h4>{item.description ? <p>{item.description}</p> : null}<small>{item.published ? "Veröffentlicht" : "Entwurf"}</small></div><strong>{(item.priceCents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" })}</strong></article>) : <p>Keine aktiven Gerichte.</p>}</section>) : <p>Keine Vorschauinhalte vorhanden.</p>}
+        {preview?.length ? preview.map((category) => <section key={category.slug}><h3>{category.name}</h3>{category.items.length ? category.items.slice((previewPage - 1) * MENU_PAGE_SIZE, previewPage * MENU_PAGE_SIZE).map((item) => <article key={item.itemId}>{item.imageUrl ? <img src={item.imageUrl} alt={item.imageAltText || "Gerichtbild ohne Alternativtext"} /> : null}<div><h4>{item.name}</h4>{item.description ? <p>{item.description}</p> : null}<small>{item.published ? "Veröffentlicht" : "Entwurf"}</small></div><strong>{(item.priceCents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" })}</strong></article>) : <p>Keine aktiven Gerichte.</p>}</section>) : <p>Keine Vorschauinhalte vorhanden.</p>}
+        {preview && Math.max(1, ...preview.map((category) => Math.ceil(category.items.length / MENU_PAGE_SIZE))) > 1 ? <nav className="admin-pagination" aria-label="Vorschauseiten"><button type="button" disabled={previewPage === 1} onClick={() => setPreviewPage((page) => page - 1)}>Zurück</button><span>Seite {previewPage} von {Math.max(1, ...preview.map((category) => Math.ceil(category.items.length / MENU_PAGE_SIZE)))}</span><button type="button" disabled={previewPage === Math.max(1, ...preview.map((category) => Math.ceil(category.items.length / MENU_PAGE_SIZE)))} onClick={() => setPreviewPage((page) => page + 1)}>Weiter</button></nav> : null}
       </dialog>
     </section>
   );
