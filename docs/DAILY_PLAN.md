@@ -424,3 +424,7 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 ## 46. FS7-FS6-Autorisierungsregression Person A – 12.11.2026
 
 - **Test:** Alle FS6-Adminrouten werden ohne Clerk-Identität mit `401` und für ein aktives `staff`-Profil mit `403` abgewiesen; der Owner-Schutz bleibt serverseitig.
+
+## 47. FS7-Aufbewahrungsverhalten Person A – 12.11.2026
+
+- **Test:** Abgelaufene Reservierungen werden anonymisiert; zugehörige Locks und Tischzuweisungen werden entfernt; gesendete Outbox- und alte Audit-Ereignisse werden anhand der dokumentierten Fristen bereinigt.
