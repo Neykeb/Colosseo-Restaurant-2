@@ -74,9 +74,6 @@ const adminProfileSchema = new Schema({ clerkUserId: { type: String, required: t
 const eventInquirySchema = new Schema({ inquiryId: { type: String, required: true, unique: true }, name: { type: String, required: true }, email: { type: String, required: true }, phone: String, eventType: { type: String, required: true }, requestedDate: { type: String, required: true }, partySize: { type: Number, required: true, min: 1 }, message: { type: String, required: true }, status: { type: String, required: true, enum: ["new", "in_review", "accepted", "declined", "closed"], default: "new" }, internalNote: String }, { timestamps });
 eventInquirySchema.index({ status: 1, requestedDate: 1 });
 eventInquirySchema.index({ email: 1 });
-const menuCategorySchema = new Schema({ slug: { type: String, required: true, unique: true }, name: { type: String, required: true }, sortOrder: { type: Number, required: true, min: 0 }, active: { type: Boolean, required: true, default: true } }, { timestamps });
-const menuItemSchema = new Schema({ itemId: { type: String, required: true, unique: true }, categorySlug: { type: String, required: true }, name: { type: String, required: true }, description: String, priceCents: { type: Number, required: true, min: 0 }, allergens: { type: [String], required: true, default: [] }, imageUrl: String, sortOrder: { type: Number, required: true, min: 0 }, active: { type: Boolean, required: true, default: true }, published: { type: Boolean, required: true, default: false } }, { timestamps });
-menuItemSchema.index({ categorySlug: 1, active: 1, sortOrder: 1 });
 
 export type Setting = InferSchemaType<typeof settingSchema>;
 export type ServicePeriod = InferSchemaType<typeof servicePeriodSchema>;
@@ -96,5 +93,3 @@ export const AuditEventModel = model("AuditEvent", auditEventSchema);
 export const OutboxEventModel = model("OutboxEvent", outboxEventSchema);
 export const AdminProfileModel = model("AdminProfile", adminProfileSchema);
 export const EventInquiryModel = model("EventInquiry", eventInquirySchema);
-export const MenuCategoryModel = model("MenuCategory", menuCategorySchema);
-export const MenuItemModel = model("MenuItem", menuItemSchema);
