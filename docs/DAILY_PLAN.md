@@ -430,3 +430,10 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 
 - **Befund:** Die lokale `CLERK_AUTHORIZED_PARTIES`-Konfiguration war als JSON-Array gepflegt, wurde aber als einfache Kommaliste geparst; dadurch scheiterte die authentifizierte Adminprüfung.
 - **Umgesetzt:** Der Umgebungsparser akzeptiert nun JSON-Arrays und Kommalisten; ein Regressionstest deckt beide Formate ab.
+
+## 46. FS7-Öffnungszeiten-Browser-E2E Person B – 12.11.2026
+
+- **Verifiziert:** Die authentifizierte Adminoberfläche lädt reguläre Servicezeiten auch dann, wenn optionale FS5-Endpunkte für Tabellen oder Kalenderdaten fehlen.
+- **E2E:** Eine temporäre Servicezeit für Dienstag von 23:00 bis 23:30 Uhr wurde über die Adminoberfläche angelegt; die Erfolgsmeldung und der Eintrag waren sichtbar.
+- **Bereinigung:** Der temporäre Eintrag wurde anschließend über die bestätigte Löschaktion der Adminoberfläche entfernt. Nach dem Neuladen ist er nicht mehr vorhanden; bestehende Wochenzeiten blieben erhalten.
+- **Nächster Schritt:** Zu den dokumentierten FS7-`break-ui`-Befunden zurückkehren und vor der Behebung ein neues Priorisierungs-`GO` einholen.
