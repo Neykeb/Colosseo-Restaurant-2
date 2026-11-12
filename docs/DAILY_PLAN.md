@@ -1,12 +1,12 @@
 # Tagesplan Full-Stack-Finalprojekt
 
-**Status:** FS5 aktiv; drei operative Person-B-Bausteine umgesetzt, Veranstaltungsanfragen als nächster freizugebender Schritt
+**Status:** FS6 aktiv; Menü- und Medienverwaltung integriert, Öffnungszeiten und öffentliche Synchronisation offen
 
-**Phase:** `FS5` – Reservierungs-, Kalender- und Anfrageverwaltung
+**Phase:** `FS6` – Speisekarte, Öffnungszeiten und Medienverwaltung
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 11.11.2026
+**Letzte Aktualisierung:** 12.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -303,3 +303,14 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Echte Parallelitätsprüfung:** `npm run test:reservation-concurrency` lief erfolgreich gegen die abgesicherte Atlas-Testdatenbank. Von zwei gleichzeitig konkurrierenden Buchungen wurde exakt eine bestätigt und eine mit `NO_AVAILABILITY` abgelehnt; die anschließende Gaststornierung entfernte alle Tischsperren.
 - **Abschlussprüfung:** Typecheck, OXLint, 83/83 automatisierte Tests, Production-Build und `git diff --check` sind erfolgreich. Der Build meldet weiterhin nur bekannte Hinweise zu fremden `use client`-Direktiven; ohne lokale `SITE_URL` werden Canonical-URLs im lokalen Prerender bewusst ausgelassen.
 - **Tagesabschluss Person B:** Sämtliche technisch ausführbaren Person-B-Aufgaben aus `FS5` sind abgeschlossen. Nächster zulässiger Schritt ist die Präsentation und ausdrückliche Abnahme von Gate `FS5`; `FS6` darf erst nach einem neuen `GO` beginnen.
+
+## 23. FS6-Start Person B – 12.11.2026
+
+- **Freigabe:** Der Nutzer hat am 12.11.2026 das ausdrückliche `GO` für `FS6` erteilt; Gate `FS5` ist damit abgenommen. `FS7` bleibt ohne eigenes späteres `GO` gesperrt.
+- **Integration:** Die bereits von Person A erstellten Migrationen `0011_menu-content` und `0012_gridfs-media` sowie die geschützten Menü-, Vorschau-, Publikations- und Medienendpunkte wurden konfliktfrei in den aktuellen Person-B-Stand übernommen. Test- und Entwicklungsdatenbank melden beide Migrationen als angewendet.
+- **Person-B-Baustein 1:** Im geschützten Dashboard lassen sich Kategorien und Gerichte über echte API-Aufrufe laden und speichern. Name, Kategorie, Preis, Beschreibung, Allergene, Sortierung, Aktivstatus und Publikationsstatus werden serverseitig validiert. Entwürfe können getrennt veröffentlicht oder zurückgezogen werden.
+- **Person-B-Baustein 2:** JPG-, PNG- und WebP-Medien bis 5 MB werden mit verpflichtendem Alternativtext in GridFS gespeichert. Die Oberfläche zeigt die Vorschau, verknüpft die interne Medien-URL mit dem Gericht und entfernt bei bestätigter Löschung zuerst die Referenz und anschließend die Datei. Ein Schnittstellenfehler zwischen relativer Medien-URL und URL-Validierung wurde behoben.
+- **Vorschau und Bedienung:** Eine nicht öffentliche native Dialogvorschau zeigt aktive Entwürfe und veröffentlichte Gerichte getrennt gekennzeichnet. Escape-Schließen, Fokusrückgabe, Reduced Motion, schmale Einspaltenansicht und klare Lade-/Leer-/Fehlerzustände sind vorgesehen. Ohne erneute Clerk-Anmeldung war die neue Realdatenansicht im Browser nicht zugänglich; der öffentliche Anmelde-Gate wurde dagegen lokal geprüft.
+- **Prüfungen:** Typecheck, OXLint, 88/88 automatisierte Tests und Production-Build sind erfolgreich. Der Build meldet ausschließlich die bekannten Drittanbieterhinweise zu `use client`; ohne lokale `SITE_URL` werden Canonical-URLs im lokalen Prerender bewusst ausgelassen.
+- **Offen für FS6:** reguläre Öffnungszeitenverwaltung, kontrollierte Migration der verifizierten Bestandskarte, öffentliche API-Synchronisation mit statischem Fallback sowie abschließende Cache-, Publikations-, Upload-, Accessibility- und E2E-Prüfung.
+- **Nächster Einstieg Person B:** reguläre Öffnungszeiten als getrennten Entwurfs-/Veröffentlichungsworkflow spezifizieren und implementieren, ohne die bereits in FS5 verwalteten datierten Sondertage zu duplizieren.
