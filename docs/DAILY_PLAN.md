@@ -424,3 +424,8 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Abgrenzung:** Bestehende Wochenzeiten, Sondertage und Sperrzeiten wurden nicht verändert. Die Oberfläche lädt ausschließlich die vorhandenen Daten aus MongoDB und erfindet keine Restaurantzeiten.
 - **Prüfungen:** Typecheck und OXLint erfolgreich; 87/87 Tests erfolgreich; Production-Build erfolgreich. Die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL` bleiben unverändert.
 - **Nächster Schritt:** Authentifizierter Browser-E2E für eine temporäre Servicezeit mit anschließender Bereinigung; danach zu den bereits präsentierten FS7-`break-ui`-Befunden zurückkehren.
+
+## 45. FS7-Clerk-Adminprüfung – 12.11.2026
+
+- **Befund:** Die lokale `CLERK_AUTHORIZED_PARTIES`-Konfiguration war als JSON-Array gepflegt, wurde aber als einfache Kommaliste geparst; dadurch scheiterte die authentifizierte Adminprüfung.
+- **Umgesetzt:** Der Umgebungsparser akzeptiert nun JSON-Arrays und Kommalisten; ein Regressionstest deckt beide Formate ab.
