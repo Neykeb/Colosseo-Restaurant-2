@@ -1,7 +1,7 @@
 # Funktionale und technische Spezifikation
 
-**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS6` in Arbeit
-**Letzte Aktualisierung:** 12.11.2026
+**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS4` für das nicht-produktive Weiterbildungsprojekt technisch geprüft
+**Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. `FS1` wurde am 02.11.2026 ausdrücklich freigegeben; spätere Full-Stack-Phasen bleiben bis zu ihrem jeweiligen Gate gesperrt.
 
@@ -558,22 +558,21 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 - `GET /api/reservations/availability?date=…&partySize=…` – implementiert; verfügbare Startzeiten ohne interne Tischdetails.
 - `POST /api/reservations` – implementiert; atomare Reservierungsanfrage, serverseitige Validierung, Rate-Limit und wiederholbare Übermittlung über `Idempotency-Key`.
 - `POST /api/public/reservations/:reference/cancel` – nur mit sicherem, zeitlich begrenztem Gast-Token; genaue Stornoregel `OFFEN`.
-- `GET /api/public/menu` und `GET /api/public/opening-hours` – ausschließlich veröffentlichte Inhalte.
+- `GET /api/public/menu` – ausschließlich aktive Kategorien und aktive Gerichte mit `published: true`; Preise werden als Minor Units (`priceCents`) ausgegeben.
+- `GET /api/public/opening-hours` – aktive reguläre Servicezeiten und datierte Sondertage ohne interne Verwaltungsfelder.
+- `GET /api/public/media/:id` – öffentliches Lesen eines gespeicherten GridFS-Mediums mit serverseitigem Content-Type und Cache-Header.
 - `POST /api/public/inquiries` – Veranstaltung anfragen; Felder und Empfänger `OFFEN`.
 
 ### Geschützt
 
-- `POST /api/admin/reservations` – implementiert; manuelles Anlegen durch einen serverseitig autorisierten Owner.
-- `GET /api/admin/reservations`, `GET /api/admin/reservations/:publicId` und `GET /api/admin/reservations/:publicId/history` – in `FS5` implementiert; Suche/Filter, Detail mit Tischzuweisung und Auditverlauf.
-- `PATCH /api/admin/reservations/:publicId/status` und `PATCH /api/admin/reservations/:publicId/tables` – in `FS5` implementiert; ausschließlich erlaubte Statusübergänge sowie transaktionssichere, kapazitäts- und konfliktgeprüfte Tischumlegung. Storno oder Ablehnung gibt Sperren und Zuordnungen in derselben Transaktion frei.
-- `GET /api/admin/tables` – in `FS5` implementiert; liefert ausschließlich aktive Tische für die geschützte operative Verwaltung.
+- `POST /api/admin/reservations` – implementiert; manuelles Anlegen durch einen serverseitig autorisierten Owner. Listen, Details und spätere Statusänderungen folgen in `FS5`.
 - `GET|POST|DELETE /api/admin/reservation-blocks` – implementiert; zeitlich begrenzte Restaurant-, Bereichs- oder Tischsperrungen mit demselben atomaren Sperrindex wie Reservierungen.
-- `GET /api/admin/special-days` sowie `PUT|DELETE /api/admin/special-days/:date` – in `FS5` implementiert; datierte Schließtage und Sonderöffnungen. Sonderöffnungen benötigen einen vollständigen, aufsteigenden Öffnungszeitraum.
-- `GET /api/admin/calendar?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` – implementiert in `FS5`; liefert für einen auf 31 Tage begrenzten Zeitraum Reservierungen, Veranstaltungsanfragen, aktive Sperrzeiten und Sondertage. Zugriff nur für serverseitig autorisierte Owner.
-- `GET /api/admin/event-inquiries`, `GET /api/admin/event-inquiries/:inquiryId`, `PATCH /api/admin/event-inquiries/:inquiryId/status` und `PATCH /api/admin/event-inquiries/:inquiryId/note` – in `FS5` implementiert; serverseitig paginierte und filterbare Liste, Detail, Bearbeitungsstatus und ausschließlich intern sichtbare Notiz. Ungültige IDs, Statuswerte und Notizen werden an der API-Grenze abgewiesen.
+- `/api/admin/calendar` – Tages-/Wochenbelegung und Sonderöffnungen folgen in `FS5`.
 - `/api/admin/tables` und `/api/admin/settings` – Kapazität und Buchungsregeln.
-- `/api/admin/menu` – Kategorien, Gerichte, Preise, Beschreibungen, Bilder, Sortierung und Veröffentlichung.
+- `/api/admin/menu/categories`, `/api/admin/menu/items`, `/api/admin/menu/preview` und `/api/admin/menu/items/:itemId/publication` – ownergeschützte Kategorien, Gerichte, Vorschau und explizites Publizieren.
+- `/api/admin/media` – ownergeschützter JSON-Upload und Löschung über MongoDB GridFS; JPEG/PNG/WebP, maximal 5 MB, Alternativtext verpflichtend, Binärsignatur serverseitig geprüft.
 - `/api/admin/opening-hours` – reguläre und datierte Abweichungen.
+- `/api/admin/inquiries` – Eingang, Status und interne Bearbeitung.
 
 Fehler verwenden stabile maschinenlesbare Codes, eine sichere Nutzermeldung und eine serverseitige Korrelations-ID. Personenbezogene Details erscheinen nicht in URLs oder Logs.
 

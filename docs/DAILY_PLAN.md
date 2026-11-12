@@ -1,12 +1,12 @@
 # Tagesplan Full-Stack-Finalprojekt
 
-**Status:** FS6 aktiv; Person-B-Menüoberfläche vorbereitet, Person-A-Backend bleibt getrennte Abhängigkeit
+**Status:** FS4 technisch umgesetzt; Person-B-Aufgaben vom 10.11. einschließlich Render-E2E abgeschlossen, externe Freigaben und Gate-Abnahme offen
 
-**Phase:** `FS6` – Speisekarte, Öffnungszeiten und Medienverwaltung
+**Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 12.11.2026
+**Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -278,42 +278,125 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Phasengrenze:** `FS5` beginnt erst nach abgeschlossener FS4-Präsentation, ausdrücklicher Gate-Abnahme und neuem `GO`.
 - **Branch-Integration:** Die Konflikte zwischen `feature/momo` und `dev` wurden vollständig aufgelöst. Die getestete öffentliche Website, mobile Navigation, Reservierungsstrecke und bestehende Admin-Autorisierung blieben maßgeblich; ergänzende Storno-, Aufbewahrungs-, Outbox- und Migrationsbausteine aus `dev` wurden kompatibel übernommen. `dist/` bleibt generiert und unversioniert. Typecheck, OXLint, 76/76 Tests und Production-Build waren anschließend erfolgreich; der Build meldete nur die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL`.
 
-## 22. FS5-Start Person B – 11.11.2026
+## 22. FS4-Abnahme – 11.11.2026
 
-- **Freigabe:** Der Nutzer hat am 11.11.2026 das ausdrückliche `GO` für `FS5` erteilt; das Gate `FS4` ist damit für den Demo-Umfang abgenommen.
-- **Aufgabenabgrenzung:** Person B bearbeitet in `FS5` Adminübersicht, Reservierungen, Kalender/Sperrzeiten und Veranstaltungsanfragen. Speisekarte und reguläre Öffnungszeiten gehören zu `FS6` und werden nicht vorgezogen.
-- **Erster Baustein erledigt:** Geschützte Kalender-API mit maximal 31 Tagen sowie responsive Tages-/Wochenübersicht mit Zeitraumwahl, vier Kennzahlen, Reservierungs- und Sperrzeitenliste, Sondertagen und Vorschau offener Veranstaltungsanfragen umgesetzt. Lade-, Leer- und Fehlerzustände sind vorhanden; das Dashboard verwendet bewusst keine Marketing-Motion.
-- **Prüfungen:** Typecheck, OXLint, 77/77 automatisierte Tests und Production-Build erfolgreich. Der Build meldet nur die bekannten Hinweise zu fremden `use client`-Direktiven und die lokal nicht gesetzte `SITE_URL`.
-- **Nächster Einstieg Person B:** Reservierungssuche, Filter, Detailansicht, kontrollierte Statusänderung und Historie auf der bestehenden Admin-API umsetzen. Tischzuweisung wird zunächst anhand des vorhandenen Datenmodells geprüft und nicht durch eine erfundene Bedienlogik vorweggenommen.
-- **Zweiter FS5-Baustein erledigt:** Reservierungssuche nach Gast/Kontakt/Referenz, Datums- und Statusfilter, responsive Ergebnisliste sowie tastaturbedienbare Detailansicht mit Gastdaten, erlaubten Statuswechseln, Tischzuordnung und Auditverlauf umgesetzt. Die Detailansicht bindet den Fokus, schließt per Escape und führt ihn zum Auslöser zurück.
-- **Konsistenz und Konfliktschutz:** Tischänderungen akzeptieren nur echte aktive Einzel- oder Kombinationstische, die zur Gruppengröße passen. MongoDB schreibt Sperren, Zuordnungen und Auditereignis gemeinsam; bei Parallelkonflikten bleibt die vorherige Zuordnung durch Rollback erhalten. Statusänderungen sind ebenfalls transaktional; Storno/Ablehnung entfernt Sperren und Zuordnungen gemeinsam. Der zuvor im Statusmodell fehlende Übergang `confirmed → seated` ist ergänzt.
-- **Prüfungen nach Baustein 2:** Typecheck, OXLint, 78/78 automatisierte Tests und Production-Build erfolgreich. Bekannte fremde `use client`-Hinweise sowie die lokal nicht gesetzte `SITE_URL` bleiben nicht blockierend.
-- **Extremdatenprüfung:** `break-ui` deckte zwei reale Schwächen auf: fehlende Bedienbarkeit weiterer Treffer oberhalb der ersten 100 Ergebnisse und falscher Plural bei genau einem Eintrag. Die Liste ist nun serverseitig in 25er-Seiten bedienbar, die Einzahl stimmt und lange Gast-/Referenzwerte können umbrechen. Lange Namen/E-Mails, fehlende optionale Kontakte, leere Ergebnisse und schmale Ansichten waren bereits abgesichert.
-- **Nächster Einstieg Person B:** Sonderöffnungen, Schließungen und operative Sperrzeiten in der Adminoberfläche verwalten; danach Veranstaltungsanfragen vollständig bearbeiten.
-- **Lokaler Adminzugriff korrigiert:** Ein alter Vite-Prozess belegte Port `5173`, sodass ein zweiter Lauf unbemerkt auf `5174` startete. Clerk akzeptierte die Anmeldung dort, der Express-Server lehnte die Session aber wegen der nicht autorisierten Herkunft ab und die Oberfläche zeigte nur den allgemeinen Verfügbarkeitsfehler. Doppelte Prozesse wurden beendet, Vite läuft wieder auf `5173`, und `strictPort` verhindert künftig ein stilles Ausweichen auf einen nicht freigegebenen Port.
-- **Dritter FS5-Baustein erledigt:** Der neue Bereich „Betrieb“ verwaltet datierte Schließtage, Sonderöffnungen und zeitlich begrenzte Restaurant-, Bereichs- oder Tischsperren. Der Owner erhält explizite Lade-, Leer-, Erfolgs-, Konflikt- und Fehlerzustände; mobile Ansichten stapeln die beiden Arbeitsbereiche ohne horizontale Abhängigkeit. Sonderöffnungen ohne vollständige oder chronologisch gültige Uhrzeiten werden auch serverseitig abgelehnt.
-- **Prüfungen nach Baustein 3:** Typecheck, OXLint, 79/79 automatisierte Tests und Production-Build erfolgreich. Der Build meldet nur die bekannten Hinweise zu fremden `use client`-Direktiven und die lokal nicht gesetzte `SITE_URL`. Die geschützte Datenansicht konnte ohne erneute Nutzeranmeldung nicht visuell mit Realdaten geöffnet werden; Struktur, Breakpoints, Touchziele und leere Zustände wurden im Code geprüft.
-- **Nächster Einstieg Person B:** Veranstaltungsanfragen mit Status und interner Bearbeitung vollständig in das Admin-Dashboard integrieren. Dafür ist ein neues ausdrückliches `GO` erforderlich.
-- **Vierter FS5-Baustein erledigt:** Veranstaltungsanfragen sind nach Name, Kontakt, Referenz oder Anlass serverseitig durchsuchbar, nach Status filterbar und paginiert. Die geschützte Detailansicht enthält Gastnachricht und Kontaktdaten sowie getrennte Aktionen für Bearbeitungsstatus und interne Notiz. Fokusbindung, Escape-Schließen und Rückkehr zum Auslöser entsprechen der Reservierungsverwaltung.
-- **Extremdatenprüfung:** Lange Namen/E-Mails und Anlässe, fehlende Telefonnummer, große Personenzahlen, lange Nachrichten und 2.000-Zeichen-Notizen besitzen sichere Umbrüche beziehungsweise vollständige Detaildarstellung. Die Einzahl „1 Anfrage“ und leere Trefferlisten sind korrekt. Als realer Skalierungsfehler wurde die unbegrenzte Listenabfrage gefunden und durch serverseitige Filter plus 25er-Pagination behoben.
-- **Prüfungen nach Baustein 4:** Typecheck, OXLint, 80/80 automatisierte Tests und Production-Build erfolgreich. Die bekannten fremden `use client`-Hinweise und die lokal nicht gesetzte `SITE_URL` bleiben nicht blockierend.
-- **Nächster Einstieg Person B:** Abschließende FS5-Berechtigungs-, Konflikt-, Tastatur- und E2E-Prüfung über alle operativen Adminmodule durchführen und anschließend das FS5-Gate präsentieren. Dafür ist ein neues ausdrückliches `GO` erforderlich.
-- **Finale FS5-Qualitätsprüfung:** Alle operativen Adminmodule weisen nicht angemeldete Zugriffe vor dem Serviceaufruf mit `401` ab; Rollen- und Inaktivitätsfälle bleiben durch die Autorisierungstests abgedeckt. Automatisierte Konflikttests bestätigen `409 RESERVATION_CONFLICT` bei kollidierenden Sperrzeiten und `409 TABLE_NOT_AVAILABLE` bei paralleler Tischzuweisung.
-- **Tastatur und Fokus:** Reservierungs- und Anfragedetails werden per Portal außerhalb des währenddessen inerten Dashboards gerendert. Tab bleibt im Dialog, Escape schließt, der Fokus kehrt zum Auslöser zurück und wird bei Status- oder Notizspeicherung nicht mehr ungewollt auf „Schließen“ gesetzt. Ein sichtbarer Sprunglink bei Tastaturfokus überspringt die Adminnavigation; der Zielbereich besitzt einen sichtbaren Fokuszustand.
-- **Echte Parallelitätsprüfung:** `npm run test:reservation-concurrency` lief erfolgreich gegen die abgesicherte Atlas-Testdatenbank. Von zwei gleichzeitig konkurrierenden Buchungen wurde exakt eine bestätigt und eine mit `NO_AVAILABILITY` abgelehnt; die anschließende Gaststornierung entfernte alle Tischsperren.
-- **Abschlussprüfung:** Typecheck, OXLint, 83/83 automatisierte Tests, Production-Build und `git diff --check` sind erfolgreich. Der Build meldet weiterhin nur bekannte Hinweise zu fremden `use client`-Direktiven; ohne lokale `SITE_URL` werden Canonical-URLs im lokalen Prerender bewusst ausgelassen.
-- **Tagesabschluss Person B:** Sämtliche technisch ausführbaren Person-B-Aufgaben aus `FS5` sind abgeschlossen. Nächster zulässiger Schritt ist die Präsentation und ausdrückliche Abnahme von Gate `FS5`; `FS6` darf erst nach einem neuen `GO` beginnen.
+- **Gate:** Der Nutzer hat die präsentierte FS4-Gaststrecke mit ausdrücklichem `GO FS4` abgenommen.
+- **Status:** FS4 ist abgenommen. FS5 darf erst nach einem separaten ausdrücklichen `GO FS5` begonnen werden.
+- **Person A nächster zulässiger Schritt:** FS5-Arbeitsumfang und Zuständigkeiten vorbereiten; keine FS5-Implementierung ohne neues Gate beginnen.
 
-## 23. FS6-Start Person B – 12.11.2026
+## 23. FS5-Freigabe – 11.11.2026
 
-- **Freigabe:** Der Nutzer hat `FS6` am 12.11.2026 ausdrücklich freigegeben. `FS7` bleibt ohne eigenes GO gesperrt.
-- **Zuständigkeitskorrektur:** Die irrtümlich in Person Bs Branch übernommenen Person-A-FS6-Backend-, Migrations- und Servertest-Commits wurden vollständig durch nachvollziehbare Reverts entfernt. Der aktuelle `dev`-Stand wurde anschließend konfliktfrei integriert.
-- **Person-B-Arbeit:** Responsive Adminoberfläche für Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung, Aktivstatus, Vorschau, Veröffentlichung sowie Bildauswahl und bestätigte Löschung vorbereitet. Sie verwendet ausschließlich die vorgesehenen API-Grenzen und enthält keine erfundenen Speisekartendaten.
-- **Abhängigkeit:** Die Oberfläche kann erst funktional abgenommen werden, wenn Person As Menü-/Medien-API in `dev` vorliegt. Person B implementiert diese Backend-Aufgabe nicht erneut.
-- **Nächster Einstieg Person B:** Nach Integration der Person-A-API echte UI-API-Aufrufe, Tastaturbedienung, schmale Viewports und FS6-E2E prüfen; bis dahin keine Backend-Doppelarbeit beginnen.
-- **Person-B-Aufgabe 1 geprüft:** Der aktuelle `dev`-Branch enthält am 12.11.2026 noch keine Menü-/Medien-API. Die Implementierung liegt ausschließlich auf `origin/feature/szymon`; daher kann Person B die realen UI-API-Aufrufe noch nicht funktional ausführen.
-- **API-Vertragsprüfung:** Kategorien, Gerichte, Vorschau, Publikationsstatus, Upload und Löschung stimmen hinsichtlich Routen, Methoden sowie Request-/Response-Feldern mit der vorbereiteten Person-B-Oberfläche überein. Ein Backend-Widerspruch blockiert die Bildverknüpfung: `POST /api/admin/media` liefert `/api/public/media/:id`, `menuItemSchema.imageUrl` akzeptiert jedoch nur eine absolute URL. Die Korrektur bleibt Person As Aufgabe und darf nicht erneut in Person Bs Branch implementiert werden.
-- **Nächster freizugebender Person-B-Schritt:** Die Adminoberfläche unabhängig von der noch fehlenden API auf Tastaturbedienung, Fokus, schmale Viewports und realistische Extremtexte prüfen. Echte End-to-End-Speicherprüfungen folgen erst nach Integration der korrigierten Person-A-API.
-- **Person-B-Aufgabe 2 umgesetzt:** Die vorbereitete Speisekartenverwaltung besitzt nun sichtbare, formulargebundene Bildauswahl und Alternativtexte statt eines Browser-Prompts. Ungültige Pflichtfelder werden programmatisch markiert, verständlich erklärt und der Fokus wird auf das erste fehlerhafte Feld gesetzt. Wiederholte Veröffentlichungsaktionen nennen das betroffene Gericht; der Löschdialog gibt den Fokus bei jeder Schließart an den Auslöser zurück.
-- **Responsive und Motion:** Bei 320 px beziehungsweise 200-%-Zoom stapeln sich Listeneinträge und Aktionen ohne erzwungene horizontale Bedienung. Dialogbewegung läuft nur ohne aktivierte reduzierte Bewegung; der statische Zustand bleibt vollständig bedienbar.
-- **Prüfgrenze:** Die statische Tastatur-, Fokus- und Reflow-Prüfung der Person-B-Oberfläche ist abgeschlossen. Die authentifizierte Browserprüfung mit echten Menü- und Mediendaten bleibt bis zur Integration der korrigierten Person-A-API blockiert und wird nicht als E2E-Erfolg ausgegeben.
+- **Gate:** Der Nutzer erteilt ausdrücklich `GO FS5`.
+- **Status:** FS5 ist freigegeben; die Umsetzung darf beginnen.
+- **Person A nächster Schritt:** FS5-Backend-Regression für Reservierungsverwaltung und Veranstaltungsanfragen gegen den aktuellen Integrationsstand prüfen und den ersten offenen API-/Datenbankpunkt bearbeiten.
+
+## 24. FS5-Backend-Regression – 11.11.2026
+
+- **Dependency-Prüfung:** `resend` war in `package.json` und `package-lock.json` deklarierter, lokal aber fehlender Bestandteil. `npm ci --include=dev --ignore-scripts` stellte die Lockfile-Installation wieder her.
+- **Ergebnisse:** Typecheck, Lint und Production-Build erfolgreich; der direkte Vitest-Lauf ergab 65/76 erfolgreiche Tests. Die 11 HTTP-Tests scheiterten ausschließlich an der Sandbox-Blockade `listen EPERM` für lokale Listener.
+- **Atlas:** `npm run db:migrate:status` erneut versucht; DNS-SRV-Auflösung zu Atlas scheitert weiterhin mit `querySrv ECONNREFUSED`. Es wurde keine Datenbankänderung durchgeführt.
+- **Nächster Einstieg:** HTTP-Regression und Atlas-Migrationsstatus in einer Umgebung mit lokalem Listener und erreichbarem Atlas-DNS wiederholen; danach FS5-Daten-/API-Regression fortsetzen.
+
+## 25. FS5-Regression nach Umgebungsfreigabe – 11.11.2026
+
+- **Verifiziert:** HTTP-Regression mit lokalem Listener erfolgreich; 12/12 HTTP-Tests bestanden.
+- **Verifiziert:** vollständiger `npm test` erfolgreich; 16 Testdateien und 76/76 Tests bestanden, einschließlich Secret-Tracking-Prüfung.
+- **Atlas:** `npm run db:migrate:status` erfolgreich; Migrationen `0001` bis `0010` stehen auf `applied`.
+- **Ergebnis:** Die bisherigen Sandbox-Blockaden sind für diese Prüfung überwunden. Es wurde keine neue Migration ausgeführt und keine Datenbankstruktur verändert.
+- **Nächster Einstieg:** FS5-Funktionsarbeit fortsetzen; als Person A folgt die fachliche API-/Datenprüfung der operativen Verwaltung und Veranstaltungsanfragen.
+
+## 26. FS5-Fachprüfung Veranstaltungsanfragen – 11.11.2026
+
+- **Befund:** Die aktuelle `ReservationAdminService`-Variante validierte bisher nur das Statusformat, nicht die fachlich erlaubten Übergänge.
+- **Korrektur:** Statusübergänge für Veranstaltungsanfragen sind jetzt atomar gegen den erwarteten Ausgangsstatus abgesichert; ungültige Übergänge und parallele Änderungen werden abgelehnt. Audit-Ereignisse entstehen nur nach erfolgreicher Änderung.
+- **Erledigt:** Statusübergangsmatrix als datenbankunabhängige Domainfunktion zentralisiert und mit 4 dedizierten Unit-Tests abgesichert. Die drei Entwicklungsbeispiele wurden anschließend gegen Atlas geprüft.
+
+## 27. FS5-Atlas-Prüfung Veranstaltungsanfragen – 11.11.2026
+
+- **Seed:** Development-Seed um drei idempotente, ausschließlich synthetische `PLATZHALTER` ergänzt: Privates Dinner (24, `new`), Firmenfeier (35, `in_review`) und Geburtstag (12, `new`).
+- **Atlas-Verifizierung:** Development-Seed erfolgreich ausgeführt; read-only Abfrage bestätigt genau 3 Datensätze mit den erwarteten Typen, Personenzahlen und Statuswerten.
+- **Offen:** öffentliche Anfrage-/Admin-UI-Integration und dedizierte Service-Unit-Tests für die Statusübergangsmatrix.
+
+## 28. FS5-Berechtigungs- und API-Regression – 11.11.2026
+
+- **Ergänzt:** API-Test für geschützte Veranstaltungsanfragen, Pflichtfeldvalidierung, Anlegen und Statusänderung.
+- **Prüfungen:** vollständiger `npm test` erfolgreich; 17 Testdateien und 81/81 Tests bestanden, inklusive Secret-Tracking.
+- **Ergebnis:** FS5-Backend-Berechtigungs- und Validierungsabdeckung ist erweitert. Frontend-Admin-UI, Tastaturprüfung und E2E bleiben offen.
+
+## 29. FS5-Abnahme – 11.11.2026
+
+- **Gate:** Der Nutzer hat die operative Verwaltung mit ausdrücklichem `GO FS5` abgenommen.
+- **Status:** FS5 ist abgenommen. FS6 darf erst nach einem separaten ausdrücklichen `GO FS6` begonnen werden.
+- **Nächster zulässiger Schritt:** FS6-Arbeitsumfang und Zuständigkeiten vorbereiten; keine FS6-Implementierung ohne neues Gate.
+
+## 30. FS6-Freigabe – 11.11.2026
+
+- **Gate:** Der Nutzer erteilt ausdrücklich `GO FS6`.
+- **Status:** FS6 ist freigegeben; die Umsetzung darf beginnen.
+- **Person A nächster Schritt:** Backend-Verträge und Datenmodell für Speisekarte, Öffnungszeiten, Medienverwaltung sowie Entwurf/Vorschau/Veröffentlichen prüfen.
+- **Person B nächster Schritt:** Admin-Oberflächen und öffentliche Synchronisation vorbereiten.
+
+## 31. FS6-Menü-Backend-Grundlage – 11.11.2026
+
+- **Umgesetzt:** versionierte Migration `0011_menu-content`, `MenuCategory`-/`MenuItem`-Modelle und geschützte Admin-API für Kategorien und Gerichte ergänzt.
+- **Datenregeln:** Preise werden als Centwerte gespeichert; Allergene, Sortierung, Aktivstatus und Publikationsstatus sind serverseitig validiert. Bild-URLs sind nur als optionale Referenz vorgesehen; Uploadregeln sind noch offen.
+- **Migration:** `0011_menu-content` erfolgreich in Atlas angewendet; Migrationen `0001` bis `0011` stehen auf `applied`. Ein bereits vorhandener gleichwertiger Index wurde idempotent berücksichtigt.
+- **Prüfungen:** Typecheck, Lint und 81/81 Tests erfolgreich.
+- **Offen:** Öffnungszeiten-/Veröffentlichungslogik, Bild-Upload, öffentliche Synchronisation, Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 32. FS6-Öffentliche Menüausgabe – 11.11.2026
+
+- **Umgesetzt:** `GET /api/public/menu` liefert ausschließlich aktive Kategorien und aktive, veröffentlichte Gerichte; interne IDs und Zeitstempel werden nicht ausgegeben. Sortierung und Kategoriezuordnung sind deterministisch.
+- **Offen:** Admin-UI, Bild-Upload mit Rechte-/Typ-/Größenprüfung, Vorschau-/Veröffentlichungsworkflow und E2E-/Accessibility-Prüfung.
+
+## 33. FS6-Öffentliche Öffnungszeiten – 11.11.2026
+
+- **Umgesetzt:** `GET /api/public/opening-hours` liefert reguläre aktive Servicezeiten und datierte Sondertage mit geschlossen-/geöffnet-Status. Interne IDs und Zeitstempel werden nicht ausgegeben.
+- **Offen:** vollständige Admin-Pflege, Veröffentlichungs-/Vorschauworkflow, Bild-Upload, UI und E2E-/Accessibility-Prüfung.
+
+## 34. FS6-Menüvorschau – 11.11.2026
+
+- **Umgesetzt:** geschützter Endpunkt `GET /api/admin/menu/preview` ergänzt. Er zeigt aktive Entwurfs- und Veröffentlichungsdaten einschließlich `published`-Status; die öffentliche Route bleibt auf veröffentlichte Gerichte begrenzt.
+- **Offen:** expliziter Veröffentlichungsworkflow, Bild-Upload, Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 35. FS6-Veröffentlichungsworkflow – 11.11.2026
+
+- **Umgesetzt:** `PATCH /api/admin/menu/items/:itemId/publication` veröffentlicht oder entzieht die Veröffentlichung eines aktiven Gerichts. Beide Aktionen werden auditiert; nicht aktive oder unbekannte Gerichte werden abgelehnt.
+- **Offen:** Bild-Upload, vollständige Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 36. FS6-GridFS-Medienablage – 11.11.2026
+
+- **Umgesetzt:** MongoDB GridFS mit Bucket `media`, geschütztem JSON-Upload `POST /api/admin/media` und öffentlichem Abruf `GET /api/public/media/:id` ergänzt.
+- **Validierung:** erlaubte Typen JPEG/PNG/WebP, maximale Größe 5 MB, verpflichtender Alternativtext und bereinigter Dateiname. Der Upload bleibt admin-geschützt; Dateien erhalten unveränderliche Cache-Header.
+- **Migration:** `0012_gridfs-media` erfolgreich in Atlas angewendet; Migrationen `0001` bis `0012` stehen auf `applied`.
+- **Offen:** tatsächliche Dateisignaturprüfung, Rechte-/Löschworkflow, Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 37. FS6-Dateisignaturprüfung – 11.11.2026
+
+- **Umgesetzt:** JPEG-, PNG- und WebP-Dateien werden zusätzlich zum MIME-Typ anhand ihrer Binärsignatur geprüft. Falsch deklarierte oder beschädigte Uploads werden mit `MEDIA_SIGNATURE_INVALID` abgelehnt.
+- **Offen:** Rechte-/Löschworkflow, Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 38. FS6-Medien-Rechte und Löschung – 11.11.2026
+
+- **Umgesetzt:** `DELETE /api/admin/media/:id` ergänzt. Medienlöschung ist ownergeschützt, entfernt GridFS-Datei und Chunks und erzeugt ein `media.deleted`-Audit-Ereignis.
+- **Offen:** Admin-UI und E2E-/Accessibility-Prüfung.
+
+## 39. FS6-Abschlussprüfung Person A – 11.11.2026
+
+- **Voraussetzung:** Die Admin-UI wird auf Nutzerangabe als erledigt übernommen; eine erneute UI-Implementierung wurde übersprungen.
+- **Prüfungen:** `npm test` erfolgreich mit 17 Testdateien und 81/81 Tests; Secret-Tracking erfolgreich. `npm run build` erfolgreich; verbleiben nur bekannte Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL`. `npm audit --omit=dev` meldet 0 bekannte Schwachstellen.
+- **Atlas:** Migrationen `0001` bis `0012` stehen auf `applied`.
+- **Offen:** dokumentierter visueller/E2E-Nachweis der FS6-UI, sofern dieser nicht bereits separat durch Person B vorliegt; danach FS6-Präsentation und Gate-Vorbereitung.
+
+## 40. Person-A-Medienvalidierung – 12.11.2026
+
+- **Umgesetzt:** dedizierte Unit-Tests für GridFS-MIME-Prüfung, Alternativtextpflicht, Binärsignatur und 5-MB-Grenze ergänzt.
+- **Prüfungen:** `npm run typecheck`, `npm run lint` und `npm test` erfolgreich; 18 Testdateien und 85/85 Tests bestanden.
+- **Abgrenzung:** Person-B-/UI-Aufgaben wurden bewusst nicht bearbeitet.
+
+## 41. FS6-Person-B-Integration – 12.11.2026
+
+- **Zuständigkeit:** Person B hat die responsive Adminoberfläche für Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung, Aktivstatus, Vorschau, Veröffentlichung, Bildauswahl und bestätigte Löschung vorbereitet. Es wurden keine Speisekartendaten erfunden.
+- **Accessibility:** Bildauswahl und Alternativtext sind sichtbar formulargebunden. Pflichtfeldfehler werden markiert, erklärt und fokussiert; wiederholte Veröffentlichungsaktionen nennen das betroffene Gericht. Der Vorschau-Dialog restauriert den Fokus bei jeder Schließart.
+- **Responsive und Motion:** Bei 320 px beziehungsweise 200-%-Zoom stapeln sich Listeneinträge und Aktionen ohne horizontale Zwangsbedienung. Dialogbewegung läuft nur ohne aktivierte reduzierte Bewegung.
+- **API-Prüfung:** Person As Menü-/Medien-API ist inzwischen in `dev` integriert. Der Vertrag ist jedoch noch nicht vollständig konsistent: Der Upload liefert `/api/public/media/:id`, während die Gerichtvalidierung weiterhin ausschließlich absolute URLs akzeptiert. Die echte Upload-zu-Gericht-E2E-Abnahme bleibt bis zur Korrektur dieses Person-A-Vertrags offen.
