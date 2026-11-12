@@ -1,10 +1,10 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS6` in Arbeit; Person-B-Oberfläche wartet auf Person-A-API
+**Status:** Full-Stack-Phase `FS6` freigegeben; Backend-Grundlagen für Menü, Öffnungszeiten und Medien umgesetzt; UI-/E2E-Abnahme offen
 
 **Phase:** `FS6` – Speisekarte, Öffnungszeiten und Medienverwaltung
 
-**Letzte Aktualisierung:** 12.11.2026
+**Letzte Aktualisierung:** 11.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
@@ -18,7 +18,7 @@ Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vol
 - Der Atlas-Benutzer besitzt am 03.11.2026 verifiziert ausschließlich datenbankspezifisches `readWrite` für `colosseo` und `colosseo_test`. Entwicklungsverbindung, Testverbindung und Test-Migrationslauf sind damit erfolgreich.
 - Vom Nutzer bestätigter Atlas-Betriebsstand: MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`), Replica Set mit drei Nodes, Backups derzeit inaktiv, keine verknüpften App Services und ein vorhandener Search-Index. Render soll später möglichst regionsnah betrieben werden; Backups bleiben vor einem realen Produktionsbetrieb zu klären.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.
-- Aktuelle Phase: `FS6`. Person Bs Adminoberfläche für Menü, Vorschau, Publikation und Medienbedienung ist vorbereitet. Menü-/Medienmodelle, Migrationen und API-Endpunkte bleiben ausdrücklich Person As Verantwortung und sind in diesem Branch nicht doppelt implementiert.
+- Aktuelle Phase: `FS6`. Menü-, Öffnungszeiten- und Medien-Backend sind als Demo-Grundlage implementiert; öffentliche Menüs zeigen nur aktive/veröffentlichte Inhalte. Die Admin-Oberfläche und E2E-Abnahme sind offen.
 - Die reine Reservierungslogik, öffentliche Config-/Verfügbarkeits-/Buchungsendpunkte, idempotente Bestätigung, Rate-Limit, atomare Tisch-Zeit-Sperren sowie geschützte Admin-Endpunkte für manuelle Buchungen und Sperrzeiten sind implementiert. Migrationen `0005` und `0006` sind in `colosseo_test` und `colosseo` angewendet.
 - Die Express-/TypeScript-Grundlage einschließlich statischer Produktionsauslieferung ist implementiert. Entwicklungs- und Produktionsprozess, Healthcheck, API-404 sowie die drei vorgerenderten Sprachseiten wurden am 05.11.2026 über echte lokale Listener geprüft.
 - Der gemeinsame React-/Express-Web-Service ist per Render-Blueprint in Frankfurt live. Reproduzierbarer Build, idempotente Migration vor dem Serverstart, `/api/health`, MongoDB Atlas, Clerk, Resend-Konfiguration und `SITE_URL` sind in der Render-Umgebung aktiv; Secrets bleiben ausschließlich dort gespeichert.
@@ -146,10 +146,29 @@ Die ausführlichen Regeln stehen in `AGENTS.md` und `docs/SPEC.md`. Für den sch
 
 Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 
-## 8. Nächster zulässiger Schritt
+## 8. FS6-API-Verträge
 
-1. Für die Demo im eingeschränkten Resend-Testmodus bleiben; keine beliebigen realen Empfänger und keine echten Gastdaten verwenden. Eine eigene Absenderdomain ist erst bei einem späteren Produktionsauftrag erforderlich.
-2. `FS6` ist seit dem ausdrücklichen `GO` vom 12.11.2026 aktiv. Person B wartet für die funktionale Integration auf Person As versionierte Menü-/Medien-API.
-3. Nach Integration der API führt Person B UI-API-, Accessibility-, Mobile- und E2E-Prüfungen aus. Backend-Doppelarbeit und `FS7` werden nicht vorgezogen.
+### Öffentliche Endpunkte
+
+- `GET /api/public/menu`: liefert aktive Kategorien mit aktiven und `published: true` gesetzten Gerichten. Preise sind Minor Units (`priceCents`); interne MongoDB-IDs und Zeitstempel werden nicht ausgegeben.
+- `GET /api/public/opening-hours`: liefert aktive reguläre Servicezeiten sowie datierte Sondertage mit `closed`, `opens` und `closes`.
+- `GET /api/public/media/:id`: liefert ein GridFS-Medium mit `Content-Type` aus den serverseitig gespeicherten Metadaten und unveränderlichem Cache-Header.
+
+### Geschützte Owner-Endpunkte
+
+- `GET /api/admin/menu/categories`, `PUT /api/admin/menu/categories/:slug`: Kategorien lesen und speichern.
+- `GET /api/admin/menu/items`, `PUT /api/admin/menu/items/:itemId`: Gerichte mit Name, Beschreibung, `priceCents`, Allergenen, optionaler Bild-URL, Sortierung, Aktiv- und Veröffentlichungsstatus speichern.
+- `GET /api/admin/menu/preview`: aktive Entwurfs- und Veröffentlichungsdaten einschließlich `published`-Status.
+- `PATCH /api/admin/menu/items/:itemId/publication`: explizit veröffentlichen oder Veröffentlichung zurücknehmen; die Aktion wird auditiert.
+- `POST /api/admin/media`: JSON mit `fileName`, `contentType`, `altText` und Base64-Daten. Erlaubt sind JPEG, PNG und WebP bis 5 MB; Alternativtext ist 1–300 Zeichen lang. Die Binärsignatur wird zusätzlich zum MIME-Typ geprüft.
+- `DELETE /api/admin/media/:id`: löscht GridFS-Datei und Chunks und erzeugt ein Audit-Ereignis.
+
+Fehlercodes der Medien-API sind `MEDIA_TYPE_NOT_ALLOWED`, `MEDIA_ALT_TEXT_INVALID`, `MEDIA_SIZE_INVALID`, `MEDIA_SIGNATURE_INVALID` und `MEDIA_NOT_FOUND`. Alle Admin-Endpunkte sind ownergeschützt; der Client darf diese Prüfung nicht ersetzen.
+
+## 9. Nächster zulässiger Schritt
+
+1. Person B integriert die Admin-Oberfläche gegen die oben genannten FS6-Endpunkte.
+2. Person A führt danach die echte UI-/API-Regression, Berechtigungs- und Fehlerfallprüfung sowie E2E-, Typecheck-, Lint-, Test- und Build-Prüfung aus.
+3. Vor `FS7` die vollständige FS6-Präsentation durchführen und auf ein ausdrückliches `GO FS7` warten.
 
 Der operative Termin- und Personenplan steht in `docs/DAILY_PLAN.md`.
