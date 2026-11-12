@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS5` technisch abgeschlossen; Gate-Präsentation und ausdrückliches `GO` für `FS6` stehen aus
-**Letzte Aktualisierung:** 11.11.2026
+**Status:** Full-Stack-Phase `FS6` in Arbeit; Person-B-Adminoberfläche vorbereitet, Person-A-API ausstehend
+**Letzte Aktualisierung:** 12.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -267,14 +267,14 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [x] Sonderöffnungen, Schließungen und Sperrzeiten verwalten. Person B ergänzte am 11.11.2026 einen geschützten, responsiven Betriebsbereich für datierte Schließtage, Sonderöffnungen sowie Restaurant-, Bereichs- und Tischsperren. Die API verlangt für Sonderöffnungen vollständige, aufsteigende Uhrzeiten; operative Sperren verwenden weiterhin den atomaren Reservierungsindex und melden Überschneidungen verständlich. Lade-, Leer-, Erfolgs- und Fehlerzustände sowie 44-px-Bedienziele sind enthalten. Typecheck, OXLint, 79/79 Tests und Production-Build sind erfolgreich.
 - [x] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren. Person B ergänzte am 11.11.2026 eine serverseitig durchsuchbare, nach Status filterbare und in 25er-Seiten paginierte Anfrageverwaltung. Die tastaturbedienbare Detailansicht zeigt Kontakt, Wunschtermin, Anlass, Personenanzahl und Gastnachricht; Status und interne Notiz werden getrennt gespeichert und auditiert. Fokusbindung, Escape, Fokus-Rückgabe, Lade-/Leer-/Fehlerzustände und mobile Tabellenreduktion sind enthalten. Der `break-ui`-Check deckte die zuvor unbegrenzte Listenabfrage als Skalierungsfehler auf; sie wurde durch echte Serverpagination behoben. Typecheck, OXLint, 80/80 Tests und Production-Build sind erfolgreich.
 - [x] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen. Person B prüfte am 11.11.2026 alle FS5-Adminmodule auf vorgeschaltete Clerk-/Owner-Autorisierung sowie Sperrzeit- und Tischzuweisungskonflikte mit strukturierten `401`-/`409`-Antworten. Reservierungs- und Anfragedialoge liegen als echte Portale außerhalb des inerten Dashboards, binden den Fokus, schließen per Escape, stellen den Auslöserfokus wieder her und verändern ihn während eines Speichervorgangs nicht mehr. Ein Tastatur-Sprunglink führt direkt zum Arbeitsbereich. Typecheck, OXLint, 83/83 automatisierte Tests, Production-Build und `git diff --check` sind erfolgreich. Der echte Atlas-Parallellauf bestätigt genau eine erfolgreiche Buchung bei zwei gleichzeitigen Zugriffen sowie die Freigabe aller Tischsperren nach Gaststornierung.
-- [ ] **GATE FS5:** operative Verwaltung präsentieren; auf GO für `FS6` warten.
+- [x] **GATE FS5:** operative Verwaltung präsentiert; ausdrückliches `GO` für `FS6` am 12.11.2026 erhalten.
 
 ### FS6 – Speisekarte, Öffnungszeiten und Medienverwaltung
 
-- [ ] Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung und Aktivstatus verwalten.
-- [ ] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren.
+- [-] Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung und Aktivstatus verwalten. Person B hat die responsive Adminoberfläche mit Formular-, Listen-, Lade-, Leer- und Fehlerzuständen vorbereitet. Die verbindliche Person-A-API muss vor der Funktionsabnahme integriert werden.
+- [-] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren. Person B hat Auswahl, clientseitige Typ-/Größenprüfung, Alternativtextabfrage, Vorschau und bestätigte Löschoberfläche vorbereitet. Speicherung und serverseitige Prüfung bleiben Person As API-Verantwortung.
 - [ ] Reguläre Öffnungszeiten und datierte Abweichungen pflegen.
-- [ ] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen.
+- [-] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen. Person Bs Admin-Vorschau und Publikationsbedienung sind vorbereitet; echte API-Funktion und öffentlicher Fallback sind noch nicht integriert.
 - [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
 - [ ] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen.
 - [ ] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentieren; auf GO für `FS7` warten.
