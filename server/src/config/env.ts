@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+function parseAuthorizedParties(value?: string): string[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (Array.isArray(parsed) && parsed.every((item): item is string => typeof item === "string")) return parsed.map((item) => item.trim()).filter(Boolean);
+  } catch {
+    // Comma-separated environment values remain supported below.
+  }
+  return value.split(",").map((party) => party.trim().replace(/^['"]|['"]$/g, "")).filter(Boolean);
+}
+
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().min(1).max(65_535).default(3_000),
@@ -11,7 +22,7 @@ const serverEnvSchema = z.object({
     .string()
     .trim()
     .optional()
-    .transform((value) => value?.split(",").map((party) => party.trim()).filter(Boolean) ?? []),
+    .transform(parseAuthorizedParties),
   RESEND_API_KEY: z.string().trim().regex(/^re_[A-Za-z0-9_]+$/, "RESEND_API_KEY must be a Resend API key").optional(),
   RESEND_FROM_EMAIL: z.string().trim().min(3).max(320).optional(),
   RESTAURANT_NOTIFICATION_EMAIL: z.string().trim().email().optional(),

@@ -431,3 +431,9 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 ## 48. FS7-einfache manuelle Datenschutzaktion – 12.11.2026
 
 - **Umgesetzt:** Ownergeschützter Endpunkt `POST /api/admin/reservations/:publicId/anonymize` ergänzt. Ein öffentliches Export-/Löschportal bleibt bewusst außerhalb des einfachen Demo-Umfangs.
+
+## 49. FS7-Person-A-Konfigurations- und Sicherheitsreview – 12.11.2026
+
+- **Umgesetzt:** `CLERK_AUTHORIZED_PARTIES` akzeptiert jetzt sowohl JSON-Arrays aus dotenv-Konfigurationen als auch Kommalisten; Anführungszeichen werden bei der Fallback-Form bereinigt. Ein Regressionstest deckt das JSON-Format ab.
+- **Prüfungen:** Typecheck, Lint, 92/92 Tests, Secret-Tracking und `npm audit --omit=dev` mit 0 bekannten Schwachstellen erfolgreich.
+- **Offen:** Betriebsseitige Secret-Rotation, produktives Monitoring/Alarmierung und Backup-/Wiederherstellungstest benötigen weiterhin externe Infrastruktur- beziehungsweise Betriebsfreigaben. Der nächste lokal ausführbare Person-A-Schritt ist der umfassende IDOR-/XSS-/CORS-/CSRF-/Log-Leak-Review.
