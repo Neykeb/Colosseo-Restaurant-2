@@ -408,7 +408,6 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Person-B-Regression:** Der zusammengeführte Stand besteht erneut Typecheck, OXLint, 86/86 Tests, Production-Build und `git diff --check`. Der lokale Express-Server startet auf Port `3000`; die Adminoberfläche erreicht die Google-Anmeldung.
 - **Manueller Browser-E2E:** Authentifizierter Bild-Upload, Speichern mit internem Medienpfad, Entwurfsvorschau, Veröffentlichung, öffentlicher Menüabruf, öffentlicher Bildabruf mit unveränderlichem Cache-Header und Zurückziehen wurden erfolgreich geprüft.
 - **Bereinigung verifiziert:** Die synthetische Kategorie `e2e-test`, das Testgericht und das GridFS-Testmedium wurden durch Person A entfernt. Eine read-only Atlas-Abfrage bestätigt, dass alle drei Datensätze nicht mehr existieren.
-
 ## 43. FS7-Start und erster `break-ui`-Durchlauf Person B – 12.11.2026
 
 - **Gate:** Der Nutzer hat FS6 nach dem integrierten E2E ausdrücklich abgenommen und `GO` für den schrittweisen Start von FS7 erteilt.
