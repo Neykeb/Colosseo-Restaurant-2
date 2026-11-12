@@ -387,3 +387,9 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Prüfungen:** `npm test` erfolgreich mit 17 Testdateien und 81/81 Tests; Secret-Tracking erfolgreich. `npm run build` erfolgreich; verbleiben nur bekannte Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL`. `npm audit --omit=dev` meldet 0 bekannte Schwachstellen.
 - **Atlas:** Migrationen `0001` bis `0012` stehen auf `applied`.
 - **Offen:** dokumentierter visueller/E2E-Nachweis der FS6-UI, sofern dieser nicht bereits separat durch Person B vorliegt; danach FS6-Präsentation und Gate-Vorbereitung.
+
+## 40. Person-A-Medienvalidierung – 12.11.2026
+
+- **Umgesetzt:** dedizierte Unit-Tests für GridFS-MIME-Prüfung, Alternativtextpflicht, Binärsignatur und 5-MB-Grenze ergänzt.
+- **Prüfungen:** `npm run typecheck`, `npm run lint` und `npm test` erfolgreich; 18 Testdateien und 85/85 Tests bestanden.
+- **Abgrenzung:** Person-B-/UI-Aufgaben wurden bewusst nicht bearbeitet.
