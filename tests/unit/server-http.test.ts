@@ -217,6 +217,35 @@ describe("Express platform foundation", () => {
     expect(deleted.status).toBe(204);
   });
 
+  it("returns an owner-protected calendar overview for a validated date range", async () => {
+    const owner = { clerkUserId: "user_owner", role: "owner" as const, active: true, displayName: "Owner" };
+    const overview = {
+      startDate: "2026-11-10",
+      endDate: "2026-11-16",
+      reservations: [{ publicId: "COL-1234567890", date: "2026-11-10", startTime: "18:00", endTime: "20:00", partySize: 4, status: "confirmed", guest: { name: "Giulia Bianchi" } }],
+      inquiries: [],
+      blocks: [],
+      specialDays: [],
+    };
+    const getCalendarOverview = vi.fn(async () => overview);
+    const baseUrl = await listen(createApp({
+      getAuthenticatedUserId: () => owner.clerkUserId,
+      findAdminProfile: async () => owner,
+      reservationAdminService: { getCalendarOverview } as never,
+    }));
+
+    const response = await fetch(`${baseUrl}/api/admin/calendar?startDate=2026-11-10&endDate=2026-11-16`);
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual(overview);
+    expect(getCalendarOverview).toHaveBeenCalledWith("2026-11-10", "2026-11-16");
+
+    const reversed = await fetch(`${baseUrl}/api/admin/calendar?startDate=2026-11-16&endDate=2026-11-10`);
+    expect(reversed.status).toBe(400);
+    const tooLarge = await fetch(`${baseUrl}/api/admin/calendar?startDate=2026-11-01&endDate=2026-12-15`);
+    expect(tooLarge.status).toBe(400);
+    expect(getCalendarOverview).toHaveBeenCalledTimes(1);
+  });
+
   it("validates and protects event inquiry administration", async () => {
     const unauthenticated = await listen(createApp());
     const denied = await fetch(`${unauthenticated}/api/admin/event-inquiries`);

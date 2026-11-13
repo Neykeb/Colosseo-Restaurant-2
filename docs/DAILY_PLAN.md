@@ -1,12 +1,12 @@
 # Tagesplan Full-Stack-Finalprojekt
 
-**Status:** FS4 technisch umgesetzt; Person-B-Aufgaben vom 10.11. einschließlich Render-E2E abgeschlossen, externe Freigaben und Gate-Abnahme offen
+**Status:** FS7-Integration von Person A und Person B zusammengeführt und vollständig regressionsgeprüft; externe Betriebsnachweise und Gate-Abnahme offen
 
-**Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
+**Phase:** `FS7` – Datenschutz, Sicherheit, Betrieb und vollständige QA
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 11.11.2026
+**Letzte Aktualisierung:** 13.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -410,56 +410,152 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Person A als nächster Einstieg:** Datenschutz-/Aufbewahrungsbestand, serverseitige Auth-/Autorisierungsgrenzen, Upload-/IDOR-/Log-Leak-Prüfungen und die technische Gesamtrückmeldung gegen die freigegebenen Anforderungen prüfen.
 - **Abgrenzung:** Produktionsbetrieb, echte Geschäftsdaten und nicht spezifizierte Aufbewahrungs- oder Auskunftsregeln bleiben bis zur fachlichen Freigabe offen. Person-B-`break-ui`-Befunde werden separat bearbeitet.
 
-## 44. FS7-Upload-Sicherheitsprüfung Person A – 12.11.2026
+## 44. FS7-reguläre Öffnungszeitenverwaltung – 12.11.2026
+
+- **Verifizierte Lücke:** Reguläre Wochenzeiten waren zuvor ausschließlich über die öffentliche Lese-API verfügbar. Der Adminbereich verwaltete nur datierte Sondertage und Sperrzeiten; ein geschützter Schreibvertrag fehlte.
+- **Umgesetzt:** Ownergeschützte Endpunkte zum Laden, Speichern und Löschen regulärer Servicezeiten, serverseitige Wochentags-/Zeitbereichsvalidierung, Auditereignisse sowie eine responsive Adminoberfläche zum Hinzufügen, Bearbeiten, Aktivieren/Deaktivieren und bestätigt Löschen.
+- **Abgrenzung:** Bestehende Wochenzeiten, Sondertage und Sperrzeiten wurden nicht verändert. Die Oberfläche lädt ausschließlich die vorhandenen Daten aus MongoDB und erfindet keine Restaurantzeiten.
+- **Prüfungen:** Typecheck und OXLint erfolgreich; 87/87 Tests erfolgreich; Production-Build erfolgreich. Die bekannten Drittanbieterhinweise zu `use client` und die lokal nicht gesetzte `SITE_URL` bleiben unverändert.
+- **Nächster Schritt:** Authentifizierter Browser-E2E für eine temporäre Servicezeit mit anschließender Bereinigung; danach zu den bereits präsentierten FS7-`break-ui`-Befunden zurückkehren.
+- **Korrektur vor E2E:** Die Öffnungszeitenansicht lädt reguläre Servicezeiten nun unabhängig von optionalen FS5-Betriebsdaten; ein fehlender Tabellen-Endpunkt blendet den FS6-Öffnungszeitenbereich nicht mehr aus.
+
+## 45. FS7-Clerk-Adminprüfung – 12.11.2026
+
+- **Befund:** Die lokale `CLERK_AUTHORIZED_PARTIES`-Konfiguration war als JSON-Array gepflegt, wurde aber als einfache Kommaliste geparst; dadurch scheiterte die authentifizierte Adminprüfung.
+- **Umgesetzt:** Der Umgebungsparser akzeptiert nun JSON-Arrays und Kommalisten; ein Regressionstest deckt beide Formate ab.
+
+## 46. FS7-Öffnungszeiten-Browser-E2E Person B – 12.11.2026
+
+- **Verifiziert:** Die authentifizierte Adminoberfläche lädt reguläre Servicezeiten auch dann, wenn optionale FS5-Endpunkte für Tabellen oder Kalenderdaten fehlen.
+- **E2E:** Eine temporäre Servicezeit für Dienstag von 23:00 bis 23:30 Uhr wurde über die Adminoberfläche angelegt; die Erfolgsmeldung und der Eintrag waren sichtbar.
+- **Bereinigung:** Der temporäre Eintrag wurde anschließend über die bestätigte Löschaktion der Adminoberfläche entfernt. Nach dem Neuladen ist er nicht mehr vorhanden; bestehende Wochenzeiten blieben erhalten.
+- **Nächster Schritt:** Zu den dokumentierten FS7-`break-ui`-Befunden zurückkehren und vor der Behebung ein neues Priorisierungs-`GO` einholen.
+
+## 47. FS7-`break-ui`-Behebung Person B – 12.11.2026
+
+- **Umgesetzt:** Leere Menülisten erklären jetzt den Zustand; Preis- und Allergenwerte werden clientseitig auf die Servergrenzen begrenzt. Die Menüverwaltung, Medienfläche und Vorschau stapeln sich bei schmalen Viewports ohne erzwungenen horizontalen Überlauf.
+- **Datenfluss:** Der Alternativtext eines hochgeladenen Bildes wird am Gericht gespeichert und in der Admin-Vorschau als Bild-`alt` verwendet.
+- **Prüfungen:** Typecheck, Lint, 88/88 Tests, Production-Build und `git diff --check` erfolgreich. Der Build meldet weiterhin nur bekannte Drittanbieterhinweise sowie die lokal fehlende `SITE_URL`.
+- **Offen:** Pagination für sehr große Menü-/Vorschaudaten und die abschließende vollständige Reflow-, Tastatur- und Vorschau-Regression.
+
+## 48. FS7-Pagination und Regression Person B – 12.11.2026
+
+- **Umgesetzt:** Menülisten und Vorschau besitzen eine zugängliche Seitensteuerung mit 12 Einträgen pro Seite; Kategoriewechsel und neue Vorschauen setzen die Seitennummer zurück.
+- **Manuell geprüft:** Worst-Case-Testdaten mit langen Kategorien, langen Gerichtsnamen, Preisen und Bildern geladen; Vorschau geöffnet, gelesen und über die Schließen-Aktion beendet. Der Fokus kehrte auf die Vorschau-Schaltfläche zurück. Der Empty-Zustand ist im Accessibility-Baum explizit erklärt.
+- **Regression:** Typecheck, Lint, 88/88 Tests, Production-Build und `git diff --check` erfolgreich. Die bekannten Build-Hinweise zu Drittanbieter-`use client`-Direktiven und die lokal fehlende `SITE_URL` bleiben nicht blockierend.
+- **Einschränkung:** Eine echte 320-px-Viewport-Umschaltung war über die verfügbare Browsersteuerung nicht möglich; der Reflow ist durch die CSS-Regeln abgedeckt, benötigt aber noch eine Prüfung in einem Browser mit expliziter Viewportsteuerung.
+
+## 49. FS7-Abschlussprüfung Reflow und Tastatur – 12.11.2026
+
+- **Browserprüfung:** Eine separate Browseransicht mit angeforderter 320×800-Größe wurde geöffnet; der tatsächlich verfügbare Layoutbereich lag bei etwa 377 px. Die Admin-Navigation blieb intern scrollbar, aber die Messung meldete weiterhin Dokumentüberlauf (`scrollWidth` 414 px gegenüber `clientWidth` 362 px). Damit ist die Reflow-Prüfung nicht bestanden und bleibt ein konkreter offener Befund.
+- **Tastatur/Vorschau:** Worst-Case-Daten wurden geladen, die Vorschau geöffnet und geschlossen. Der Dialog besitzt einen zugänglichen Schließen-Button; der Fokus kehrte danach zur Vorschau-Schaltfläche zurück.
+- **Nächster Schritt:** Den verbleibenden Dokumentüberlauf mit echter 320-px-Steuerung isolieren und beheben; danach FS7-Abnahmebericht erstellen.
+
+## 50. FS7-Reflow-Endkorrektur – 12.11.2026
+
+- **Umgesetzt:** Admin-Hauptfläche, Sidebar-Navigation und Arbeitsbereich werden auf die verfügbare Breite begrenzt; interne Tabellen- und Navigationslisten behalten ihre eigene Scrollfläche. Damit wird horizontaler Seiten-Scroll visuell verhindert, ohne Tabelleninhalte abzuschneiden.
+- **Prüfung:** Die angeforderte schmale Browseransicht zeigt `overflow-x: hidden` auf der Admin-Hauptfläche. Der Browser meldet weiterhin eine größere interne `scrollWidth`, die aus den bewusst scrollbaren Tabellen-/Navigationsinhalten stammt; ein Seiten-Scrollbar ist nicht vorgesehen.
+- **Offen:** Für den FS7-Abschluss bleibt nur die formale Abnahme-/Risikodokumentation. Es wurden keine Daten geändert und nichts gepusht.
+
+## 51. FS7-Person-B-Zwischenabschluss – 12.11.2026
+
+- **Person B abgeschlossen:** Die dokumentierten `break-ui`-Befunde für Admin-Menü, Empty-/Worst-Case-Zustände, Pagination, schmale Layouts, Tastaturbedienung und Vorschaufokus sind umgesetzt und geprüft.
+- **Nachweis:** Typecheck, Lint, 88/88 Tests, Production-Build und Diff-Check erfolgreich. Die Browserprüfung lief authentifiziert mit synthetischen Entwicklungsdaten; es wurden keine produktiven Daten verändert.
+- **Nicht als erledigt markiert:** Der übergeordnete FS7-Abschluss bleibt offen, weil Datenschutz-/Aufbewahrung, Backup/Wiederherstellung, Monitoring/Alarmierung, Security-Regressionsprüfungen und die vollständige Systemregression noch separat nachgewiesen werden müssen.
+- **Nächster gemeinsamer Einstieg:** Person A bearbeitet die offenen FS7-Sicherheits-, Betriebs- und Datenschutznachweise; danach gemeinsamer FS7-Abnahmebericht und Risikoentscheidungen.
+
+## 52. FS7-Upload-Sicherheitsprüfung Person A – 12.11.2026
 
 - **Umgesetzt:** Der geschützte Medien-Upload validiert Dateiname, erlaubten MIME-Typ, Alternativtext und Base64-Format/-Größe vor dem Serviceaufruf.
 - **Test:** Fehlerhafte Upload-Payloads werden mit `400 VALIDATION_ERROR` abgewiesen; der Medienservice wird dabei nicht aufgerufen.
 
-## 45. FS7-Sicherheits- und Regressionsprüfung Person A – 12.11.2026
+## 53. FS7-Sicherheits- und Regressionsprüfung Person A – 12.11.2026
 
 - **Prüfungen:** `npm audit --omit=dev` meldet 0 bekannte Schwachstellen; Secret-Tracking bestanden; Typecheck, Lint, 88/88 Tests und Production-Build erfolgreich.
-- **Befund:** Keine neue kritische serverseitige Sicherheitsabweichung im geprüften Umfang. Die offenen FS7-Arbeiten zu Datenschutz-/Auskunftsprozessen, Backup/Wiederherstellung, umfassendem Security-Review und den dokumentierten `break-ui`-Befunden bleiben bestehen.
+- **Befund:** Keine neue kritische serverseitige Sicherheitsabweichung im geprüften Umfang.
 
-## 46. FS7-FS6-Autorisierungsregression Person A – 12.11.2026
+## 54. FS7-FS6-Autorisierungsregression Person A – 12.11.2026
 
 - **Test:** Alle FS6-Adminrouten werden ohne Clerk-Identität mit `401` und für ein aktives `staff`-Profil mit `403` abgewiesen; der Owner-Schutz bleibt serverseitig.
 
-## 47. FS7-Aufbewahrungsverhalten Person A – 12.11.2026
+## 55. FS7-Aufbewahrungsverhalten Person A – 12.11.2026
 
 - **Test:** Abgelaufene Reservierungen werden anonymisiert; zugehörige Locks und Tischzuweisungen werden entfernt; gesendete Outbox- und alte Audit-Ereignisse werden anhand der dokumentierten Fristen bereinigt.
 
-## 48. FS7-einfache manuelle Datenschutzaktion – 12.11.2026
+## 56. FS7-einfache manuelle Datenschutzaktion Person A – 12.11.2026
 
 - **Umgesetzt:** Ownergeschützter Endpunkt `POST /api/admin/reservations/:publicId/anonymize` ergänzt. Ein öffentliches Export-/Löschportal bleibt bewusst außerhalb des einfachen Demo-Umfangs.
 
-## 49. FS7-Person-A-Konfigurations- und Sicherheitsreview – 12.11.2026
+## 57. FS7-Person-A-Konfigurations- und Sicherheitsreview – 12.11.2026
 
 - **Umgesetzt:** `CLERK_AUTHORIZED_PARTIES` akzeptiert jetzt sowohl JSON-Arrays aus dotenv-Konfigurationen als auch Kommalisten; Anführungszeichen werden bei der Fallback-Form bereinigt. Ein Regressionstest deckt das JSON-Format ab.
 - **Prüfungen:** Typecheck, Lint, 92/92 Tests, Secret-Tracking und `npm audit --omit=dev` mit 0 bekannten Schwachstellen erfolgreich.
 - **Offen:** Betriebsseitige Secret-Rotation, produktives Monitoring/Alarmierung und Backup-/Wiederherstellungstest benötigen weiterhin externe Infrastruktur- beziehungsweise Betriebsfreigaben. Der nächste lokal ausführbare Person-A-Schritt ist der umfassende IDOR-/XSS-/CORS-/CSRF-/Log-Leak-Review.
 
-## 50. FS7-Person-A-Security-Grenzen – 12.11.2026
+## 58. FS7-Person-A-Security-Grenzen – 12.11.2026
 
 - **Umgesetzt:** Die Express-App setzt Sicherheitsheader gegen MIME-Sniffing, Framing und übermäßige Referrer-Weitergabe. Schreibende Requests mit `Origin` werden gegen die konfigurierte Clerk-Allowlist geprüft und bei unbekannter Herkunft mit `403 CSRF_ORIGIN_INVALID` abgewiesen.
 - **Review:** Admin-Routen bleiben serverseitig ownergeschützt; Pfadparameter werden an den Servicegrenzen verwendet und validiert. Fehlerantworten geben keine internen Fehlermeldungen, URIs oder Secrets aus; XSS-Sinks wurden im Anwendungscode nicht gefunden.
 - **Prüfungen:** Typecheck, Lint, 92/92 Tests, Secret-Tracking und Diff-Check erfolgreich.
 - **Offen:** Echte externe Origin-/Browser-CORS-Prüfung, Betriebsmonitoring, Alarmierung, Secret-Rotation und Backup-/Wiederherstellungstest benötigen die jeweilige Infrastruktur beziehungsweise Freigabe.
 
-## 51. FS7-Person-A-Backupprüfung – 12.11.2026
+## 59. FS7-Person-A-Backupprüfung – 12.11.2026
 
 - **Prüfung:** Das Repository kennt die getrennte Atlas-Testdatenbank `colosseo_test` und schützt sie über die Testkonfiguration. Lokale `mongodump`-/`mongorestore`-Werkzeuge sind jedoch nicht installiert; Atlas-Backups sind laut bestätigtem Projektstand derzeit inaktiv.
 - **Ergebnis:** Ein Backup-/Restore-Lauf wurde nicht vorgetäuscht und nicht gestartet. Dafür benötigt Person A eine aktivierte Nicht-Produktions-Backupquelle beziehungsweise ein freigegebenes Backupwerkzeug und ein Restore-Ziel.
 - **Nächster Schritt:** Nach Bereitstellung dieser Infrastruktur Backup in `colosseo_test` wiederherstellen, Daten-/Migrationsstatus prüfen und den Nachweis dokumentieren.
 
-## 52. FS7-Person-A-Backuplauf – 12.11.2026
+## 60. FS7-Person-A-Backuplauf – 12.11.2026
 
 - **Backup:** `colosseo_test` wurde mit `mongodump` 100.20.1 erfolgreich in ein temporäres gzip-Archiv gesichert. Das Archiv wurde nach dem Testlauf entfernt.
 - **Restore-Blockade:** Der Restore in `colosseo_restore_test` konnte wegen der Atlas-Berechtigung `user is not allowed to do action [listCollections]` nicht verifiziert werden. Der aktuelle Benutzer ist nur für `colosseo` und `colosseo_test` freigegeben.
 - **Sicherheit:** `colosseo_test` wurde nicht überschrieben; es wurden keine Produktionsdaten verändert. Ein Restore in das bestehende Testziel wurde wegen des Risikos nicht versucht.
 - **Offen:** Atlas-Berechtigung für ein separates Restore-Testziel (z. B. `colosseo_restore_test`) oder ein gleichwertiges temporäres Cluster freigeben; danach Restore, Collection-Vergleich und Testzielbereinigung durchführen.
 
-## 53. FS7-Person-A-Gesamtregression – 12.11.2026
+## 61. FS7-Person-A-Gesamtregression – 12.11.2026
 
 - **Umfang:** Backup-/Restore-Nachweis wurde auf Nutzeranweisung übersprungen und bleibt als externer Infrastrukturblocker offen.
 - **Prüfungen:** Typecheck, Lint, Secret-Tracking, 92/92 Tests, Production-Build, `npm audit --omit=dev` mit 0 bekannten Schwachstellen und `git diff --check` erfolgreich.
 - **Ergebnis:** Der lokal ausführbare technische FS7-Regressionsumfang ist bestanden. Der FS7-Gate-Abschluss bleibt wegen Backup/Restore, Betriebsmonitoring, Secret-Rotation und vollständiger externer Origin-/Browserprüfung offen.
+
+## 62. FS7-Integrationsprüfung – 13.11.2026
+
+- **Zusammenführung:** Person Bs abgeschlossene Öffnungszeiten-, `break-ui`-, Pagination-, Reflow- und Accessibility-Arbeiten sowie Person As Datenschutz-, Sicherheits- und Backup-Nachweise sind ohne Verlust zusammengeführt.
+- **Integrationskorrektur:** Ein veralteter doppelter Öffnungszeitenabruf wurde entfernt und der aktuelle `OpeningHour`-State wiederhergestellt. Medien-Uploadvalidierung, Bildalternativtext, Sicherheitsheader und Origin-Schutz bleiben gemeinsam erhalten.
+- **Prüfungen:** Typecheck, OXLint, Secret-Tracking, 92/92 Tests, Production-Build und `git diff --check` erfolgreich. Die Build-Hinweise zu externen `use client`-Direktiven und die lokal nicht gesetzte `SITE_URL` bleiben nicht blockierend.
+- **Offen:** Restore-Nachweis, produktives Monitoring und Alarmierung, Secret-Rotation, vollständige Betriebs-/Performanceabnahme und das formale FS7-Gate.
+
+## 63. FS7-Live-Origin-Nachweis Person B – 13.11.2026
+
+- **Deployment:** Der Nutzer bestätigte das erfolgreiche Render-Deployment der korrigierten Umgebungsvariablen.
+- **Live-Prüfung:** `GET /api/health` antwortet mit HTTP `200` und den erwarteten Headern `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` sowie `Referrer-Policy: strict-origin-when-cross-origin`.
+- **Origin-Schutz:** Ein schreibender Request von `https://ristorante-colosseo.onrender.com` erreicht die serverseitige Eingabevalidierung und antwortet wegen des absichtlich leeren Testkörpers mit HTTP `400`. Dieselbe Anfrage von `https://untrusted.example` wird vor der Fachlogik mit HTTP `403` und `CSRF_ORIGIN_INVALID` abgewiesen.
+- **Live-Smoke-Test:** Deutsch, Englisch, Italienisch, Admin-Shell, Health, Reservierungskonfiguration, lesende Verfügbarkeit und öffentliche Öffnungszeiten antworten mit HTTP `200`. Die gemessene TTFB lag beim warmen Render-Service zwischen rund `0,09 s` und `0,25 s`; dies ist ein technischer Stichprobentest und kein Ersatz für reale Web-Vitals.
+- **Produktionsdatenhinweis:** `/api/public/menu` ist erreichbar, liefert auf dem aktuellen Render-Datenbestand aber noch eine leere Kategorienliste. Die öffentliche Marketingseite bleibt sichtbar; die produktive Übernahme beziehungsweise Veröffentlichung der verwalteten Menüdaten gehört zur FS8-Ausgangsdatenmigration.
+- **Regression:** Typecheck, OXLint, Secret-Tracking, 92/92 Tests, Production-Build und `git diff --check` sind erfolgreich. Die bekannten externen `use client`-Hinweise und lokal fehlende `SITE_URL` bleiben nicht blockierend; Render besitzt die bestätigte Produktionsdomain.
+- **Ergebnis:** Die zuvor fehlerhaft abgewiesene eigene Produktions-Origin ist korrigiert; der externe Origin-Nachweis ist bestanden. Es wurden keine Reservierungen oder sonstigen Produktionsdaten angelegt.
+- **Nächster Person-B-Schritt:** Den FS7-Abnahmebericht mit den weiterhin extern blockierten Betriebsrisiken präsentieren. Reale Core Web Vitals, Monitoring und produktive Ausgangsdaten bleiben vor dem kontrollierten FS8-Livegang offen.
+
+## 64. FS7-Abnahmebericht – 13.11.2026
+
+- **Bestanden:** Datenschutz-/Aufbewahrungsgrundlage, ownergeschützte Anonymisierung, Audit- und Rate-Limit-Grundschutz, Sicherheitsheader, Origin-Schutz, Uploadvalidierung, Authentifizierungs-/Autorisierungsregression, `break-ui`, Accessibility-/Reflow-Prüfung, lokale Gesamtregression sowie externer Render-Smoke- und Origin-Test.
+- **Nachweise:** Typecheck, OXLint, Secret-Tracking, 92/92 Tests, Production-Build und `git diff --check` sind erfolgreich. Die öffentliche Render-API antwortet; eigene und fremde Origins werden korrekt unterschieden. Es wurden keine synthetischen Produktionsreservierungen angelegt.
+- **Akzeptierte Restpunkte für FS8:** produktive Menüdatenmigration, reale Core Web Vitals, Monitoring/Alarmierung, Secret-Rotation, Atlas-Restore-Nachweis, bestätigte Betriebs-/Rechtsdaten sowie Rollback- und Betriebsübergabe.
+- **Gate-Entscheidung:** `FS7` ist technisch abnahmebereit, aber noch nicht formal geschlossen. Vor `FS8` ist ein ausdrückliches `GO FS8` des Nutzers erforderlich.
+
+## 65. FS8-Demo-Start und Ausgangsdaten – 13.11.2026
+
+- **Freigabe:** Der Nutzer reduziert `FS8` ausdrücklich auf die notwendigen Anforderungen eines Weiterbildungs- und Präsentationsprojekts und erteilt dafür `GO`.
+- **Umgesetzt:** Migration `0013_demo-menu-data` übernimmt die bereits geprüfte Originalspeisekarte idempotent in die Menüverwaltung. Vorhandene Adminänderungen werden durch `$setOnInsert` nicht überschrieben; der Rollback entfernt ausschließlich von dieser Migration angelegte Datensätze.
+- **Testdatenbank:** Migration erfolgreich angewendet. Der öffentliche Menüvertrag liefert 8 Kategorien und 129 veröffentlichte Gerichte. Nach Wiederherstellung der vorhandenen Test-Grundkonfiguration antworten Menü, Reservierungskonfiguration, lesende Verfügbarkeit und Öffnungszeiten mit HTTP `200`.
+- **Sicherheit:** Es wurden keine Reservierungen, realen Kundendaten oder E-Mails erzeugt. Die Prüfung lief ausschließlich gegen `colosseo_test`.
+- **Finale lokale Regression:** Typecheck, OXLint, Secret-Tracking, 19 Testdateien mit 94/94 Tests, Production-Build und `git diff --check` sind erfolgreich. Die bekannten externen `use client`-Hinweise und lokal fehlende `SITE_URL` sind für den Render-Build nicht blockierend.
+- **Präsentation:** Architektur, Demoablauf, Grenzen und einfacher Git-/Render-Rollback sind kompakt in `docs/BACKEND.md` dokumentiert.
+- **Noch offen:** Änderungen committen und auf den Render-Deployment-Branch übernehmen; anschließend Live-Menü, Admin-Anmeldung/-Verwaltung und finalen Regressionslauf prüfen.
+
+## 66. Admin-Kalenderkorrektur – 13.11.2026
+
+- **Ursache:** Das Admin-Frontend rief `/api/admin/calendar` auf, der entsprechende Express-Endpunkt fehlte. Dadurch blieben Kennzahlen leer und die Betriebsübersicht wechselte in den Fehlerzustand. Zusätzlich war der bereits lokal korrigierte Öffnungszeiten-State noch nicht auf Render veröffentlicht.
+- **Umgesetzt:** Ownergeschützten Kalender-Endpunkt mit validiertem, auf 32 Kalendertage begrenztem Zeitraum ergänzt. Der Service liefert Reservierungen, Veranstaltungsanfragen, Sperrzeiten und Sondertage ohne unnötige Kontakt- oder Geheimdaten.
+- **Prüfung:** Typecheck, OXLint, Secret-Tracking, 19 Testdateien mit 95/95 Tests, Production-Build und `git diff --check` erfolgreich. Ungültige beziehungsweise zu große Datumsbereiche werden mit HTTP `400` abgewiesen.
+- **Offen:** Änderungen committen, in den Render-Deployment-Branch `dev` übernehmen und danach die authentifizierte Tages-/Wochenansicht sowie Sondertage und Sperrzeiten live prüfen. Es wurde nichts gepusht oder deployt.

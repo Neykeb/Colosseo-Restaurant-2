@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS7` freigegeben; Person-B-QA begonnen
-**Letzte Aktualisierung:** 12.11.2026
+**Status:** Verkürzte Demo-Abschlussphase `FS8 Demo` freigegeben; versionierte Demo-Ausgangsdaten vorbereitet
+**Letzte Aktualisierung:** 13.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -152,6 +152,7 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 11.11.2026 | Gate FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist abgenommen; `FS6` benötigt ein separates GO. |
 | 11.11.2026 | Gate FS5 / Start FS6 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS6“. FS6 ist freigegeben und darf umgesetzt werden. |
 | 12.11.2026 | Gate FS6 / Start FS7 | Freigegeben | Nach erfolgreichem integriertem Browser-E2E und verifizierter Testdatenbereinigung erteilt der Nutzer ausdrücklich „GO“. FS6 ist abgenommen; FS7 darf schrittweise für Person B beginnen. |
+| 13.11.2026 | Gate FS7 / Start FS8 Demo | Freigegeben | Nach Präsentation des FS7-Abnahmeberichts reduziert der Nutzer FS8 ausdrücklich auf den notwendigen Demo- und Präsentationsumfang und erteilt dafür `GO`. |
 
 ## Aktuelle Blocker
 
@@ -292,20 +293,21 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [-] Aufbewahrung und technische Anonymisierung sowie eine ownergeschützte manuelle Anonymisierung sind umgesetzt und getestet; öffentliches Auskunfts-/Exportportal und vollständige Lösch-/Exportregeln bleiben fachlich beziehungsweise rechtlich offen.
 - [-] Auditlog, serverseitiger Rate-Limit-Grundschutz, Sicherheitsheader und Origin-Schutz sind geprüft beziehungsweise ergänzt; produktives Monitoring, Alarmierung und Secret-Rotation benötigen noch Betriebsfreigabe.
 - [-] Ein `mongodump` von `colosseo_test` wurde erfolgreich erzeugt und wieder entfernt; der Restore-Nachweis bleibt wegen fehlender Atlas-Berechtigung für ein separates Restore-Testziel offen.
-- [-] Dependency-, Auth-, Autorisierungs-, Upload-, CORS-/CSRF- und Log-Leak-Grundprüfungen sind erfolgt; ein vollständiger externer Browser-/Origin-Nachweis und die abschließende Security-Prüfung bleiben offen.
-- [-] Die lokal ausführbare Regression mit Typecheck, Lint, 92/92 Tests, Production-Build, Secret-Tracking, Audit und Diff-Check ist bestanden; die vollständige externe Betriebs-/Performanceabnahme bleibt offen.
-- [-] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden. Person B hat eine ausschließlich lokale Entwicklungsumschaltung für Worst Case, Empty und One an der Admin-Menü-Datengrenze ergänzt. Der erste Test weist horizontalen Überlauf bei 320 px/200-%-Reflow, fehlendes explizites Listen-Leerfeedback sowie nicht deckungsgleiche Client-/Servergrenzen für Preis und Allergene nach. Behebung folgt erst nach Präsentation der Befunde.
-- [ ] **GATE FS7:** Abnahmebericht und offene Produktionsrisiken präsentieren; auf GO für `FS8` warten.
+- [-] Dependency-, Auth-, Autorisierungs-, Upload-, CORS-/CSRF- und Log-Leak-Grundprüfungen sind erfolgt. Der externe Live-Origin-Nachweis ist bestanden: Die eigene Render-Origin erreicht die Validierung, eine fremde Origin wird mit `403 CSRF_ORIGIN_INVALID` blockiert. Die abschließende Security-/Betriebsabnahme bleibt offen.
+- [-] Die lokal ausführbare Regression mit Typecheck, Lint, 92/92 Tests, Production-Build, Secret-Tracking, Audit und Diff-Check ist bestanden. Der warme Render-Smoke-Test für Sprachrouten, Admin-Shell und öffentliche Lese-APIs ist bestanden; reale Core Web Vitals sowie die vollständige externe Betriebs-/Performanceabnahme bleiben offen.
+- [x] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden. Person B hat lokale Worst-Case-, Empty- und One-Testzustände, Pagination, explizites Leerfeedback, deckungsgleiche Preis-/Allergenlimits und schmale Layoutregeln ergänzt. Tastatur-/Vorschau-Fokus sowie die schmale Adminansicht wurden geprüft; Tabellen und Navigation besitzen eigene interne Scrollflächen, während der Seitenüberlauf unterdrückt wird.
+- [x] **GATE FS7:** Abnahmebericht und offene Produktionsrisiken sind am 13.11.2026 dokumentiert und präsentiert. Der Nutzer hat anschließend die verkürzte Phase `FS8 Demo` ausdrücklich freigegeben.
 
-### FS8 – Produktionsmigration und kontrollierter Livegang
+### FS8 Demo – Abschlussprojekt und Präsentationsabnahme
 
-**Benötigt vor Start:** ausdrückliche Deployment-Erlaubnis, bestätigte Rechts- und Geschäftsdaten, produktive Render-/Resend-Konten, Domain, Verantwortliche und Rollbackfenster.
+**Freigegebener Umfang:** Die Anwendung bleibt ein Weiterbildungs- und Präsentationsprojekt und wird nicht als reales Restaurantsystem betrieben. Eigene Domain, 24/7-Monitoring, automatische Alarmierung, vollständiger Backupbetrieb, rechtliche Endabnahme und produktive Betriebsübergabe sind deshalb nicht Teil des Gates.
 
-- [ ] Produktionsmigration und validierte Ausgangsdaten vorbereiten.
-- [ ] Render Web Service und MongoDB Atlas möglichst regionsnah, Domain, E-Mail-DNS, Umgebungsvariablen, Monitoring und Backups konfigurieren.
-- [ ] Smoke-Tests, Rollbackplan und Abnahmecheckliste ausführen.
-- [ ] Erst nach gesonderter Freigabe deployen und keine Test-E-Mails an reale Gäste senden.
-- [ ] **GATE FS8:** Livegang abnehmen und Betriebsübergabe dokumentieren.
+- [-] Versionierte, idempotente Demo-Menüdatenmigration aus der bereits geprüften Originalspeisekarte vorbereiten und auf der getrennten Atlas-Testdatenbank verifizieren. Lokal bestanden; Render-Deployment und Live-Nachweis stehen noch aus.
+- [x] Reservierungskonfiguration, lesende Verfügbarkeit, Öffnungszeiten und veröffentlichte Menüdaten gegen die Testdatenbank prüfen. Ergebnis: HTTP `200`, 8 Kategorien und 129 Gerichte; keine Reservierung und keine E-Mail erzeugt.
+- [-] Render-Demo nach dem nächsten Deployment auf Menü, Reservierung, Admin-Anmeldung und Admin-Verwaltung prüfen. Der zuvor fehlende ownergeschützte Kalendervertrag ist lokal implementiert und regressionsgeprüft; Deployment und authentifizierter Live-Nachweis stehen noch aus.
+- [x] Finalen Typecheck, OXLint, Tests, Production-Build, Secret-Tracking und Diff-Check ausführen. Ergebnis: 19 Testdateien und 95/95 Tests bestanden; bekannte externe `use client`-Hinweise bleiben nicht blockierend.
+- [x] Kompakten Präsentationsablauf, Architekturübersicht, bekannte Demo-Einschränkungen und einfachen Git-/Render-Rollback dokumentieren.
+- [ ] **GATE FS8 Demo:** Demo-Abnahme präsentieren und Abschlussprojekt als fertig markieren.
 
 ## Offene Entscheidungen vor der Reservierungsimplementierung
 

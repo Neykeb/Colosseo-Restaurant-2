@@ -19,6 +19,29 @@ function duplicateKey(error: unknown): boolean {
 }
 
 export class ReservationAdminService {
+  async getCalendarOverview(startDate: string, endDate: string) {
+    const dateRange = { $gte: startDate, $lte: endDate };
+    const [reservations, inquiries, blocks, specialDays] = await Promise.all([
+      ReservationModel.find({ date: dateRange })
+        .sort({ date: 1, startTime: 1, publicId: 1 })
+        .select({ _id: 0, publicId: 1, date: 1, startTime: 1, endTime: 1, partySize: 1, status: 1, "guest.name": 1 })
+        .lean().exec(),
+      EventInquiryModel.find({ requestedDate: dateRange })
+        .sort({ requestedDate: 1, createdAt: 1, inquiryId: 1 })
+        .select({ _id: 0, inquiryId: 1, requestedDate: 1, partySize: 1, eventType: 1, status: 1, name: 1 })
+        .lean().exec(),
+      ReservationBlockModel.find({ date: dateRange })
+        .sort({ date: 1, startTime: 1, blockId: 1 })
+        .select({ _id: 0, blockId: 1, date: 1, startTime: 1, endTime: 1, reason: 1 })
+        .lean().exec(),
+      SpecialDayModel.find({ date: dateRange })
+        .sort({ date: 1 })
+        .select({ _id: 0, date: 1, label: 1, closed: 1, opens: 1, closes: 1 })
+        .lean().exec(),
+    ]);
+    return { startDate, endDate, reservations, inquiries, blocks, specialDays };
+  }
+
   async listReservations(filters: { date?: string; status?: ReservationStatus; q?: string; page?: number; pageSize?: number }) {
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 25));
