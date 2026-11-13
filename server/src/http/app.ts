@@ -54,6 +54,20 @@ const reservationBlockSchema = z.object({
   .refine(({ scope, scopeKey }) => scope === "restaurant" || Boolean(scopeKey), { path: ["scopeKey"], message: "Area and table blocks require a scope key." });
 const reservationStatusSchema = z.enum(["requested", "pending", "confirmed", "cancelled", "declined", "seated", "completed", "no_show"]);
 const reservationListSchema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), status: reservationStatusSchema.optional(), q: z.string().trim().max(120).optional(), page: z.coerce.number().int().min(1).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() });
+const calendarQuerySchema = z.object({
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+}).refine(({ startDate, endDate }) => startDate <= endDate, {
+  path: ["endDate"],
+  message: "End date must not be before start date.",
+}).refine(({ startDate, endDate }) => {
+  const start = Date.parse(`${startDate}T00:00:00Z`);
+  const end = Date.parse(`${endDate}T00:00:00Z`);
+  return Number.isFinite(start) && Number.isFinite(end) && end - start <= 31 * 24 * 60 * 60 * 1_000;
+}, {
+  path: ["endDate"],
+  message: "Calendar ranges may span at most 32 days.",
+});
 const servicePeriodSchema = z.object({
   key: z.string().trim().min(1).max(80).regex(/^[a-z0-9_-]+$/),
   weekday: z.number().int().min(0).max(6),
@@ -275,6 +289,14 @@ export function createApp(options: CreateAppOptions = {}) {
     const input = reservationListSchema.safeParse(request.query);
     if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
     try { response.json(await reservationAdmin.listReservations(input.data)); } catch (error) { next(error); }
+  });
+
+  app.get("/api/admin/calendar", ...adminGuard, async (request, response, next) => {
+    const input = calendarQuerySchema.safeParse(request.query);
+    if (!input.success) { sendValidationError(response, input.error.flatten()); return; }
+    try {
+      response.json(await reservationAdmin.getCalendarOverview(input.data.startDate, input.data.endDate));
+    } catch (error) { next(error); }
   });
 
   app.get("/api/admin/reservations/:publicId", ...adminGuard, async (request, response, next) => {

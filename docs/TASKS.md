@@ -304,8 +304,8 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 - [-] Versionierte, idempotente Demo-Menüdatenmigration aus der bereits geprüften Originalspeisekarte vorbereiten und auf der getrennten Atlas-Testdatenbank verifizieren. Lokal bestanden; Render-Deployment und Live-Nachweis stehen noch aus.
 - [x] Reservierungskonfiguration, lesende Verfügbarkeit, Öffnungszeiten und veröffentlichte Menüdaten gegen die Testdatenbank prüfen. Ergebnis: HTTP `200`, 8 Kategorien und 129 Gerichte; keine Reservierung und keine E-Mail erzeugt.
-- [ ] Render-Demo nach dem nächsten Deployment auf Menü, Reservierung, Admin-Anmeldung und Admin-Verwaltung prüfen.
-- [x] Finalen Typecheck, OXLint, Tests, Production-Build, Secret-Tracking und Diff-Check ausführen. Ergebnis: 19 Testdateien und 94/94 Tests bestanden; bekannte externe `use client`-Hinweise bleiben nicht blockierend.
+- [-] Render-Demo nach dem nächsten Deployment auf Menü, Reservierung, Admin-Anmeldung und Admin-Verwaltung prüfen. Der zuvor fehlende ownergeschützte Kalendervertrag ist lokal implementiert und regressionsgeprüft; Deployment und authentifizierter Live-Nachweis stehen noch aus.
+- [x] Finalen Typecheck, OXLint, Tests, Production-Build, Secret-Tracking und Diff-Check ausführen. Ergebnis: 19 Testdateien und 95/95 Tests bestanden; bekannte externe `use client`-Hinweise bleiben nicht blockierend.
 - [x] Kompakten Präsentationsablauf, Architekturübersicht, bekannte Demo-Einschränkungen und einfachen Git-/Render-Rollback dokumentieren.
 - [ ] **GATE FS8 Demo:** Demo-Abnahme präsentieren und Abschlussprojekt als fertig markieren.
 

@@ -552,3 +552,10 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Finale lokale Regression:** Typecheck, OXLint, Secret-Tracking, 19 Testdateien mit 94/94 Tests, Production-Build und `git diff --check` sind erfolgreich. Die bekannten externen `use client`-Hinweise und lokal fehlende `SITE_URL` sind für den Render-Build nicht blockierend.
 - **Präsentation:** Architektur, Demoablauf, Grenzen und einfacher Git-/Render-Rollback sind kompakt in `docs/BACKEND.md` dokumentiert.
 - **Noch offen:** Änderungen committen und auf den Render-Deployment-Branch übernehmen; anschließend Live-Menü, Admin-Anmeldung/-Verwaltung und finalen Regressionslauf prüfen.
+
+## 66. Admin-Kalenderkorrektur – 13.11.2026
+
+- **Ursache:** Das Admin-Frontend rief `/api/admin/calendar` auf, der entsprechende Express-Endpunkt fehlte. Dadurch blieben Kennzahlen leer und die Betriebsübersicht wechselte in den Fehlerzustand. Zusätzlich war der bereits lokal korrigierte Öffnungszeiten-State noch nicht auf Render veröffentlicht.
+- **Umgesetzt:** Ownergeschützten Kalender-Endpunkt mit validiertem, auf 32 Kalendertage begrenztem Zeitraum ergänzt. Der Service liefert Reservierungen, Veranstaltungsanfragen, Sperrzeiten und Sondertage ohne unnötige Kontakt- oder Geheimdaten.
+- **Prüfung:** Typecheck, OXLint, Secret-Tracking, 19 Testdateien mit 95/95 Tests, Production-Build und `git diff --check` erfolgreich. Ungültige beziehungsweise zu große Datumsbereiche werden mit HTTP `400` abgewiesen.
+- **Offen:** Änderungen committen, in den Render-Deployment-Branch `dev` übernehmen und danach die authentifizierte Tages-/Wochenansicht sowie Sondertage und Sperrzeiten live prüfen. Es wurde nichts gepusht oder deployt.
