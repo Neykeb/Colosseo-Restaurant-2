@@ -74,6 +74,12 @@ const menuImageUrlSchema = z.string().trim().max(2_000).refine((value) => {
     return false;
   }
 }, "Image URL must be an internal media URL or an absolute HTTPS URL.");
+const mediaUploadSchema = z.object({
+  fileName: z.string().trim().min(1).max(255),
+  contentType: z.enum(["image/jpeg", "image/png", "image/webp"]),
+  altText: z.string().trim().min(1).max(300),
+  dataBase64: z.string().regex(/^[A-Za-z0-9+/]*={0,2}$/).max(7_000_000),
+});
 const menuItemSchema = z.object({ itemId: z.string().trim().min(1).max(100), categorySlug: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(160), description: z.string().trim().max(2_000).optional(), priceCents: z.number().int().min(0).max(100_000), allergens: z.array(z.string().trim().min(1).max(80)).max(50), imageUrl: menuImageUrlSchema.optional(), imageAltText: z.string().trim().min(1).max(300).optional(), sortOrder: z.number().int().min(0).max(10_000), active: z.boolean(), published: z.boolean() });
 
 function sendValidationError(response: express.Response, details: unknown): void {
@@ -117,6 +123,23 @@ const correlationIdMiddleware: RequestHandler = (request, response, next) => {
   next();
 };
 
+const securityHeadersMiddleware: RequestHandler = (_request, response, next) => {
+  response.setHeader("x-content-type-options", "nosniff");
+  response.setHeader("x-frame-options", "DENY");
+  response.setHeader("referrer-policy", "strict-origin-when-cross-origin");
+  next();
+};
+
+function createOriginGuard(authorizedParties: string[] = []): RequestHandler {
+  const allowed = new Set(authorizedParties);
+  return (request, response, next) => {
+    if (["GET", "HEAD", "OPTIONS"].includes(request.method)) { next(); return; }
+    const origin = request.header("origin");
+    if (!origin || allowed.has(origin)) { next(); return; }
+    response.status(403).json({ error: { code: "CSRF_ORIGIN_INVALID", message: "The request origin is not allowed.", correlationId: response.locals.correlationId } });
+  };
+}
+
 const notFoundHandler: RequestHandler = (request, response) => {
   response.status(404).json({
     error: {
@@ -154,6 +177,8 @@ export function createApp(options: CreateAppOptions = {}) {
       }];
 
   app.disable("x-powered-by");
+  app.use(securityHeadersMiddleware);
+  app.use(createOriginGuard(options.clerk?.authorizedParties));
   if (options.clerk) {
     app.use(clerkMiddleware({
       secretKey: options.clerk.secretKey,

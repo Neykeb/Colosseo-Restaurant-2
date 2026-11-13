@@ -1,12 +1,12 @@
 # Tagesplan Full-Stack-Finalprojekt
 
-**Status:** FS4 technisch umgesetzt; Person-B-Aufgaben vom 10.11. einschließlich Render-E2E abgeschlossen, externe Freigaben und Gate-Abnahme offen
+**Status:** FS7-Integration von Person A und Person B zusammengeführt und vollständig regressionsgeprüft; externe Betriebsnachweise und Gate-Abnahme offen
 
-**Phase:** `FS4` – Öffentliche Reservierungsstrecke und Benachrichtigungen
+**Phase:** `FS7` – Datenschutz, Sicherheit, Betrieb und vollständige QA
 
 **Planungszeitraum:** 02.11.2026–13.11.2026
 
-**Letzte Aktualisierung:** 11.11.2026
+**Letzte Aktualisierung:** 13.11.2026
 
 Diese Datei ist ausschließlich die operative Arbeitsübersicht. Anforderungen stehen in `docs/SPEC.md`, verbindliche Phasen und Gates in `docs/TASKS.md`. Ein Datum ersetzt kein erforderliches `GO`. Ohne Freigabe werden an diesem Tag nur erlaubte Planung, Dokumentation und Vorbereitung ausgeführt.
 
@@ -410,7 +410,7 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Person A als nächster Einstieg:** Datenschutz-/Aufbewahrungsbestand, serverseitige Auth-/Autorisierungsgrenzen, Upload-/IDOR-/Log-Leak-Prüfungen und die technische Gesamtrückmeldung gegen die freigegebenen Anforderungen prüfen.
 - **Abgrenzung:** Produktionsbetrieb, echte Geschäftsdaten und nicht spezifizierte Aufbewahrungs- oder Auskunftsregeln bleiben bis zur fachlichen Freigabe offen. Person-B-`break-ui`-Befunde werden separat bearbeitet.
 
-## 44. FS7-Upload-Sicherheitsprüfung Person A – 12.11.2026
+## 44. FS7-reguläre Öffnungszeitenverwaltung – 12.11.2026
 
 - **Verifizierte Lücke:** Reguläre Wochenzeiten waren zuvor ausschließlich über die öffentliche Lese-API verfügbar. Der Adminbereich verwaltete nur datierte Sondertage und Sperrzeiten; ein geschützter Schreibvertrag fehlte.
 - **Umgesetzt:** Ownergeschützte Endpunkte zum Laden, Speichern und Löschen regulärer Servicezeiten, serverseitige Wochentags-/Zeitbereichsvalidierung, Auditereignisse sowie eine responsive Adminoberfläche zum Hinzufügen, Bearbeiten, Aktivieren/Deaktivieren und bestätigt Löschen.
@@ -463,3 +463,64 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Nachweis:** Typecheck, Lint, 88/88 Tests, Production-Build und Diff-Check erfolgreich. Die Browserprüfung lief authentifiziert mit synthetischen Entwicklungsdaten; es wurden keine produktiven Daten verändert.
 - **Nicht als erledigt markiert:** Der übergeordnete FS7-Abschluss bleibt offen, weil Datenschutz-/Aufbewahrung, Backup/Wiederherstellung, Monitoring/Alarmierung, Security-Regressionsprüfungen und die vollständige Systemregression noch separat nachgewiesen werden müssen.
 - **Nächster gemeinsamer Einstieg:** Person A bearbeitet die offenen FS7-Sicherheits-, Betriebs- und Datenschutznachweise; danach gemeinsamer FS7-Abnahmebericht und Risikoentscheidungen.
+
+## 52. FS7-Upload-Sicherheitsprüfung Person A – 12.11.2026
+
+- **Umgesetzt:** Der geschützte Medien-Upload validiert Dateiname, erlaubten MIME-Typ, Alternativtext und Base64-Format/-Größe vor dem Serviceaufruf.
+- **Test:** Fehlerhafte Upload-Payloads werden mit `400 VALIDATION_ERROR` abgewiesen; der Medienservice wird dabei nicht aufgerufen.
+
+## 53. FS7-Sicherheits- und Regressionsprüfung Person A – 12.11.2026
+
+- **Prüfungen:** `npm audit --omit=dev` meldet 0 bekannte Schwachstellen; Secret-Tracking bestanden; Typecheck, Lint, 88/88 Tests und Production-Build erfolgreich.
+- **Befund:** Keine neue kritische serverseitige Sicherheitsabweichung im geprüften Umfang.
+
+## 54. FS7-FS6-Autorisierungsregression Person A – 12.11.2026
+
+- **Test:** Alle FS6-Adminrouten werden ohne Clerk-Identität mit `401` und für ein aktives `staff`-Profil mit `403` abgewiesen; der Owner-Schutz bleibt serverseitig.
+
+## 55. FS7-Aufbewahrungsverhalten Person A – 12.11.2026
+
+- **Test:** Abgelaufene Reservierungen werden anonymisiert; zugehörige Locks und Tischzuweisungen werden entfernt; gesendete Outbox- und alte Audit-Ereignisse werden anhand der dokumentierten Fristen bereinigt.
+
+## 56. FS7-einfache manuelle Datenschutzaktion Person A – 12.11.2026
+
+- **Umgesetzt:** Ownergeschützter Endpunkt `POST /api/admin/reservations/:publicId/anonymize` ergänzt. Ein öffentliches Export-/Löschportal bleibt bewusst außerhalb des einfachen Demo-Umfangs.
+
+## 57. FS7-Person-A-Konfigurations- und Sicherheitsreview – 12.11.2026
+
+- **Umgesetzt:** `CLERK_AUTHORIZED_PARTIES` akzeptiert jetzt sowohl JSON-Arrays aus dotenv-Konfigurationen als auch Kommalisten; Anführungszeichen werden bei der Fallback-Form bereinigt. Ein Regressionstest deckt das JSON-Format ab.
+- **Prüfungen:** Typecheck, Lint, 92/92 Tests, Secret-Tracking und `npm audit --omit=dev` mit 0 bekannten Schwachstellen erfolgreich.
+- **Offen:** Betriebsseitige Secret-Rotation, produktives Monitoring/Alarmierung und Backup-/Wiederherstellungstest benötigen weiterhin externe Infrastruktur- beziehungsweise Betriebsfreigaben. Der nächste lokal ausführbare Person-A-Schritt ist der umfassende IDOR-/XSS-/CORS-/CSRF-/Log-Leak-Review.
+
+## 58. FS7-Person-A-Security-Grenzen – 12.11.2026
+
+- **Umgesetzt:** Die Express-App setzt Sicherheitsheader gegen MIME-Sniffing, Framing und übermäßige Referrer-Weitergabe. Schreibende Requests mit `Origin` werden gegen die konfigurierte Clerk-Allowlist geprüft und bei unbekannter Herkunft mit `403 CSRF_ORIGIN_INVALID` abgewiesen.
+- **Review:** Admin-Routen bleiben serverseitig ownergeschützt; Pfadparameter werden an den Servicegrenzen verwendet und validiert. Fehlerantworten geben keine internen Fehlermeldungen, URIs oder Secrets aus; XSS-Sinks wurden im Anwendungscode nicht gefunden.
+- **Prüfungen:** Typecheck, Lint, 92/92 Tests, Secret-Tracking und Diff-Check erfolgreich.
+- **Offen:** Echte externe Origin-/Browser-CORS-Prüfung, Betriebsmonitoring, Alarmierung, Secret-Rotation und Backup-/Wiederherstellungstest benötigen die jeweilige Infrastruktur beziehungsweise Freigabe.
+
+## 59. FS7-Person-A-Backupprüfung – 12.11.2026
+
+- **Prüfung:** Das Repository kennt die getrennte Atlas-Testdatenbank `colosseo_test` und schützt sie über die Testkonfiguration. Lokale `mongodump`-/`mongorestore`-Werkzeuge sind jedoch nicht installiert; Atlas-Backups sind laut bestätigtem Projektstand derzeit inaktiv.
+- **Ergebnis:** Ein Backup-/Restore-Lauf wurde nicht vorgetäuscht und nicht gestartet. Dafür benötigt Person A eine aktivierte Nicht-Produktions-Backupquelle beziehungsweise ein freigegebenes Backupwerkzeug und ein Restore-Ziel.
+- **Nächster Schritt:** Nach Bereitstellung dieser Infrastruktur Backup in `colosseo_test` wiederherstellen, Daten-/Migrationsstatus prüfen und den Nachweis dokumentieren.
+
+## 60. FS7-Person-A-Backuplauf – 12.11.2026
+
+- **Backup:** `colosseo_test` wurde mit `mongodump` 100.20.1 erfolgreich in ein temporäres gzip-Archiv gesichert. Das Archiv wurde nach dem Testlauf entfernt.
+- **Restore-Blockade:** Der Restore in `colosseo_restore_test` konnte wegen der Atlas-Berechtigung `user is not allowed to do action [listCollections]` nicht verifiziert werden. Der aktuelle Benutzer ist nur für `colosseo` und `colosseo_test` freigegeben.
+- **Sicherheit:** `colosseo_test` wurde nicht überschrieben; es wurden keine Produktionsdaten verändert. Ein Restore in das bestehende Testziel wurde wegen des Risikos nicht versucht.
+- **Offen:** Atlas-Berechtigung für ein separates Restore-Testziel (z. B. `colosseo_restore_test`) oder ein gleichwertiges temporäres Cluster freigeben; danach Restore, Collection-Vergleich und Testzielbereinigung durchführen.
+
+## 61. FS7-Person-A-Gesamtregression – 12.11.2026
+
+- **Umfang:** Backup-/Restore-Nachweis wurde auf Nutzeranweisung übersprungen und bleibt als externer Infrastrukturblocker offen.
+- **Prüfungen:** Typecheck, Lint, Secret-Tracking, 92/92 Tests, Production-Build, `npm audit --omit=dev` mit 0 bekannten Schwachstellen und `git diff --check` erfolgreich.
+- **Ergebnis:** Der lokal ausführbare technische FS7-Regressionsumfang ist bestanden. Der FS7-Gate-Abschluss bleibt wegen Backup/Restore, Betriebsmonitoring, Secret-Rotation und vollständiger externer Origin-/Browserprüfung offen.
+
+## 62. FS7-Integrationsprüfung – 13.11.2026
+
+- **Zusammenführung:** Person Bs abgeschlossene Öffnungszeiten-, `break-ui`-, Pagination-, Reflow- und Accessibility-Arbeiten sowie Person As Datenschutz-, Sicherheits- und Backup-Nachweise sind ohne Verlust zusammengeführt.
+- **Integrationskorrektur:** Ein veralteter doppelter Öffnungszeitenabruf wurde entfernt und der aktuelle `OpeningHour`-State wiederhergestellt. Medien-Uploadvalidierung, Bildalternativtext, Sicherheitsheader und Origin-Schutz bleiben gemeinsam erhalten.
+- **Prüfungen:** Typecheck, OXLint, Secret-Tracking, 92/92 Tests, Production-Build und `git diff --check` erfolgreich. Die Build-Hinweise zu externen `use client`-Direktiven und die lokal nicht gesetzte `SITE_URL` bleiben nicht blockierend.
+- **Offen:** Restore-Nachweis, produktives Monitoring und Alarmierung, Secret-Rotation, externe Browser-/Origin-Prüfung, vollständige Betriebs-/Performanceabnahme und das formale FS7-Gate.

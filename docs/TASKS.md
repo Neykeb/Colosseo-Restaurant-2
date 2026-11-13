@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
 **Status:** Full-Stack-Phase `FS7` freigegeben; Person-B-QA begonnen
-**Letzte Aktualisierung:** 12.11.2026
+**Letzte Aktualisierung:** 13.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -289,11 +289,11 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 
 ### FS7 – Datenschutz, Sicherheit, Betrieb und vollständige QA
 
-- [ ] Aufbewahrung, Löschung, Auskunft und Datenexport technisch umsetzen und dokumentieren.
-- [ ] Auditlog, Monitoring, Alarmierung, Rate-Limits und Secret-Rotation prüfen.
-- [ ] Backup und Wiederherstellung in einer Nicht-Produktionsumgebung nachweislich testen.
-- [ ] Dependency-, Auth-, Autorisierungs-, IDOR-, XSS-, Upload-, CORS-/CSRF- und Log-Leak-Prüfungen durchführen.
-- [ ] Gesamte Regression für öffentliche Website, Admin, API, Datenbank, E-Mails, Accessibility, Mobile und Performance ausführen.
+- [-] Aufbewahrung und technische Anonymisierung sowie eine ownergeschützte manuelle Anonymisierung sind umgesetzt und getestet; öffentliches Auskunfts-/Exportportal und vollständige Lösch-/Exportregeln bleiben fachlich beziehungsweise rechtlich offen.
+- [-] Auditlog, serverseitiger Rate-Limit-Grundschutz, Sicherheitsheader und Origin-Schutz sind geprüft beziehungsweise ergänzt; produktives Monitoring, Alarmierung und Secret-Rotation benötigen noch Betriebsfreigabe.
+- [-] Ein `mongodump` von `colosseo_test` wurde erfolgreich erzeugt und wieder entfernt; der Restore-Nachweis bleibt wegen fehlender Atlas-Berechtigung für ein separates Restore-Testziel offen.
+- [-] Dependency-, Auth-, Autorisierungs-, Upload-, CORS-/CSRF- und Log-Leak-Grundprüfungen sind erfolgt; ein vollständiger externer Browser-/Origin-Nachweis und die abschließende Security-Prüfung bleiben offen.
+- [-] Die lokal ausführbare Regression mit Typecheck, Lint, 92/92 Tests, Production-Build, Secret-Tracking, Audit und Diff-Check ist bestanden; die vollständige externe Betriebs-/Performanceabnahme bleibt offen.
 - [x] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden. Person B hat lokale Worst-Case-, Empty- und One-Testzustände, Pagination, explizites Leerfeedback, deckungsgleiche Preis-/Allergenlimits und schmale Layoutregeln ergänzt. Tastatur-/Vorschau-Fokus sowie die schmale Adminansicht wurden geprüft; Tabellen und Navigation besitzen eigene interne Scrollflächen, während der Seitenüberlauf unterdrückt wird.
 - [ ] **GATE FS7:** Abnahmebericht und offene Produktionsrisiken präsentieren; auf GO für `FS8` warten.
 
