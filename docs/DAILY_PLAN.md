@@ -535,3 +535,20 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Regression:** Typecheck, OXLint, Secret-Tracking, 92/92 Tests, Production-Build und `git diff --check` sind erfolgreich. Die bekannten externen `use client`-Hinweise und lokal fehlende `SITE_URL` bleiben nicht blockierend; Render besitzt die bestätigte Produktionsdomain.
 - **Ergebnis:** Die zuvor fehlerhaft abgewiesene eigene Produktions-Origin ist korrigiert; der externe Origin-Nachweis ist bestanden. Es wurden keine Reservierungen oder sonstigen Produktionsdaten angelegt.
 - **Nächster Person-B-Schritt:** Den FS7-Abnahmebericht mit den weiterhin extern blockierten Betriebsrisiken präsentieren. Reale Core Web Vitals, Monitoring und produktive Ausgangsdaten bleiben vor dem kontrollierten FS8-Livegang offen.
+
+## 64. FS7-Abnahmebericht – 13.11.2026
+
+- **Bestanden:** Datenschutz-/Aufbewahrungsgrundlage, ownergeschützte Anonymisierung, Audit- und Rate-Limit-Grundschutz, Sicherheitsheader, Origin-Schutz, Uploadvalidierung, Authentifizierungs-/Autorisierungsregression, `break-ui`, Accessibility-/Reflow-Prüfung, lokale Gesamtregression sowie externer Render-Smoke- und Origin-Test.
+- **Nachweise:** Typecheck, OXLint, Secret-Tracking, 92/92 Tests, Production-Build und `git diff --check` sind erfolgreich. Die öffentliche Render-API antwortet; eigene und fremde Origins werden korrekt unterschieden. Es wurden keine synthetischen Produktionsreservierungen angelegt.
+- **Akzeptierte Restpunkte für FS8:** produktive Menüdatenmigration, reale Core Web Vitals, Monitoring/Alarmierung, Secret-Rotation, Atlas-Restore-Nachweis, bestätigte Betriebs-/Rechtsdaten sowie Rollback- und Betriebsübergabe.
+- **Gate-Entscheidung:** `FS7` ist technisch abnahmebereit, aber noch nicht formal geschlossen. Vor `FS8` ist ein ausdrückliches `GO FS8` des Nutzers erforderlich.
+
+## 65. FS8-Demo-Start und Ausgangsdaten – 13.11.2026
+
+- **Freigabe:** Der Nutzer reduziert `FS8` ausdrücklich auf die notwendigen Anforderungen eines Weiterbildungs- und Präsentationsprojekts und erteilt dafür `GO`.
+- **Umgesetzt:** Migration `0013_demo-menu-data` übernimmt die bereits geprüfte Originalspeisekarte idempotent in die Menüverwaltung. Vorhandene Adminänderungen werden durch `$setOnInsert` nicht überschrieben; der Rollback entfernt ausschließlich von dieser Migration angelegte Datensätze.
+- **Testdatenbank:** Migration erfolgreich angewendet. Der öffentliche Menüvertrag liefert 8 Kategorien und 129 veröffentlichte Gerichte. Nach Wiederherstellung der vorhandenen Test-Grundkonfiguration antworten Menü, Reservierungskonfiguration, lesende Verfügbarkeit und Öffnungszeiten mit HTTP `200`.
+- **Sicherheit:** Es wurden keine Reservierungen, realen Kundendaten oder E-Mails erzeugt. Die Prüfung lief ausschließlich gegen `colosseo_test`.
+- **Finale lokale Regression:** Typecheck, OXLint, Secret-Tracking, 19 Testdateien mit 94/94 Tests, Production-Build und `git diff --check` sind erfolgreich. Die bekannten externen `use client`-Hinweise und lokal fehlende `SITE_URL` sind für den Render-Build nicht blockierend.
+- **Präsentation:** Architektur, Demoablauf, Grenzen und einfacher Git-/Render-Rollback sind kompakt in `docs/BACKEND.md` dokumentiert.
+- **Noch offen:** Änderungen committen und auf den Render-Deployment-Branch übernehmen; anschließend Live-Menü, Admin-Anmeldung/-Verwaltung und finalen Regressionslauf prüfen.

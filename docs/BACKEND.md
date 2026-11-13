@@ -1,10 +1,10 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS7` freigegeben; FS6-Menü-, Medien- und Öffnungszeitenverwaltung integriert
+**Status:** Verkürzte Abschlussphase `FS8 Demo` freigegeben; Demo-Menüdaten und Präsentationsabnahme in Arbeit
 
-**Phase:** `FS7` – Datenschutz, Sicherheit, Betrieb und vollständige QA
+**Phase:** `FS8 Demo` – Abschlussprojekt und Präsentationsabnahme
 
-**Letzte Aktualisierung:** 11.11.2026
+**Letzte Aktualisierung:** 13.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
@@ -169,10 +169,19 @@ Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 
 Fehlercodes der Medien-API sind `MEDIA_TYPE_NOT_ALLOWED`, `MEDIA_ALT_TEXT_INVALID`, `MEDIA_SIZE_INVALID`, `MEDIA_SIGNATURE_INVALID` und `MEDIA_NOT_FOUND`. Alle Admin-Endpunkte sind ownergeschützt; der Client darf diese Prüfung nicht ersetzen.
 
-## 9. Nächster zulässiger Schritt
+## 9. Präsentationsablauf für das Abschlussprojekt
 
-1. Person B integriert die Admin-Oberfläche gegen die oben genannten FS6-Endpunkte.
-2. Person A führt danach die echte UI-/API-Regression, Berechtigungs- und Fehlerfallprüfung sowie E2E-, Typecheck-, Lint-, Test- und Build-Prüfung aus.
-3. Vor `FS7` die vollständige FS6-Präsentation durchführen und auf ein ausdrückliches `GO FS7` warten.
+1. Öffentliche Website und Sprachrouten zeigen; anschließend Datum und Personenzahl im Reservierungsformular wählen.
+2. Erklären, dass Express die Eingabe validiert und die atomare MongoDB-Transaktion erst bei erfolgreicher Tischzuweisung bestätigt.
+3. Im geschützten Adminbereich Clerk-Anmeldung, Reservierungsübersicht, Kalender, Öffnungszeiten und Menüverwaltung zeigen.
+4. Ein veröffentlichtes Gericht ändern beziehungsweise dessen Vorschau zeigen und den Unterschied zwischen Entwurf und Veröffentlichung erklären.
+5. Resend-Outbox, idempotenten Versand und neutrale Fehlerantworten anhand von Code oder Testnachweis erklären; keine E-Mail an reale Gäste senden.
+6. Abschließend die bestandenen Tests und die bewusst reduzierten Demo-Grenzen nennen.
+
+**Architektur in einem Satz:** React/TanStack Router spricht mit einer eigenen Express-/TypeScript-API; Clerk liefert die Adminidentität, die eigene Autorisierung schützt die Funktionen, Mongoose speichert in MongoDB Atlas und Resend verarbeitet E-Mails über eine idempotente Outbox.
+
+**Bekannte Demo-Grenzen:** keine eigene Domain, kein 24/7-Monitoring, keine rechtlich finalen Restaurantregeln, keine echten Kundendaten, kein produktiver Backupbetrieb und kein Versand an reale Gäste.
+
+**Einfacher Rollback:** In Render den letzten nachweislich funktionierenden Deploy erneut ausrollen oder den vorherigen Git-Commit auf dem Deployment-Branch wiederherstellen; anschließend `/api/health`, Sprachrouten und öffentliche Lese-APIs erneut prüfen. Datenmigration `0013_demo-menu-data` besitzt einen gezielten Rollback und entfernt nur Datensätze, die sie selbst angelegt hat.
 
 Der operative Termin- und Personenplan steht in `docs/DAILY_PLAN.md`.
