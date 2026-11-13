@@ -523,4 +523,15 @@ Nur nachweislich erledigte Aufgaben erhalten `ERLEDIGT`. Testnamen und Ergebniss
 - **Zusammenführung:** Person Bs abgeschlossene Öffnungszeiten-, `break-ui`-, Pagination-, Reflow- und Accessibility-Arbeiten sowie Person As Datenschutz-, Sicherheits- und Backup-Nachweise sind ohne Verlust zusammengeführt.
 - **Integrationskorrektur:** Ein veralteter doppelter Öffnungszeitenabruf wurde entfernt und der aktuelle `OpeningHour`-State wiederhergestellt. Medien-Uploadvalidierung, Bildalternativtext, Sicherheitsheader und Origin-Schutz bleiben gemeinsam erhalten.
 - **Prüfungen:** Typecheck, OXLint, Secret-Tracking, 92/92 Tests, Production-Build und `git diff --check` erfolgreich. Die Build-Hinweise zu externen `use client`-Direktiven und die lokal nicht gesetzte `SITE_URL` bleiben nicht blockierend.
-- **Offen:** Restore-Nachweis, produktives Monitoring und Alarmierung, Secret-Rotation, externe Browser-/Origin-Prüfung, vollständige Betriebs-/Performanceabnahme und das formale FS7-Gate.
+- **Offen:** Restore-Nachweis, produktives Monitoring und Alarmierung, Secret-Rotation, vollständige Betriebs-/Performanceabnahme und das formale FS7-Gate.
+
+## 63. FS7-Live-Origin-Nachweis Person B – 13.11.2026
+
+- **Deployment:** Der Nutzer bestätigte das erfolgreiche Render-Deployment der korrigierten Umgebungsvariablen.
+- **Live-Prüfung:** `GET /api/health` antwortet mit HTTP `200` und den erwarteten Headern `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` sowie `Referrer-Policy: strict-origin-when-cross-origin`.
+- **Origin-Schutz:** Ein schreibender Request von `https://ristorante-colosseo.onrender.com` erreicht die serverseitige Eingabevalidierung und antwortet wegen des absichtlich leeren Testkörpers mit HTTP `400`. Dieselbe Anfrage von `https://untrusted.example` wird vor der Fachlogik mit HTTP `403` und `CSRF_ORIGIN_INVALID` abgewiesen.
+- **Live-Smoke-Test:** Deutsch, Englisch, Italienisch, Admin-Shell, Health, Reservierungskonfiguration, lesende Verfügbarkeit und öffentliche Öffnungszeiten antworten mit HTTP `200`. Die gemessene TTFB lag beim warmen Render-Service zwischen rund `0,09 s` und `0,25 s`; dies ist ein technischer Stichprobentest und kein Ersatz für reale Web-Vitals.
+- **Produktionsdatenhinweis:** `/api/public/menu` ist erreichbar, liefert auf dem aktuellen Render-Datenbestand aber noch eine leere Kategorienliste. Die öffentliche Marketingseite bleibt sichtbar; die produktive Übernahme beziehungsweise Veröffentlichung der verwalteten Menüdaten gehört zur FS8-Ausgangsdatenmigration.
+- **Regression:** Typecheck, OXLint, Secret-Tracking, 92/92 Tests, Production-Build und `git diff --check` sind erfolgreich. Die bekannten externen `use client`-Hinweise und lokal fehlende `SITE_URL` bleiben nicht blockierend; Render besitzt die bestätigte Produktionsdomain.
+- **Ergebnis:** Die zuvor fehlerhaft abgewiesene eigene Produktions-Origin ist korrigiert; der externe Origin-Nachweis ist bestanden. Es wurden keine Reservierungen oder sonstigen Produktionsdaten angelegt.
+- **Nächster Person-B-Schritt:** Den FS7-Abnahmebericht mit den weiterhin extern blockierten Betriebsrisiken präsentieren. Reale Core Web Vitals, Monitoring und produktive Ausgangsdaten bleiben vor dem kontrollierten FS8-Livegang offen.

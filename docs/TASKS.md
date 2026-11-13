@@ -1,6 +1,6 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS7` freigegeben; Person-B-QA begonnen
+**Status:** Full-Stack-Phase `FS7`; Person-B-QA und Live-Origin-Nachweis abgeschlossen, Gate-Abnahme offen
 **Letzte Aktualisierung:** 13.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
@@ -292,8 +292,8 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 - [-] Aufbewahrung und technische Anonymisierung sowie eine ownergeschützte manuelle Anonymisierung sind umgesetzt und getestet; öffentliches Auskunfts-/Exportportal und vollständige Lösch-/Exportregeln bleiben fachlich beziehungsweise rechtlich offen.
 - [-] Auditlog, serverseitiger Rate-Limit-Grundschutz, Sicherheitsheader und Origin-Schutz sind geprüft beziehungsweise ergänzt; produktives Monitoring, Alarmierung und Secret-Rotation benötigen noch Betriebsfreigabe.
 - [-] Ein `mongodump` von `colosseo_test` wurde erfolgreich erzeugt und wieder entfernt; der Restore-Nachweis bleibt wegen fehlender Atlas-Berechtigung für ein separates Restore-Testziel offen.
-- [-] Dependency-, Auth-, Autorisierungs-, Upload-, CORS-/CSRF- und Log-Leak-Grundprüfungen sind erfolgt; ein vollständiger externer Browser-/Origin-Nachweis und die abschließende Security-Prüfung bleiben offen.
-- [-] Die lokal ausführbare Regression mit Typecheck, Lint, 92/92 Tests, Production-Build, Secret-Tracking, Audit und Diff-Check ist bestanden; die vollständige externe Betriebs-/Performanceabnahme bleibt offen.
+- [-] Dependency-, Auth-, Autorisierungs-, Upload-, CORS-/CSRF- und Log-Leak-Grundprüfungen sind erfolgt. Der externe Live-Origin-Nachweis ist bestanden: Die eigene Render-Origin erreicht die Validierung, eine fremde Origin wird mit `403 CSRF_ORIGIN_INVALID` blockiert. Die abschließende Security-/Betriebsabnahme bleibt offen.
+- [-] Die lokal ausführbare Regression mit Typecheck, Lint, 92/92 Tests, Production-Build, Secret-Tracking, Audit und Diff-Check ist bestanden. Der warme Render-Smoke-Test für Sprachrouten, Admin-Shell und öffentliche Lese-APIs ist bestanden; reale Core Web Vitals sowie die vollständige externe Betriebs-/Performanceabnahme bleiben offen.
 - [x] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden. Person B hat lokale Worst-Case-, Empty- und One-Testzustände, Pagination, explizites Leerfeedback, deckungsgleiche Preis-/Allergenlimits und schmale Layoutregeln ergänzt. Tastatur-/Vorschau-Fokus sowie die schmale Adminansicht wurden geprüft; Tabellen und Navigation besitzen eigene interne Scrollflächen, während der Seitenüberlauf unterdrückt wird.
 - [ ] **GATE FS7:** Abnahmebericht und offene Produktionsrisiken präsentieren; auf GO für `FS8` warten.
 
