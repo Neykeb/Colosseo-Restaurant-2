@@ -71,7 +71,7 @@ Die am 22.10.2026 freigegebene Reihenfolge der deutschen Notte-Startseite lautet
 2. **Begrüßung** „Liebe Gäste und Amici“ mit realem Innenraumfoto.
 3. **Speisekarten-Vorschau** als Sticky-Editorial-Sequenz und Zugang zur vollständigen Karte.
 4. **Familiengeschichte** mit der bestätigten Aussage zum über 30-jährigen Familienbetrieb.
-5. **Feiern und besondere Anlässe** als einzelne bilddominante Section; der frühere redundante Services-Slider entfällt vollständig.
+5. **Feiern und besondere Anlässe** mit der freigegebenen Überschrift „Momente, die in Erinnerung bleiben.“; der frühere redundante Services-Slider und das in der Reservierung bereits verwendete Tischmotiv entfallen vollständig.
 6. **Google-Bewertungen** als Vertrauensbeleg.
 7. **Reservierungsabschluss** mit bestätigter telefonischer Alternative; externer Anbieter bleibt `OFFEN`.
 8. **Besuch planen** mit Öffnungszeiten, Adresse, Telefon und Anfahrt.

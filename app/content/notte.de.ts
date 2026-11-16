@@ -38,8 +38,8 @@ export const notteContent = {
   },
   events: {
     eyebrow: "Feiern im Colosseo",
-    title: "Ein Tisch für die Menschen, die Ihnen wichtig sind.",
-    body: "Private Veranstaltungen, Hochzeiten und Catering können persönlich angefragt werden.",
+    title: "Momente, die in Erinnerung bleiben.",
+    body: "Private Feiern, Hochzeiten und Catering können Sie persönlich bei uns anfragen.",
     action: "Feier anfragen",
     imageAlt: "Gäste stoßen bei einem italienischen Abendessen miteinander an",
   },
@@ -93,8 +93,8 @@ const notteContentEn = {
   },
   events: {
     eyebrow: "Celebrate at Colosseo",
-    title: "A table for the people who matter to you.",
-    body: "Private events, weddings and catering can be requested personally.",
+    title: "Moments worth remembering.",
+    body: "You can enquire with us personally about private celebrations, weddings and catering.",
     action: "Enquire about an event",
     imageAlt: "Guests raising their glasses over an Italian dinner",
   },
@@ -122,8 +122,8 @@ const notteContentIt = {
   },
   events: {
     eyebrow: "Festeggiare al Colosseo",
-    title: "Un tavolo per le persone che contano.",
-    body: "Eventi privati, matrimoni e catering possono essere richiesti personalmente.",
+    title: "Momenti da ricordare.",
+    body: "Potete contattarci personalmente per feste private, matrimoni e catering.",
     action: "Richiedi un evento",
     imageAlt: "Ospiti che brindano durante una cena italiana",
   },

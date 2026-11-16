@@ -5,6 +5,10 @@
 .admin-shell,
 .admin-configuration,
 .admin-dashboard {
+  --admin-radius-surface: 1.25rem;
+  --admin-radius-control: 0.75rem;
+  --admin-surface: #f8f2e8;
+  --admin-surface-hover: #fffaf2;
   min-height: 100svh;
   font-family: "Geist Variable", "DM Sans", sans-serif;
   background: #eee7da;
@@ -29,9 +33,11 @@
 }
 
 .admin-sidebar {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 20;
   display: flex;
+  width: 15rem;
   height: 100svh;
   flex-direction: column;
   border-right: 1px solid rgb(33 29 24 / 14%);
@@ -82,6 +88,7 @@
 .admin-sidebar a:focus-visible { outline: 3px solid #d89478; outline-offset: 2px; }
 
 .admin-workspace {
+  grid-column: 2;
   width: min(100%, 92rem);
   min-width: 0;
   max-width: 100%;
@@ -128,6 +135,8 @@
 .admin-view-switch {
   display: flex;
   border: 1px solid rgb(33 29 24 / 24%);
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .admin-view-switch button,
@@ -143,6 +152,10 @@
 }
 
 .admin-view-switch button[aria-pressed="true"] { background: #211d18; color: #fffaf2; }
+.admin-view-switch button { border-radius: 0; box-shadow: none; }
+.admin-view-switch button:first-child { border-radius: var(--admin-radius-control) 0 0 var(--admin-radius-control); }
+.admin-view-switch button:last-child { border-radius: 0 var(--admin-radius-control) var(--admin-radius-control) 0; }
+.admin-view-switch button:focus-visible { outline-offset: -3px; }
 .admin-text-button { text-decoration: underline; text-underline-offset: 0.3em; }
 .admin-toolbar label { display: flex; align-items: center; gap: 0.65rem; margin-left: auto; font-size: 0.82rem; font-weight: 650; }
 .admin-toolbar input { min-height: 2.75rem; border: 1px solid rgb(33 29 24 / 24%); padding: 0.55rem 0.7rem; color: #211d18; background: #f8f2e8; font: inherit; }
@@ -298,8 +311,8 @@
 .admin-pagination button:focus-visible { outline: 3px solid #a94b3f; outline-offset: 3px; }
 .admin-pagination span { color: #5d554c; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
 
-.admin-operation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: 2rem; background: rgb(33 29 24 / 16%); }
-.admin-operation-card { min-width: 0; padding: clamp(1.25rem, 3vw, 2.25rem); background: #f8f2e8; }
+.admin-operation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 1px; margin-top: 2rem; background: rgb(33 29 24 / 16%); }
+.admin-operation-card { min-width: 0; align-self: start; padding: clamp(1.25rem, 3vw, 2.25rem); background: #f8f2e8; }
 .admin-operation-card-wide { grid-column: 1 / -1; }
 .admin-period-form { display: grid; grid-template-columns: minmax(11rem, 1fr) minmax(16rem, 1.5fr) minmax(12rem, 1fr); align-items: end; gap: 0.75rem; }
 .admin-period-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; grid-column: 1 / -1; }
@@ -337,6 +350,10 @@
 .admin-operation-list button { display: grid; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; place-items: center; border: 1px solid rgb(33 29 24 / 24%); color: #6f2e27; background: transparent; cursor: pointer; }
 .admin-operation-list button svg { width: 1rem; height: 1rem; }
 .admin-compact-empty { margin: 0; padding: 1.25rem 0; color: #6a6056; font-size: 0.84rem; }
+.admin-disclosure-button { display: flex; width: 100%; min-height: 2.75rem; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.75rem; border: 0; padding: 0.7rem 0.85rem; color: #211d18; background: rgb(33 29 24 / 6%); font: 650 0.82rem/1 "Geist Variable", sans-serif; cursor: pointer; }
+.admin-disclosure-button svg { width: 1rem; height: 1rem; transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1); }
+.admin-disclosure-button[aria-expanded="true"] svg { transform: rotate(180deg); }
+.admin-disclosure-button:focus-visible { outline: 3px solid #a94b3f; outline-offset: 3px; }
 
 .admin-inquiry-filters { display: grid; grid-template-columns: minmax(14rem, 2fr) minmax(11rem, 1fr) auto auto; align-items: end; gap: 0.75rem; border-bottom: 1px solid rgb(33 29 24 / 16%); padding: 1.25rem 0; }
 .admin-inquiry-filters label { display: grid; gap: 0.45rem; color: #5d554c; font-size: 0.74rem; font-weight: 650; }
@@ -377,9 +394,9 @@
 .admin-remove-media svg { width: 1rem; height: 1rem; }
 .admin-preview-button:disabled,
 .admin-menu button:disabled { cursor: not-allowed; opacity: 0.48; }
-.admin-menu-layout { display: grid; grid-template-columns: minmax(15rem, 4fr) minmax(0, 8fr); gap: 1px; margin-top: 2rem; background: rgb(33 29 24 / 18%); }
+.admin-menu-layout { display: grid; grid-template-columns: minmax(15rem, 4fr) minmax(0, 8fr); align-items: start; gap: 1px; margin-top: 2rem; background: rgb(33 29 24 / 18%); }
 .admin-menu-index,
-.admin-menu-editor { min-width: 0; padding: clamp(1rem, 2.5vw, 2rem); background: #f8f2e8; }
+.admin-menu-editor { min-width: 0; align-self: start; padding: clamp(1rem, 2.5vw, 2rem); background: #f8f2e8; }
 .admin-menu-index > label,
 .admin-category-form label,
 .admin-menu-form-grid > label { display: grid; gap: 0.45rem; color: #5d554c; font-size: 0.74rem; font-weight: 650; }
@@ -426,6 +443,9 @@
 .admin-remove-media { margin-left: 0.5rem; border-color: #8e4036; color: #8e4036; }
 .admin-menu-actions { display: flex; justify-content: flex-end; border-top: 1px solid rgb(33 29 24 / 18%); margin-top: 1.5rem; padding-top: 1.5rem; }
 .admin-form-error { min-height: 1.5rem; margin: 1rem 0 0; color: #8e4036; font-size: 0.82rem; font-weight: 650; }
+.admin-form-message:empty,
+.admin-form-error:empty,
+.admin-save-message:empty { display: none; }
 .admin-menu :focus-visible { outline: 3px solid #a94b3f; outline-offset: 3px; }
 
 .admin-menu-preview { width: min(62rem, calc(100% - 2rem)); max-height: calc(100svh - 2rem); border: 0; padding: clamp(1.25rem, 4vw, 3rem); color: #211d18; background: #eee7da; box-shadow: 0 2rem 6rem rgb(20 15 12 / 36%); }
@@ -440,6 +460,254 @@
 .admin-menu-preview article p { margin: 0.35rem 0; color: #5d554c; line-height: 1.5; }
 .admin-menu-preview article small { color: #8e4036; font-size: 0.7rem; font-weight: 650; text-transform: uppercase; }
 .admin-menu-preview article strong { font-family: "Instrument Serif", Georgia, serif; font-size: 1.35rem; font-weight: 400; white-space: nowrap; }
+
+/* Ruhige Admin-Flächen: Abstand und Gruppierung ersetzen dekorative Trennlinien. */
+.admin-skip-link,
+.admin-sidebar nav a,
+.admin-site-link,
+.admin-toolbar,
+.admin-view-switch,
+.admin-toolbar input,
+.admin-metrics article,
+.admin-day,
+.admin-agenda-item,
+.admin-status,
+.admin-empty,
+.admin-notice,
+.admin-inquiry-row,
+.admin-filterbar,
+.admin-filterbar input,
+.admin-filterbar select,
+.admin-filter-submit,
+.admin-filter-reset,
+.admin-reservation-table button,
+.admin-detail-actions button,
+.admin-save-button,
+.admin-detail-close,
+.admin-detail-facts div,
+.admin-table-options label,
+.admin-pagination button,
+.admin-operation-card,
+.admin-operation-form input,
+.admin-operation-form select,
+.admin-choice-row label,
+.admin-operation-list > div,
+.admin-operation-list button,
+.admin-disclosure-button,
+.admin-inquiry-filters,
+.admin-inquiry-filters input,
+.admin-inquiry-filters select,
+.admin-detail-edit-row select,
+.admin-note-field textarea,
+.admin-preview-button,
+.admin-new-item,
+.admin-category-form button,
+.admin-upload-button,
+.admin-remove-media,
+.admin-menu-index,
+.admin-menu-editor,
+.admin-menu-index select,
+.admin-category-form input,
+.admin-menu-form-grid input,
+.admin-menu-form-grid select,
+.admin-menu-form-grid textarea,
+.admin-menu-items article,
+.admin-menu-editor-heading > span,
+.admin-media-field > div:first-child,
+.admin-media-controls > label:not(.admin-upload-button) input,
+.admin-upload-start,
+.admin-menu-preview,
+.admin-menu-preview article,
+.admin-menu-preview article img,
+.admin-primary,
+.admin-module-list span {
+  border-radius: var(--admin-radius-control);
+}
+
+.admin-toolbar,
+.admin-metrics article,
+.admin-day,
+.admin-filterbar,
+.admin-notice,
+.admin-operation-card,
+.admin-inquiry-filters,
+.admin-menu-index,
+.admin-menu-editor,
+.admin-menu-preview {
+  border-radius: var(--admin-radius-surface);
+}
+
+.admin-site-link,
+.admin-toolbar,
+.admin-section-heading,
+.admin-day,
+.admin-empty,
+.admin-inquiry-row,
+.admin-filterbar,
+.admin-detail-section,
+.admin-history li,
+.admin-pagination,
+.admin-operation-list,
+.admin-operation-list > div,
+.admin-inquiry-filters,
+.admin-category-form,
+.admin-media-field,
+.admin-menu-actions,
+.admin-menu-preview > section > h3,
+.admin-menu-preview article {
+  border-color: transparent;
+}
+
+.admin-toolbar,
+.admin-filterbar,
+.admin-inquiry-filters {
+  padding: 1rem;
+  background: rgb(255 250 242 / 34%);
+}
+
+.admin-metrics {
+  gap: 0.75rem;
+  border: 0;
+}
+
+.admin-metrics article {
+  border: 1px solid rgb(33 29 24 / 10%);
+}
+
+.admin-day,
+.admin-inquiry-row,
+.admin-operation-list > div,
+.admin-menu-items article,
+.admin-menu-preview article {
+  border: 0;
+  background: rgb(255 250 242 / 42%);
+}
+
+.admin-day {
+  margin-top: 0.75rem;
+  padding: 1.25rem;
+}
+
+.admin-inquiry-row,
+.admin-operation-list > div {
+  margin-top: 0.5rem;
+  padding: 0.9rem 1rem;
+}
+
+.admin-detail {
+  border-radius: var(--admin-radius-surface) 0 0 var(--admin-radius-surface);
+}
+
+.admin-detail-facts,
+.admin-operation-grid,
+.admin-menu-layout {
+  gap: 1rem;
+  background: transparent;
+}
+
+.admin-detail-section,
+.admin-category-form,
+.admin-media-field,
+.admin-menu-actions {
+  border: 0;
+}
+
+.admin-history {
+  gap: 0.45rem;
+}
+
+.admin-history li {
+  padding: 0.8rem;
+  border: 0;
+  border-radius: var(--admin-radius-control);
+  background: rgb(255 250 242 / 34%);
+}
+
+.admin-operation-list,
+.admin-menu-items {
+  gap: 0.5rem;
+  border: 0;
+}
+
+.admin-menu-items article > button:last-child {
+  border-left-color: transparent;
+}
+
+.admin-menu-preview article {
+  margin-top: 0.5rem;
+  padding: 1rem;
+}
+
+.admin-sidebar nav a,
+.admin-site-link,
+.admin-view-switch button,
+.admin-text-button,
+.admin-filter-submit,
+.admin-filter-reset,
+.admin-reservation-table button,
+.admin-detail-actions button,
+.admin-save-button,
+.admin-pagination button,
+.admin-operation-list button,
+.admin-disclosure-button,
+.admin-preview-button,
+.admin-new-item,
+.admin-category-form button,
+.admin-upload-button,
+.admin-remove-media,
+.admin-upload-start,
+.admin-primary,
+.admin-metrics article,
+.admin-agenda-item,
+.admin-inquiry-row,
+.admin-table-options label,
+.admin-choice-row label,
+.admin-operation-list > div,
+.admin-menu-items article {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .admin-sidebar nav a:hover,
+  .admin-site-link:hover {
+    background: rgb(255 250 242 / 10%);
+  }
+
+  .admin-view-switch button:hover:not([aria-pressed="true"]),
+  .admin-text-button:hover,
+  .admin-filter-reset:hover,
+  .admin-reservation-table button:hover,
+  .admin-detail-actions button:hover:not(:disabled),
+  .admin-pagination button:hover:not(:disabled),
+  .admin-preview-button:hover:not(:disabled),
+  .admin-remove-media:hover:not(:disabled) {
+    background: rgb(33 29 24 / 7%);
+  }
+
+  .admin-filter-submit:hover,
+  .admin-save-button:hover:not(:disabled),
+  .admin-new-item:hover:not(:disabled),
+  .admin-category-form button:hover:not(:disabled),
+  .admin-upload-start:hover:not(:disabled),
+  .admin-primary:hover {
+    transform: translateY(-1px);
+    background: #6f2e27;
+    box-shadow: 0 0.5rem 1.4rem rgb(33 29 24 / 12%);
+  }
+
+  .admin-metrics article:hover,
+  .admin-agenda-item:hover,
+  .admin-inquiry-row:hover,
+  .admin-table-options label:hover,
+  .admin-choice-row label:hover,
+  .admin-operation-list > div:hover,
+  .admin-disclosure-button:hover,
+  .admin-menu-items article:hover {
+    transform: translateY(-1px);
+    background: var(--admin-surface-hover);
+    box-shadow: 0 0.65rem 1.7rem rgb(33 29 24 / 7%);
+  }
+}
 @keyframes admin-preview-enter { from { opacity: 0; transform: translateY(1.5rem) scale(0.985); } }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -587,11 +855,11 @@
   .admin-access { min-height: 66svh; }
   .admin-copy h1 { font-size: clamp(3rem, 15vw, 5.5rem); }
   .admin-dashboard { grid-template-columns: 1fr; }
-  .admin-sidebar { position: static; height: auto; padding: 1.15rem; overflow: hidden; }
+  .admin-sidebar { position: static; width: auto; height: auto; padding: 1.15rem; overflow: hidden; }
   .admin-sidebar nav { display: flex; width: 100%; overflow-x: auto; margin-top: 1.5rem; }
   .admin-sidebar nav a { flex: 0 0 auto; }
   .admin-site-link { position: absolute; top: 1rem; right: 1rem; min-height: 2.75rem; border: 0; padding-inline: 0.5rem; }
-  .admin-workspace { padding: 1.25rem; }
+  .admin-workspace { grid-column: 1; padding: 1.25rem; }
   .admin-dashboard-header h1 { font-size: clamp(2.7rem, 12vw, 4.5rem); }
   .admin-toolbar label { width: 100%; margin-left: 0; }
   .admin-toolbar input { flex: 1; min-width: 0; }
@@ -630,7 +898,7 @@
   .admin-inquiry-filters label:first-child { grid-column: auto; }
   .admin-menu-form-grid { grid-template-columns: 1fr; }
   .admin-menu-items article { grid-template-columns: 1fr; }
-  .admin-menu-items article > button:last-child { border-top: 1px solid rgb(33 29 24 / 14%); border-left: 0; text-align: center; }
+  .admin-menu-items article > button:last-child { border-top: 0; border-left: 0; text-align: center; }
   .admin-media-field { grid-template-columns: 1fr; }
   .admin-media-field > div:first-child { width: min(10rem, 100%); }
   .admin-period-list > div { flex-wrap: wrap; }
@@ -651,7 +919,7 @@
   .admin-media-field > div:first-child { width: min(100%, 13rem); }
   .admin-remove-media { margin: 0.5rem 0 0; }
   .admin-menu-items article { grid-template-columns: 1fr; align-items: stretch; }
-  .admin-menu-items article > button:last-child { min-height: 2.75rem; border-top: 1px solid rgb(33 29 24 / 14%); border-left: 0; }
+  .admin-menu-items article > button:last-child { min-height: 2.75rem; border-top: 0; border-left: 0; }
   .admin-menu-editor-heading { flex-direction: column; }
   .admin-menu-form-grid fieldset { flex-wrap: wrap; }
   .admin-menu-preview article,
@@ -664,7 +932,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .admin-copy { animation: none; }
-  .admin-primary { transition: none; }
+  .admin-dashboard *,
+  .admin-shell *,
+  .admin-configuration * { transition: none !important; }
   .admin-detail-backdrop,
   .admin-detail { animation: none; }
 }
