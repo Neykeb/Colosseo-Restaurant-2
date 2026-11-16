@@ -1,24 +1,29 @@
 # Backend-Cockpit
 
-**Status:** Full-Stack-Phase `FS1` in Arbeit; Atlas-Verbindung und versionierter Migrationsrahmen verifiziert
+**Status:** Verkürzte Abschlussphase `FS8 Demo` freigegeben; Demo-Menüdaten und Präsentationsabnahme in Arbeit
 
-**Phase:** `FS1` – Plattformgrundlage und reproduzierbare Datenbank
+**Phase:** `FS8 Demo` – Abschlussprojekt und Präsentationsabnahme
 
-**Letzte Aktualisierung:** 03.11.2026
+**Letzte Aktualisierung:** 13.11.2026
 
 Diese Datei ist der schnelle Einstieg in die Backend-Arbeit. Sie fasst keine vollständige Spezifikation doppelt zusammen, sondern zeigt, **wo** eine Entscheidung verbindlich dokumentiert ist und **was als Nächstes** zu tun ist.
 
 ## 1. Aktueller Stand in 30 Sekunden
 
 - Die bestehende öffentliche React-/TypeScript-Website bleibt erhalten.
-- Die erste Backend-Grundlage ist implementiert: validierte Serverumgebung, Mongoose-Verbindung und erfolgreicher Atlas-Verbindungstest.
-- Der versionierte MongoDB-Migrationsrahmen ist implementiert: geordnete Registry, Historie, Ausführungssperre, Status, Vorwärtslauf, einzelner Rollback und Unit-Tests. Konkrete Schema-/Indexmigrationen folgen mit den bestätigten Modellen.
+- Die erste Backend-Grundlage ist implementiert: validierte Serverumgebung, getrennte Express-App und Serverstart, Healthcheck, Korrelations-ID, Fehlerformat, Mongoose-Verbindung und erfolgreicher Atlas-Verbindungstest.
+- Der versionierte MongoDB-Migrationsrahmen ist implementiert: geordnete Registry, Historie, Ausführungssperre, Status, Vorwärtslauf, einzelner Rollback und Unit-Tests. Die erste Core-Indexmigration ist in `colosseo_test` und `colosseo` erfolgreich angewendet.
 - Zielstack: React, TypeScript, Vite und TanStack Router im Frontend; Node.js, Express und TypeScript im Backend; MongoDB mit Mongoose, Clerk für OAuth und Sessions, Resend für E-Mails sowie Render für das Finalprojekt.
-- TanStack Router ist im Quellcode implementiert; Sprachrouten, direkte Reloads, gestalteter 404-Zustand, Lazy Loading, Netlify-Publish-Pfad und Build-Prerendering für 15 lokalisierte Routen sind lokal verifiziert. Die verknüpfte Netlify-Produktionsbasis `https://ristorante-colosseo-winsen.netlify.app` ist als `SITE_URL` gesetzt; Canonical, Hreflang, Sitemap und `robots.txt` wurden damit im lokalen Production-Build erfolgreich geprüft. Die Regression nach einem echten Netlify-Deployment bleibt offen.
+- TanStack Router, Sprachrouten, direkte Reloads, gestalteter 404-Zustand, Lazy Loading, Netlify-Publish-Pfad und Build-Prerendering für 15 lokalisierte Routen sind lokal und auf `https://ristorante-colosseo-winsen.netlify.app` verifiziert. Canonical, Hreflang, Sitemap, `robots.txt` und die öffentlich geladenen JavaScript-Chunks wurden am 04.11.2026 live geprüft; der zuvor aktive Netlify-SSO-Zugriffsschutz ist deaktiviert.
 - Der Atlas-Benutzer besitzt am 03.11.2026 verifiziert ausschließlich datenbankspezifisches `readWrite` für `colosseo` und `colosseo_test`. Entwicklungsverbindung, Testverbindung und Test-Migrationslauf sind damit erfolgreich.
 - Vom Nutzer bestätigter Atlas-Betriebsstand: MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`), Replica Set mit drei Nodes, Backups derzeit inaktiv, keine verknüpften App Services und ein vorhandener Search-Index. Render soll später möglichst regionsnah betrieben werden; Backups bleiben vor einem realen Produktionsbetrieb zu klären.
 - Clerk authentifiziert Admins. Die eigene Express-/MongoDB-Logik entscheidet zusätzlich, ob ein Konto als `owner` oder `staff` zugelassen ist.
-- Aktuelle Phase: `FS1`. MongoDB Atlas ohne zusätzliche lokale Docker-Datenbank und `GO für FS1` wurden am 02.11.2026 bestätigt.
+- Aktuelle Phase: `FS7`. Menü-, Medien- und reguläre Öffnungszeitenverwaltung sind geschützt integriert; öffentliche Menüs zeigen nur aktive/veröffentlichte Inhalte. Der priorisierte QA- und Sicherheitsabschluss läuft.
+- Die reine Reservierungslogik, öffentliche Config-/Verfügbarkeits-/Buchungsendpunkte, idempotente Bestätigung, Rate-Limit, atomare Tisch-Zeit-Sperren sowie geschützte Admin-Endpunkte für manuelle Buchungen und Sperrzeiten sind implementiert. Migrationen `0005` und `0006` sind in `colosseo_test` und `colosseo` angewendet.
+- Die Express-/TypeScript-Grundlage einschließlich statischer Produktionsauslieferung ist implementiert. Entwicklungs- und Produktionsprozess, Healthcheck, API-404 sowie die drei vorgerenderten Sprachseiten wurden am 05.11.2026 über echte lokale Listener geprüft.
+- Der gemeinsame React-/Express-Web-Service ist per Render-Blueprint in Frankfurt live. Reproduzierbarer Build, idempotente Migration vor dem Serverstart, `/api/health`, MongoDB Atlas, Clerk, Resend-Konfiguration und `SITE_URL` sind in der Render-Umgebung aktiv; Secrets bleiben ausschließlich dort gespeichert.
+- Person A hat am 04.11.2026 vorläufige Kernmodelle, eine typisierte Reservation-Repository-/Service-Grenze, die erste Core-Indexmigration und einen künstlichen Development-Seed ergänzt. Reale Reservierungsregeln und produktive Geschäftsdaten sind nicht festgeschrieben.
+- Person A hat am 05.11.2026 die Clerk-Express-Middleware, `admin_profiles`, das Adminprofil-Repository sowie serverseitige `owner`-/`staff`-Autorisierung mit 401-/403-Tests ergänzt. Clerk bleibt Quelle der Identität; MongoDB bleibt Quelle der fachlichen Adminberechtigung.
 
 ## 2. Wo finde ich was?
 
@@ -121,28 +126,62 @@ Die ausführlichen Regeln stehen in `AGENTS.md` und `docs/SPEC.md`. Für den sch
 - E-Mail-Service: Resend
 - Hosting: Render, zunächst für das Finalprojekt
 
-### In `FS1` noch offen
+### Aktueller FS4-Stand
 
-- Express-Grundgerüst, Kernmodelle, konkrete Indexmigrationen und typisierte Repositories umsetzen
-- Konkrete Schema-/Indexmigrationen ergänzen, sobald die zugehörigen Modelle in `FS1` festgelegt sind
-- Ein ausdrücklich freigegebenes Netlify-Deployment ausführen und anschließend Canonical, Hreflang, Sitemap, Reloads und Sprachrouten auf der Live-Site regressionsprüfen
+- Die Gaststrecke prüft Verfügbarkeit und bestätigt eine Reservierung ausschließlich nach erfolgreicher atomarer Datenbanktransaktion.
+- Pro bestätigter Buchung entstehen eindeutige Outbox-Ereignisse für Restaurant und – sofern eine E-Mail angegeben wurde – Gast. Der Worker nutzt dieselbe Ereignis-ID als Resend-Idempotenzschlüssel und wiederholt temporär fehlgeschlagene Zustellungen begrenzt.
+- Empfänger für Restaurantbenachrichtigungen: `mohammad.amiri@dci-student.org` (`VORLÄUFIG BESTÄTIGT 09.11.2026`).
+- Der lokale Resend-API-Key und der Testabsender `onboarding@resend.dev` sind konfiguriert. Ein realer Gastversand wurde am 09.11.2026 mit Providerstatus `Delivered` und genau einem eindeutigen Outbox-Ereignis verifiziert.
+- Ohne verifizierte eigene Domain erlaubt Resend nur Testzustellungen an die Adresse des Resend-Kontos. Die Restaurantbenachrichtigung an die vorläufige DCI-Adresse wurde deshalb erwartungsgemäß abgelehnt und bleibt in der Outbox wiederholbar; eine produktive Absenderdomain bleibt offen.
 
 ### Vor späteren Phasen offen
 
 - Backup-Strategie beziehungsweise passender Atlas-Tarif vor einem realen Produktionsbetrieb
-- Clerk-Anwendung, OAuth-Anbieter und erste Owner-Identität
-- Rollenmatrix für `owner` und `staff`
+- konkrete Clerk User-ID jedes freizugebenden Owners
+- konkrete Rechte für `staff`; bis zur Freigabe bleibt diese Rolle gesperrt
 - reale Tische, Bereiche, Kombinations- und Reservierungsregeln
 - Datenschutz-, Aufbewahrungs-, Storno- und No-show-Regeln
-- E-Mail-Absenderdomain und Restaurantempfänger
+- E-Mail-Absenderdomain; Restaurantempfänger ist vorläufig festgelegt
 - Bildspeicher für Speisekartenmedien
 
 Die vollständige nummerierte Liste wird nur in `docs/TASKS.md` gepflegt.
 
-## 8. Nächster zulässiger Schritt
+## 8. FS6-API-Verträge
 
-1. Node-/Express-/TypeScript-Grundgerüst mit getrennten `app`-/`server`-Startpunkten aufbauen.
-2. Healthcheck, einheitliches Fehlerformat, Korrelations-ID und sichere Basiskonfiguration ergänzen.
-3. Danach Kernmodelle, konkrete Indexmigrationen und typisierte Repositories innerhalb von `FS1` umsetzen und testen.
+### Öffentliche Endpunkte
+
+- `GET /api/public/menu`: liefert aktive Kategorien mit aktiven und `published: true` gesetzten Gerichten. Preise sind Minor Units (`priceCents`); interne MongoDB-IDs und Zeitstempel werden nicht ausgegeben.
+- `GET /api/public/opening-hours`: liefert aktive reguläre Servicezeiten sowie datierte Sondertage mit `closed`, `opens` und `closes`.
+- `GET /api/admin/opening-hours`, `PUT /api/admin/opening-hours/:key` und `DELETE /api/admin/opening-hours/:key`: ownergeschützte Verwaltung der regulären Wochenzeiten mit Validierung und Auditlog.
+- `GET /api/public/media/:id`: liefert ein GridFS-Medium mit `Content-Type` aus den serverseitig gespeicherten Metadaten und unveränderlichem Cache-Header.
+
+### Geschützte Owner-Endpunkte
+
+- `GET /api/admin/menu/categories`, `PUT /api/admin/menu/categories/:slug`: Kategorien lesen und speichern.
+- `GET /api/admin/menu/items`, `PUT /api/admin/menu/items/:itemId`: Gerichte mit Name, Beschreibung, `priceCents`, Allergenen, optionaler Bild-URL, Sortierung, Aktiv- und Veröffentlichungsstatus speichern.
+- `GET /api/admin/menu/preview`: aktive Entwurfs- und Veröffentlichungsdaten einschließlich `published`-Status.
+- `PATCH /api/admin/menu/items/:itemId/publication`: explizit veröffentlichen oder Veröffentlichung zurücknehmen; die Aktion wird auditiert.
+- `imageUrl` bei `PUT /api/admin/menu/items/:itemId` akzeptiert ausschließlich interne Medien-URLs im Format `/api/public/media/<24-stellige ObjectId>` oder absolute `https://`-URLs; beliebige relative Pfade und nicht-HTTPS-URLs werden abgelehnt.
+- `POST /api/admin/media`: JSON mit `fileName`, `contentType`, `altText` und Base64-Daten. Erlaubt sind JPEG, PNG und WebP bis 5 MB; Alternativtext ist 1–300 Zeichen lang. Die Binärsignatur wird zusätzlich zum MIME-Typ geprüft.
+- `DELETE /api/admin/media/:id`: löscht GridFS-Datei und Chunks und erzeugt ein Audit-Ereignis.
+- `GET /api/admin/opening-hours`, `PUT /api/admin/opening-hours/:key`, `DELETE /api/admin/opening-hours/:key`: ownergeschützte Pflege regulärer wöchentlicher Servicezeiten mit Wochentag, Uhrzeitbereich und Aktivstatus.
+- `POST /api/admin/reservations/:publicId/anonymize`: ownergeschützte manuelle Anonymisierung einer Reservierung; Gastdaten, interne Notiz, Stornotoken, Locks und Tischzuweisungen werden entfernt beziehungsweise anonymisiert.
+
+Fehlercodes der Medien-API sind `MEDIA_TYPE_NOT_ALLOWED`, `MEDIA_ALT_TEXT_INVALID`, `MEDIA_SIZE_INVALID`, `MEDIA_SIGNATURE_INVALID` und `MEDIA_NOT_FOUND`. Alle Admin-Endpunkte sind ownergeschützt; der Client darf diese Prüfung nicht ersetzen.
+
+## 9. Präsentationsablauf für das Abschlussprojekt
+
+1. Öffentliche Website und Sprachrouten zeigen; anschließend Datum und Personenzahl im Reservierungsformular wählen.
+2. Erklären, dass Express die Eingabe validiert und die atomare MongoDB-Transaktion erst bei erfolgreicher Tischzuweisung bestätigt.
+3. Im geschützten Adminbereich Clerk-Anmeldung, Reservierungsübersicht, Kalender, Öffnungszeiten und Menüverwaltung zeigen.
+4. Ein veröffentlichtes Gericht ändern beziehungsweise dessen Vorschau zeigen und den Unterschied zwischen Entwurf und Veröffentlichung erklären.
+5. Resend-Outbox, idempotenten Versand und neutrale Fehlerantworten anhand von Code oder Testnachweis erklären; keine E-Mail an reale Gäste senden.
+6. Abschließend die bestandenen Tests und die bewusst reduzierten Demo-Grenzen nennen.
+
+**Architektur in einem Satz:** React/TanStack Router spricht mit einer eigenen Express-/TypeScript-API; Clerk liefert die Adminidentität, die eigene Autorisierung schützt die Funktionen, Mongoose speichert in MongoDB Atlas und Resend verarbeitet E-Mails über eine idempotente Outbox.
+
+**Bekannte Demo-Grenzen:** keine eigene Domain, kein 24/7-Monitoring, keine rechtlich finalen Restaurantregeln, keine echten Kundendaten, kein produktiver Backupbetrieb und kein Versand an reale Gäste.
+
+**Einfacher Rollback:** In Render den letzten nachweislich funktionierenden Deploy erneut ausrollen oder den vorherigen Git-Commit auf dem Deployment-Branch wiederherstellen; anschließend `/api/health`, Sprachrouten und öffentliche Lese-APIs erneut prüfen. Datenmigration `0013_demo-menu-data` besitzt einen gezielten Rollback und entfernt nur Datensätze, die sie selbst angelegt hat.
 
 Der operative Termin- und Personenplan steht in `docs/DAILY_PLAN.md`.

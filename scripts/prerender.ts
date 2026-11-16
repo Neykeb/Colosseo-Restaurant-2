@@ -97,7 +97,7 @@ function renderStructuredData(locale: Locale, url: string | undefined): string {
 }
 
 async function writeRobotsAndSitemap(): Promise<void> {
-  const robots = ["User-agent: *", "Allow: /"];
+  const robots = ["User-agent: *", "Allow: /", "Disallow: /admin"];
   if (configuredSiteUrl) {
     const routes = locales.flatMap((locale) => pageKeys.map((pageKey) => `${configuredSiteUrl}${pathFor(locale, pageKey)}`));
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${routes.map((url) => `  <url><loc>${escapeHtml(url)}</loc></url>`).join("\n")}\n</urlset>\n`;

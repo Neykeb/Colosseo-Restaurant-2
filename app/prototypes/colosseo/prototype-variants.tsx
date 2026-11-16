@@ -60,7 +60,10 @@ function usePrototypeMotion(kind: "materia" | "notte" | "grafica" | "casa") {
       let removeNavigationListener = () => undefined;
 
       if (siteNav) {
-        gsap.from(siteNav.children, { opacity: 0, y: -10, duration: 0.55, stagger: 0.06, ease: "power3.out" });
+        const navigationEntranceTargets = compactViewport
+          ? siteNav.querySelectorAll(":scope > .p-logo, :scope > .no-nav-toggle")
+          : siteNav.children;
+        gsap.from(navigationEntranceTargets, { opacity: 0, y: -10, duration: 0.55, stagger: 0.06, ease: "power3.out" });
         const setNavigationState = (scrollTop: number, direction: number) => {
           siteNav.classList.toggle("is-compact", scrollTop > 72);
           if (scrollTop <= 72) siteNav.classList.remove("is-hidden");
@@ -204,15 +207,13 @@ function usePrototypeMotion(kind: "materia" | "notte" | "grafica" | "casa") {
         });
       });
       const reservation = root.current?.querySelector<HTMLElement>(".no-reservation");
-      const reservationRule = reservation?.querySelector<HTMLElement>(".no-reservation-rule");
       const reservationDetails = reservation?.querySelector<HTMLElement>(".no-reservation-details");
-      if (reservation && reservationRule && reservationDetails) {
+      if (reservation && reservationDetails) {
         gsap.timeline({
           defaults: { ease: "power3.out" },
           scrollTrigger: { trigger: reservation, start: "top 72%", once: true },
         })
-          .from(reservationRule, { scaleX: 0, transformOrigin: "left center", duration: 0.85 })
-          .from(reservationDetails, { opacity: 0, y: 24, duration: 0.7 }, "<+0.18");
+          .from(reservationDetails, { opacity: 0, y: 24, duration: 0.7 });
       }
       const events = root.current?.querySelector<HTMLElement>(".no-events");
       const eventsImage = events?.querySelector<HTMLImageElement>(".no-events-image");

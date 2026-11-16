@@ -8,6 +8,7 @@ import { getNotteContent, getOpeningHours, googleReviews, menuDishes, notteImage
 
 import { MaskedWords } from "./atoms";
 import { ReviewCard } from "./molecules";
+import { ReservationForm } from "~/components/reservation-form";
 
 type NotteLocale = "de" | "en" | "it";
 
@@ -24,11 +25,10 @@ export function NotteNavigation({ locale }: { locale: NotteLocale }) {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [open]);
 
-  return <header className="p-nav p-nav-dark no-site-nav">
+  return <header className={`p-nav p-nav-dark no-site-nav${open ? " is-menu-open" : ""}`}>
     <a className="p-logo" href="#top"><small>{content.brandEyebrow}</small>{content.brandName}</a>
-    <nav aria-label={locale === "de" ? "Hauptnavigation" : locale === "en" ? "Main navigation" : "Navigazione principale"} className={open ? "is-open" : undefined}><a href="#menu" onClick={() => setOpen(false)}>{content.menu}</a><a href="#events" onClick={() => setOpen(false)}>{content.events}</a><a href="#contact" onClick={() => setOpen(false)}>{content.contact}</a></nav>
-    <button aria-expanded={open} aria-label={open ? (locale === "de" ? "Navigation schließen" : locale === "en" ? "Close navigation" : "Chiudi navigazione") : (locale === "de" ? "Navigation öffnen" : locale === "en" ? "Open navigation" : "Apri navigazione")} className="no-nav-toggle" onClick={() => setOpen((value) => !value)} type="button">{open ? <X size={22} /> : <List size={22} />}</button>
-    <a className="p-nav-cta" href={notteLinks.phone}><Phone size={17} /> {content.reserve}</a>
+    <nav aria-label={locale === "de" ? "Hauptnavigation" : locale === "en" ? "Main navigation" : "Navigazione principale"} className={open ? "is-open" : undefined} id="colosseo-mobile-navigation"><span className="no-nav-primary"><a href="#menu" onClick={() => setOpen(false)}>{content.menu}</a><a href="#events" onClick={() => setOpen(false)}>{content.events}</a><a href="#contact" onClick={() => setOpen(false)}>{content.contact}</a></span><a className="no-nav-reserve" href="#action" onClick={() => setOpen(false)}>{content.reserve}</a></nav>
+    <button aria-controls="colosseo-mobile-navigation" aria-expanded={open} aria-label={open ? (locale === "de" ? "Navigation schließen" : locale === "en" ? "Close navigation" : "Chiudi navigazione") : (locale === "de" ? "Navigation öffnen" : locale === "en" ? "Open navigation" : "Apri navigazione")} className="no-nav-toggle" onClick={() => setOpen((value) => !value)} type="button">{open ? <X size={22} /> : <List size={22} />}</button>
   </header>;
 }
 
@@ -70,11 +70,11 @@ export function MenuPreviewSection({ locale, onOpenMenu, triggerRef }: { locale:
   useEffect(() => textRotateRef.current?.jumpTo(activeSlide), [activeSlide]);
 
   return <section className="no-menu-journey" id="menu" ref={sectionRef}>
+    <div className="no-menu-heading"><p>{content.eyebrow}</p></div>
     <div className="no-menu-sticky">
       <div className="no-menu-images" aria-hidden="true">
         {menuDishes.map((dish, index) => <img className={`no-menu-image${index === 0 ? " is-active" : ""}`} data-menu-image={index} key={dish.name} src={dish.image} alt="" loading="lazy" decoding="async" />)}
       </div>
-      <div className="no-menu-heading"><p>{content.eyebrow}</p></div>
     </div>
     <div className="no-menu-display" aria-live="polite">
       <div className="no-menu-meta"><span>{activeDish.category}</span><strong>{activeDish.price}</strong></div>
@@ -122,7 +122,6 @@ export function ReviewsSection({ locale }: { locale: NotteLocale }) {
         {[false, true].map((duplicate) => <div className="no-review-set" aria-hidden={duplicate || undefined} key={duplicate ? "duplicate" : "original"}>{row.map((review) => <ReviewCard duplicate={duplicate} key={review.author} locale={locale} review={review} />)}</div>)}
       </div>)}
     </div>
-    <footer className="no-reviews-footer" data-reveal-item><a href={notteLinks.reviews} rel="noreferrer" target="_blank">{content.link} <ArrowRight /></a><small>{content.date}</small></footer>
   </section>;
 }
 
@@ -130,9 +129,10 @@ export function ReservationSection({ locale }: { locale: NotteLocale }) {
   const content = getNotteContent(locale).reservation;
   return <Velaris className="no-reservation-shell">
     <section className="no-reservation" id="action" aria-labelledby="reservation-title">
-      <div className="no-reservation-intro"><p>{content.eyebrow}</p><span className="no-reservation-rule" aria-hidden="true" /></div>
+      <div className="no-reservation-intro"><p>{content.eyebrow}</p></div>
       <h2 id="reservation-title" data-word-reveal><MaskedWords text={content.title} /></h2>
-      <div className="no-reservation-details"><p>{content.body}</p><a href={notteLinks.phone}><Phone size={20} weight="regular" />{content.action}</a></div>
+      <div className="no-reservation-details"><p>{content.body}</p></div>
+      <ReservationForm locale={locale} />
     </section>
   </Velaris>;
 }
@@ -152,7 +152,7 @@ export function NotteFooter({ locale }: { locale: "de" | "en" | "it" }) {
   const visit = localizedContent.visit;
   return <footer className="no-footer" data-reveal-once>
     <div className="no-footer-brand" data-reveal-item><strong>Ristorante Colosseo</strong><p>{content.statement}</p></div>
-    <nav aria-label="Footer-Navigation" data-reveal-item><a href="#menu">{content.menu}</a><a href="#story">{content.restaurant}</a><a href="#events">{content.events}</a><a href="#reviews">{content.reviews}</a></nav>
+    <nav aria-label="Footer-Navigation" data-reveal-item><a href="#menu">{content.menu}</a><a href="#story">{content.restaurant}</a><a href="#events">{content.events}</a><a href="#reviews">{content.reviews}</a><Link className="no-footer-admin" to="/admin">{content.admin}</Link></nav>
     <div className="no-footer-contact" data-reveal-item><a href={notteLinks.phone}>{visit.phone}</a><p>{visit.addressLine1}<br />{visit.addressLine2}</p></div>
     <nav className="no-footer-languages" aria-label={content.languages} data-reveal-item>{(["de", "en", "it"] as const).map((language) => <Link aria-current={locale === language ? "page" : undefined} key={language} to="/$lang" params={{ lang: language }} search={{}}>{language.toUpperCase()}</Link>)}</nav>
   </footer>;

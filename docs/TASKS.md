@@ -1,7 +1,7 @@
 # Projektplan und Entscheidungsstatus
 
-**Status:** Full-Stack-Phase `FS1` – MongoDB-Atlas-Verbindung verifiziert; übrige Plattformaufgaben offen
-**Letzte Aktualisierung:** 03.11.2026
+**Status:** Verkürzte Demo-Abschlussphase `FS8 Demo` freigegeben; versionierte Demo-Ausgangsdaten vorbereitet
+**Letzte Aktualisierung:** 13.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeiten, Prioritäten, Freigaben und Implementierungsfortschritt. Fachliche Details bleiben in ihren zuständigen Dokumenten.
 
@@ -147,6 +147,12 @@ Diese Datei ist die einzige verbindliche Quelle für Phasenstatus, Abhängigkeit
 | 10.10.2026 | Gate 3 | Freigegeben | Nutzer: „Phase drei ist freigegeben.“ Phase 4 autorisiert. |
 | 30.10.2026 | FS0-Dokumentation | Freigegeben | Nutzer: „go“. Autorisiert wurden Backend-Cockpit und Zwei-Personen-Tagesplan; dies ist ausdrücklich keine Gate-Freigabe für `FS1`. |
 | 02.11.2026 | Gate FS0 / Start FS1 | Freigegeben | Nutzer bestätigt MongoDB Atlas ohne zusätzliche Docker-Datenbank und erteilt ausdrücklich „Go für FS1“. |
+| 11.11.2026 | Gate FS4 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS4“. FS4 ist abgenommen; `FS5` benötigt ein separates GO. |
+| 11.11.2026 | Gate FS4 / Start FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist freigegeben und darf umgesetzt werden. |
+| 11.11.2026 | Gate FS5 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS5“. FS5 ist abgenommen; `FS6` benötigt ein separates GO. |
+| 11.11.2026 | Gate FS5 / Start FS6 | Freigegeben | Nutzer erteilt ausdrücklich „GO FS6“. FS6 ist freigegeben und darf umgesetzt werden. |
+| 12.11.2026 | Gate FS6 / Start FS7 | Freigegeben | Nach erfolgreichem integriertem Browser-E2E und verifizierter Testdatenbereinigung erteilt der Nutzer ausdrücklich „GO“. FS6 ist abgenommen; FS7 darf schrittweise für Person B beginnen. |
+| 13.11.2026 | Gate FS7 / Start FS8 Demo | Freigegeben | Nach Präsentation des FS7-Abnahmeberichts reduziert der Nutzer FS8 ausdrücklich auf den notwendigen Demo- und Präsentationsumfang und erteilt dafür `GO`. |
 
 ## Aktuelle Blocker
 
@@ -192,89 +198,116 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 **Start bestätigt:** GO für `FS1` sowie MongoDB Atlas ohne zusätzliche lokale Docker-Datenbank wurden am 02.11.2026 bestätigt. Die lokale Verbindung zum eingerichteten Atlas-Cluster wurde am 02.11.2026 mit `npm run db:check` verifiziert. Am 03.11.2026 wurden ausschließlich datenbankspezifische `readWrite`-Rollen für `colosseo` und `colosseo_test` technisch verifiziert; Entwicklungsverbindung, Testverbindung und Test-Migrationslauf sind erfolgreich. Der Nutzer bestätigte MongoDB `8.0.36`, AWS Frankfurt (`eu-central-1`) und ein Replica Set mit drei Nodes. Backups sind derzeit inaktiv und bleiben vor einem realen Produktionsbetrieb offen.
 
 - [x] Lokale Entwicklungs- und Umgebungsvariablenstrategie ohne Secrets im Repository einrichten: `.env` wird ignoriert, `.env.example` enthält ausschließlich Platzhalter und Zod validiert MongoDB-Werte.
-- [-] TanStack Router ist im Quellcode implementiert; Typecheck, OXLint, 24 Unit-Tests und Production-Build laufen. Am 03.11.2026 wurden `/de`, `/en`, `/it`, direkter Reload und die gestaltete 404-Seite im lokalen Produktions-Build verifiziert; Netlify veröffentlicht `dist`. Der Build erzeugt für alle 15 lokalisierten Inhaltsrouten eigenes semantisches HTML mit lokalisierter Description, Open Graph und `Restaurant`-JSON-LD. Die über die verknüpfte Netlify-Site verifizierte Produktionsbasis `https://ristorante-colosseo-winsen.netlify.app` ist als `SITE_URL` gesetzt; Canonical, Hreflang, Sitemap und `robots.txt` wurden damit lokal erfolgreich geprüft. `OFFEN`: Regression nach einem ausdrücklich freigegebenen echten Netlify-Deployment.
-- [ ] Node-/Express-/TypeScript-Serverstruktur und getrennte `app`-/`server`-Startpunkte etablieren.
-- [-] Mongoose installieren und sichere, wiederverwendbare Verbindungslogik samt Statusprüfung und `db:check` etablieren; Installation, Verbindungslogik und echte Atlas-Verbindung sind verifiziert, Schemas/Modelle, Seed und typisierte Repositories bleiben offen.
-- [ ] Kernschema für Einstellungen, Servicezeiten, Sondertage, Bereiche, Tische, Reservierungen, Zuweisungen, Ereignisse und Outbox umsetzen.
+- [x] TanStack Router ist implementiert und am 04.11.2026 lokal sowie auf Netlify vollständig regressionsgeprüft: Typecheck, OXLint, 24 Unit-Tests und Production-Build laufen; `/de`, `/en`, `/it`, direkte Reloads, lokalisierte Unterseiten und die gestaltete 404 funktionieren. Netlify veröffentlicht `dist`; alle 15 lokalisierten Inhaltsrouten besitzen vorgerendertes semantisches HTML, lokalisierte Description, Open Graph und `Restaurant`-JSON-LD. Die bestätigte Produktionsbasis `https://ristorante-colosseo-winsen.netlify.app` erzeugt korrekte Canonical-/Hreflang-Links, Sitemap und `robots.txt`. Der zunächst aktive Netlify-SSO-Zugriffsschutz wurde für den öffentlichen Betrieb deaktiviert und die Live-Site anschließend erneut geprüft.
+- [x] Node-/Express-/TypeScript-Serverstruktur und getrennte `app`-/`server`-Startpunkte etablieren: `server/src/http/app.ts` kapselt die Express-App, `server/src/server.ts` den Prozessstart und das kontrollierte Herunterfahren.
+- [x] Mongoose installieren und sichere, wiederverwendbare Verbindungslogik samt Statusprüfung und `db:check` etablieren; Installation, echte Atlas-Verbindung, Kernmodelle, künstlicher Development-Seed und typisierte Repository-/Service-Grenze sind verifiziert.
+- [x] Kernschema für Einstellungen, Servicezeiten, Sondertage, Bereiche, Tische, Reservierungen, Zuweisungen, Audit-Ereignisse und Outbox umsetzen; typisierte Reservation-Repository-/Service-Grenze und ausschließlich künstlicher Development-Seed sind vorhanden. Fachliche Reservierungsregeln und produktive Inhalte bleiben bewusst für die dafür freizugebenden Folgephasen offen.
 - [x] Versionierten, idempotent ausführbaren MongoDB-Migrationsrahmen mit Registry, Historie, Ausführungssperre, Status, Vorwärtslauf, einzelnem Rollback, sicherer Testzielprüfung und Unit-Tests ergänzen.
-- [-] Getrennte Atlas-Testdatenbank `colosseo_test`, datenbankspezifische `readWrite`-Rollen, leerer Test-Migrationslauf sowie AWS Frankfurt (`eu-central-1`) und das dreiknotige Replica Set sind verifiziert beziehungsweise vom Nutzer bestätigt. Offen sind konkrete Indexmigrationen zusammen mit den bestätigten Modellen; Backups sind als späterer Produktionspunkt offen.
-- [ ] Express-Grundgerüst mit Healthcheck, Fehlerformat, Korrelations-ID, sicherer Basiskonfiguration und statischer Produktionsauslieferung aufsetzen.
-- [-] Bestehenden öffentlichen Build lokal regressionsprüfen; Typecheck, Lint, 24/24 Tests, Build, erzeugte Sprachdateien und interaktive `/de`-Darstellung sind erfolgreich geprüft. Echte Netlify-Regression bleibt offen.
-- [ ] **GATE FS1:** Schema, lokale Einrichtung, Tests und Sicherheitsgrenzen präsentieren; auf GO für `FS2` warten.
+- [x] Getrennte Atlas-Testdatenbank `colosseo_test`, datenbankspezifische `readWrite`-Rollen, AWS Frankfurt (`eu-central-1`) und das dreiknotige Replica Set verifizieren; die erste Core-Indexmigration ist am 05.11.2026 erfolgreich und idempotent in `colosseo_test` sowie `colosseo` angewendet. Backups bleiben als späterer Produktionsbetriebspunkt offen.
+- [x] Express-Grundgerüst mit Healthcheck, Fehlerformat, Korrelations-ID, sicherer Basiskonfiguration und statischer Produktionsauslieferung aufsetzen. Der direkte TypeScript-Prozessstart wurde korrigiert; echte Listener-Smoke-Tests für Development, Production, Healthcheck, API-404 und vorgerenderte Sprachseiten sind erfolgreich.
+- [x] Bestehenden öffentlichen Build lokal und auf Netlify regressionsprüfen; Typecheck, Lint, 24/24 Tests, Build, erzeugte Sprachdateien, lokalisierte Live-Routen, direkte Reloads, clientseitige 404, SEO-Dateien und JavaScript-Chunks sind erfolgreich geprüft.
+- [x] **GATE FS1:** Technische Umsetzung und Prüfungen wurden am 05.11.2026 präsentiert und vom Nutzer mit ausdrücklichem `GO` abgenommen. `FS2` ist freigegeben; der Anwendungsstart wartet ausschließlich auf die darunter genannten Clerk-Eingangsdaten.
 
 ### FS2 – Admin-Authentifizierung und geschütztes Grundlayout
 
 **Benötigt vor Start:** Clerk-Konto/Anwendung, gewünschte OAuth-Anbieter, erste Owner-Identität und Rollenmatrix.
 
-- [ ] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren.
-- [ ] OAuth-Anmeldung, Abmeldung, Sessionablauf, Redirect-Allowlist und Fehlerzustände umsetzen.
-- [ ] Eigenes `admin_profiles`-Modell und sicheren Owner-Bootstrap für Clerk-User-IDs implementieren.
-- [ ] `/admin` mit Lade-, Zugriff-verweigert- und geschützten Layoutzuständen erstellen.
-- [ ] Owner-/Staff-Rechte als serverseitige Middleware-, Service- und API-Tests verankern.
-- [ ] Admin aus Sitemap/Indexierung und öffentlicher Navigation ausschließen.
-- [ ] Accessibility- und Security-Tests durchführen.
-- [ ] **GATE FS2:** geschützten Zugang und Rollenprüfung präsentieren; auf GO für `FS3` warten.
+**Freigabe:** `GO für FS2` am 05.11.2026 erteilt. Eine Clerk-Anwendung existiert und Google wurde als einziger OAuth-Anbieter bestätigt. `owner` erhält Vollzugriff; `staff` bleibt bis zu einer späteren Rechtefreigabe gesperrt. Die Clerk-Änderungen von Person A wurden integriert. Schlüssel, Owner User-ID und Google-Verbindung wurden am 05.11.2026 technisch verifiziert.
+
+**Erweiterung vom 05.11.2026:** Mehrere ausdrücklich benannte Clerk-Benutzer dürfen `owner` mit Vollzugriff sein. Ein zweiter verifizierter Google-Benutzer wurde über ein idempotentes Grant-Skript als aktiver Owner angelegt; beide Ownerprofile sind in Atlas aktiv.
+
+- [x] Clerk Development Instance, Vite-Client und Express-Middleware mit getrennten Secrets konfigurieren; Schlüssel, Anwendung, Google-Verbindung, Development-Proxy und echter signierter Owner-Request sind verifiziert.
+- [x] Google-OAuth-Anmeldung, Abmeldung, Sessionablauf, Redirect-Allowlist und Fehlerzustände umsetzen; reale Anmeldung, Abmeldung, erneute Anmeldung, Invite-only und der deutsche Clerk-Dialog wurden geprüft.
+- [x] Eigenes `admin_profiles`-Modell, Repository und idempotenten Owner-Bootstrap für Clerk-User-IDs implementieren; bestätigte Owner-ID wurde erfolgreich in Atlas gebootstrapped.
+- [x] `/admin` als lazy geladenes Grundlayout mit Lade-, fehlender Konfiguration, Anmeldung, Berechtigungsprüfung, Zugriff-verweigert-, Serverfehler- und Owner-Zustand erstellen; öffentlicher Header bleibt frei von Admin-Login.
+- [x] Owner-/Staff-Rechte als serverseitige Autorisierungsfunktion und Middleware mit verständlichen `401`-/`403`-Antworten sowie Unit-Tests verankern.
+- [x] Admin aus Sitemap/Indexierung und öffentlicher Navigation ausschließen; dynamisches Robots-Meta, `robots.txt`, Netlify- und Express-`X-Robots-Tag` sind gesetzt.
+- [x] Accessibility- und Security-Tests durchführen; 320-px-Ansicht, fehlende Konfiguration, `401`, `403`, `503`, Owner-Erfolg, Secret-Tracking und Tastaturfluss des Anmeldedialogs sind geprüft.
+- [x] `BREAK-UI`-Befund beheben: `displayName` ist einheitlich auf 120 getrimmte Zeichen begrenzt, bestehende Datensätze werden über Migration `0002_admin-display-name-limit` geprüft und lange Namen dürfen in der Begrüßung sicher umbrechen.
+- [x] Lokalisierten, visuell nachgeordneten „Adminbereich“-Utility-Link im öffentlichen Footer ergänzen; der Link verändert die serverseitige Berechtigungsprüfung nicht.
+- [x] **GATE FS2:** geschützter Zugang und Rollenprüfung wurden präsentiert; der Nutzer hat anschließend FS3 ausdrücklich begonnen.
 
 ### FS3 – Reservierungs- und Verfügbarkeitskern
 
 **Benötigt vor Start:** reale Tischliste, Bereiche, Kombinationsregeln, Servicezeiten, Dauer/Buffer, Vorlauf, Buchungshorizont, Gruppengrenzen, Sperr- und Bestätigungsregeln.
 
-- [ ] Pure Domainlogik für Zeitfenster und Statusübergänge umsetzen.
-- [ ] Atomare Tischzuweisung einschließlich Parallelitätsschutz implementieren.
-- [ ] Öffentliche Config-/Availability-/Reservation-API mit Validierung, Rate-Limit und Idempotenz erstellen.
-- [ ] Admin-API für manuelle Reservierungen und Sperrzeiten ergänzen.
-- [ ] Concurrency-, Grenzzeit-, Zeitzonen- und Ausgebucht-Tests ausführen.
+**Freigegebener Teilumfang 06.11.2026:** Der Nutzer hat erfundene, aber wie reguläre Restaurantkonfiguration benannte Daten erlaubt und anschließend die Fortsetzung mit den offenen FS3-Grundlagen angeordnet. Die Werte dürfen neutral gespeichert werden, bleiben bis zur Bestätigung durch das Restaurant jedoch fachlich vorläufig.
+
+- [x] Zwei vorläufige Bereiche und acht Tische mit Mindest-/Maximalkapazität als idempotente Restaurantkonfiguration modellieren.
+- [x] Drei eindeutige Kombinationspaare modellieren und durch Konfigurations-/Schema-Tests absichern.
+- [x] Elf wöchentliche Servicezeiten sowie Dauer, Puffer, Vorlauf, Buchungshorizont, Zeitfenster und Gruppengrenzen zentral konfigurieren und validieren.
+- [x] Versionierte Migrationen `0003_table-capacity-and-combinations` und `0004_initial-restaurant-configuration` in Test- und Entwicklungsdatenbank anwenden; alte `demo-*`-/`development-*`-Datensätze ersetzen beziehungsweise entfernen.
+- [ ] Vorläufige Restaurant- und Reservierungswerte vor Produktion fachlich bestätigen und Abweichungen versioniert anpassen.
+
+- [x] Pure Domainlogik für Kalenderdaten, Servicezeitfenster, Vorlauf, Buchungshorizont, DST-Sonderfall, Tischkandidaten und Statusübergänge umsetzen.
+- [x] Atomare Tischzuweisung einschließlich Transaktion und eindeutigem Tisch-Zeit-Sperrindex über Migration `0005_reservation-locks` implementieren.
+- [x] Öffentliche Config-/Availability-/Reservation-API mit Zod-Validierung, Kontaktgrenzen, Rate-Limit und Idempotency-Key erstellen.
+- [x] Geschützte Admin-API für manuelle Reservierungen und Sperrzeiten ergänzen; Migration `0006_reservation-blocks` in Test- und Entwicklungsdatenbank anwenden.
+- [x] Concurrency-, Grenzzeit-, Zeitzonen-, DST-, geschlossen- und Ausgebucht-Tests ausführen; ein echter paralleler Atlas-Test bestätigt genau einen Gewinner für dieselbe letzte Tischkapazität.
 - [ ] **GATE FS3:** Reservierungskern per API und Tests präsentieren; auf GO für `FS4` warten.
 
 ### FS4 – Öffentliche Reservierungsstrecke und Benachrichtigungen
 
-**Benötigt vor Start:** freigegebene Formularfelder/-texte in DE/EN/IT, Datenschutzgrundlage, Stornoregeln, Absenderdomain, Restaurantempfänger und E-Mail-Anbieter.
+**Benötigt vor Start:** freigegebene Formularfelder/-texte in DE/EN/IT, Datenschutzgrundlage, Stornoregeln, Absenderdomain und Restaurantempfänger. Resend ist als E-Mail-Anbieter bestätigt.
 
-- [ ] Reservierungsoberfläche in das bestehende Design integrieren, ohne Hero oder öffentliche Dramaturgie unnötig zu verändern.
-- [ ] Zugängliche Datum-, Uhrzeit-, Personen- und Kontaktdateneingabe mit vollständigen Zuständen umsetzen.
-- [ ] Outbox-Verarbeitung und idempotente Gast-/Restaurant-E-Mails integrieren.
+- [x] Reservierungsoberfläche in das bestehende Design integrieren, ohne Hero oder öffentliche Dramaturgie unnötig zu verändern.
+- [x] Zugängliche Datum-, Uhrzeit-, Personen- und Kontaktdateneingabe mit Lade-, Leer-, Konflikt-, Fehler- und Bestätigungszuständen umsetzen.
+- [x] Outbox-Verarbeitung und idempotente Gast-/Restaurant-E-Mails mit begrenzten Wiederholungen integrieren.
+- [x] Migration `0007_email-outbox` in Test- und Entwicklungsdatenbank anwenden; Zustellindex und Bestandsfelder sind aktiv.
+- [x] Restaurantempfänger vorläufig auf `mohammad.amiri@dci-student.org` festlegen; Secret und Absender bleiben ausschließlich in Umgebungsvariablen.
+- [x] Resend-Integration für den bestätigten Demo-/Weiterbildungsumfang verifizieren: API-Key, Testabsender, reale Zustellung an den zulässigen Testempfänger, Provider-ID, Idempotenz und Fehler-Outbox sind bestätigt. Eine eigene Absenderdomain ist für diesen Umfang nicht erforderlich; beliebige reale Empfänger bleiben bewusst ausgeschlossen.
+- [x] Datenschutz-, Aufbewahrungs- und Stornorahmen für den Demo-/Weiterbildungsumfang festlegen: keine reale Nutzung, keine echten Gastdaten und keine Produktionsfreigabe. Person A hat den technischen Bestand am 11.11.2026 gegengeprüft und den Fachentwurf in `SPEC.md` dokumentiert. Eine rechtliche Produktionsprüfung wäre erst bei späterer echter Nutzung erforderlich.
 - [ ] Sichere Gaststornierung nur bei freigegebener Regel ergänzen.
-- [ ] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und E2E-Prüfungen ausführen.
-- [ ] **GATE FS4:** komplette Gaststrecke präsentieren; auf GO für `FS5` warten.
+- [x] Spam-, Fehler-, Locale-, Mobile-, Reduced-Motion- und technisches Produktions-E2E ausführen. Person B prüfte DE/EN/IT, mobilen Überlauf, Touchziele, Kontaktfehler-Fokus, Statusrücksetzung, Reduced-Motion-Fallback und Desktop-Ankernavigation; der Nutzer bestätigte einen echten Smartphone-Test ohne Geräteprotokoll. Auf Render wurden Health, Config, Availability, Sprach- und Unterseiten, Reloads, Canonical, Sitemap, Robots, Adminschutz, neutrale Validierungsfehler, Secret-Freiheit und die clientseitige 404-Oberfläche geprüft. Eine synthetische Produktionsbuchung wurde bewusst nicht erzeugt, weil sie reale Daten- und E-Mail-Nebenwirkungen auslösen würde; Buchung, Idempotenz und Concurrency bleiben durch automatisierte Tests und den Atlas-Parallellauf nachgewiesen.
+- [x] Unabhängigen technischen FS4-Gegenreview durch Person A ausführen: am 11.11.2026 bestanden mit Secret-Tracking-Prüfung, `npm audit --omit=dev` ohne bekannte Schwachstellen, Typecheck, OXLint, 76/76 Tests und Production-Build. Bekannte Drittanbieterhinweise zu `use client` sind nicht blockierend; `SITE_URL` war im lokalen Build erwartungsgemäß nicht gesetzt.
+- [x] **GATE FS4:** komplette Gaststrecke präsentiert und am 11.11.2026 durch ausdrückliches `GO FS4` abgenommen. `FS5` bleibt bis zu einem separaten GO gesperrt.
+
+**Integrationsstand 10.11.2026:** Die Merge-Konflikte mit `dev` sind ohne Rücknahme der bestehenden Website-, Admin- und Reservierungsfunktionen aufgelöst. Neue Migrations-, Storno-, Aufbewahrungs- und E-Mail-Verarbeitungsbausteine wurden aufgenommen; `dist/` bleibt aus Git ausgeschlossen. Render ist live und der technische Produktions-E2E ist abgeschlossen. Der Integrationsstand besteht Typecheck, OXLint, 76/76 Tests und Production-Build. Dies ersetzt weder die offenen fachlich/rechtlichen Freigaben noch das Gate `FS4`.
+
+**Migrationsnachprüfung 11.11.2026:** Atlas-SRV und Datenbankverbindung sind erreichbar. Migration `0010_event-inquiries` wurde hinsichtlich ID-Format und bereits vorhandener gleichwertiger Indizes korrigiert, erfolgreich angewendet und per Statuslauf als `applied` bestätigt. Alle Migrationen `0001` bis `0010` sind angewendet; Typecheck, OXLint, 76/76 Tests und Production-Build bleiben erfolgreich.
 
 ### FS5 – Reservierungs-, Kalender- und Anfrageverwaltung
 
-- [ ] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen.
-- [ ] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren.
-- [ ] Sonderöffnungen, Schließungen und Sperrzeiten verwalten.
-- [ ] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren.
-- [ ] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen.
-- [ ] **GATE FS5:** operative Verwaltung präsentieren; auf GO für `FS6` warten.
+- [x] Dashboardübersicht und zugängliche Tages-/Wochenansichten umsetzen. Person B ergänzte die geschützte Kalender-API und responsive Adminübersicht mit Zeitraumwahl, Kennzahlen, Listenalternative, Reservierungen, Sperrzeiten, Sondertagen und offenen Veranstaltungsanfragen.
+- [x] Reservierungssuche, Filter, Detail, Status, Tischzuweisung und Historie implementieren. Paginierte Suche, zugängliche Detailansicht, atomare Tischumlegung, Statusaktionen und Auditverlauf sind umgesetzt.
+- [x] Sonderöffnungen, Schließungen und Sperrzeiten verwalten. Der responsive Betriebsbereich deckt datierte Schließtage, Sonderöffnungen sowie Restaurant-, Bereichs- und Tischsperren ab.
+- [x] Veranstaltungsanfragen mit freigegebenen Feldern, Status und interner Bearbeitung integrieren. Suche, Filter, Pagination, Detailansicht, Status und interne Notiz sind umgesetzt.
+- [x] Berechtigungs-, Konflikt-, Tastatur- und E2E-Tests ausführen. Autorisierung, Konflikte, Dialogfokus, Escape, Fokusrückgabe und Atlas-Parallelität sind geprüft; der Abschlusslauf bestand mit 83/83 Tests.
+- [x] **GATE FS5:** operative Verwaltung präsentiert und am 11.11.2026 durch ausdrückliches `GO FS5` abgenommen. `FS6` bleibt bis zu einem separaten GO gesperrt.
 
 ### FS6 – Speisekarte, Öffnungszeiten und Medienverwaltung
 
-- [ ] Kategorien, Gerichte, Preise, Beschreibungen, Allergene, Sortierung und Aktivstatus verwalten.
-- [ ] Bild-Upload mit Größen-, Typ-, Rechte- und Alternativtextregeln integrieren.
-- [ ] Reguläre Öffnungszeiten und datierte Abweichungen pflegen.
-- [ ] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen.
-- [ ] Bestehende verifizierte Daten kontrolliert migrieren; keine Inhalte automatisch umformulieren.
-- [ ] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen.
-- [ ] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentieren; auf GO für `FS7` warten.
+**Start:** `GO FS6` am 11.11.2026 ausdrücklich erteilt. Person As Backend und Person Bs vorbereitete Adminoberfläche sind in `dev` beziehungsweise im Integrationsbranch vorhanden.
+
+- [x] Versioniertes Backend-Modell, geschützte Admin-API, Vorschau und expliziter Veröffentlichungsworkflow für Kategorien/Gerichte sind integriert und im authentifizierten Browser-E2E geprüft.
+- [x] MongoDB-GridFS-Medienablage mit 5-MB-/MIME-/Alternativtext- und Dateisignaturprüfung, ownergeschütztem Upload/Löschen, Auditierung und öffentlichem Cache-Endpunkt ist integriert. Der interne Medienpfadvertrag ist konsistent und E2E-geprüft.
+- [x] Öffentliche Ausgabe regulärer Servicezeiten und datierter Sondertage sowie geschützte Verwaltung sind umgesetzt. Reguläre Wochenzeiten lassen sich im Adminbereich laden, hinzufügen, bearbeiten, aktivieren/deaktivieren und bestätigt löschen; Eingaben werden serverseitig validiert und Änderungen auditiert.
+- [x] Entwurf/Vorschau/Veröffentlichen und sicheren öffentlichen Fallback umsetzen. Upload, Entwurfsvorschau, Veröffentlichung, öffentlicher Abruf und Zurückziehen wurden integriert geprüft.
+- [x] Tastatur, Fokus und Reduced Motion für den FS6-Workflow prüfen. Der erweiterte 320-px-/200-%-Belastungstest wird als FS7-QA fortgeführt und hat einen horizontalen Admin-Reflow-Fehler offengelegt.
+- [x] Bestehende verifizierte Daten kontrolliert beibehalten; es wurden keine Inhalte automatisch umformuliert oder ungeprüft migriert.
+- [x] Cache-, Veröffentlichungs-, Upload- und Regressionsprüfungen ausführen. Automatisierter Vertrag, Typecheck, OXLint, 86/86 Tests, Production-Build und authentifizierter Browser-E2E sind erfolgreich; synthetische FS6-Datensätze wurden anschließend nachweislich entfernt.
+- [x] **GATE FS6:** CMS-Funktionen und öffentliche Synchronisation präsentiert und am 12.11.2026 durch ausdrückliches `GO` abgenommen.
 
 ### FS7 – Datenschutz, Sicherheit, Betrieb und vollständige QA
 
-- [ ] Aufbewahrung, Löschung, Auskunft und Datenexport technisch umsetzen und dokumentieren.
-- [ ] Auditlog, Monitoring, Alarmierung, Rate-Limits und Secret-Rotation prüfen.
-- [ ] Backup und Wiederherstellung in einer Nicht-Produktionsumgebung nachweislich testen.
-- [ ] Dependency-, Auth-, Autorisierungs-, IDOR-, XSS-, Upload-, CORS-/CSRF- und Log-Leak-Prüfungen durchführen.
-- [ ] Gesamte Regression für öffentliche Website, Admin, API, Datenbank, E-Mails, Accessibility, Mobile und Performance ausführen.
-- [ ] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden.
-- [ ] **GATE FS7:** Abnahmebericht und offene Produktionsrisiken präsentieren; auf GO für `FS8` warten.
+- [-] Aufbewahrung und technische Anonymisierung sowie eine ownergeschützte manuelle Anonymisierung sind umgesetzt und getestet; öffentliches Auskunfts-/Exportportal und vollständige Lösch-/Exportregeln bleiben fachlich beziehungsweise rechtlich offen.
+- [-] Auditlog, serverseitiger Rate-Limit-Grundschutz, Sicherheitsheader und Origin-Schutz sind geprüft beziehungsweise ergänzt; produktives Monitoring, Alarmierung und Secret-Rotation benötigen noch Betriebsfreigabe.
+- [-] Ein `mongodump` von `colosseo_test` wurde erfolgreich erzeugt und wieder entfernt; der Restore-Nachweis bleibt wegen fehlender Atlas-Berechtigung für ein separates Restore-Testziel offen.
+- [-] Dependency-, Auth-, Autorisierungs-, Upload-, CORS-/CSRF- und Log-Leak-Grundprüfungen sind erfolgt. Der externe Live-Origin-Nachweis ist bestanden: Die eigene Render-Origin erreicht die Validierung, eine fremde Origin wird mit `403 CSRF_ORIGIN_INVALID` blockiert. Die abschließende Security-/Betriebsabnahme bleibt offen.
+- [-] Die lokal ausführbare Regression mit Typecheck, Lint, 92/92 Tests, Production-Build, Secret-Tracking, Audit und Diff-Check ist bestanden. Der warme Render-Smoke-Test für Sprachrouten, Admin-Shell und öffentliche Lese-APIs ist bestanden; reale Core Web Vitals sowie die vollständige externe Betriebs-/Performanceabnahme bleiben offen.
+- [x] `break-ui` auf Formulare, Kalender, lange Menüinhalte, leere Daten und Fehlerzustände anwenden. Person B hat lokale Worst-Case-, Empty- und One-Testzustände, Pagination, explizites Leerfeedback, deckungsgleiche Preis-/Allergenlimits und schmale Layoutregeln ergänzt. Tastatur-/Vorschau-Fokus sowie die schmale Adminansicht wurden geprüft; Tabellen und Navigation besitzen eigene interne Scrollflächen, während der Seitenüberlauf unterdrückt wird.
+- [x] **GATE FS7:** Abnahmebericht und offene Produktionsrisiken sind am 13.11.2026 dokumentiert und präsentiert. Der Nutzer hat anschließend die verkürzte Phase `FS8 Demo` ausdrücklich freigegeben.
 
-### FS8 – Produktionsmigration und kontrollierter Livegang
+### FS8 Demo – Abschlussprojekt und Präsentationsabnahme
 
-**Benötigt vor Start:** ausdrückliche Deployment-Erlaubnis, bestätigte Rechts- und Geschäftsdaten, produktive Render-/Resend-Konten, Domain, Verantwortliche und Rollbackfenster.
+**Freigegebener Umfang:** Die Anwendung bleibt ein Weiterbildungs- und Präsentationsprojekt und wird nicht als reales Restaurantsystem betrieben. Eigene Domain, 24/7-Monitoring, automatische Alarmierung, vollständiger Backupbetrieb, rechtliche Endabnahme und produktive Betriebsübergabe sind deshalb nicht Teil des Gates.
 
-- [ ] Produktionsmigration und validierte Ausgangsdaten vorbereiten.
-- [ ] Render Web Service und MongoDB Atlas möglichst regionsnah, Domain, E-Mail-DNS, Umgebungsvariablen, Monitoring und Backups konfigurieren.
-- [ ] Smoke-Tests, Rollbackplan und Abnahmecheckliste ausführen.
-- [ ] Erst nach gesonderter Freigabe deployen und keine Test-E-Mails an reale Gäste senden.
-- [ ] **GATE FS8:** Livegang abnehmen und Betriebsübergabe dokumentieren.
+- [-] Versionierte, idempotente Demo-Menüdatenmigration aus der bereits geprüften Originalspeisekarte vorbereiten und auf der getrennten Atlas-Testdatenbank verifizieren. Lokal bestanden; Render-Deployment und Live-Nachweis stehen noch aus.
+- [x] Reservierungskonfiguration, lesende Verfügbarkeit, Öffnungszeiten und veröffentlichte Menüdaten gegen die Testdatenbank prüfen. Ergebnis: HTTP `200`, 8 Kategorien und 129 Gerichte; keine Reservierung und keine E-Mail erzeugt.
+- [-] Render-Demo nach dem nächsten Deployment auf Menü, Reservierung, Admin-Anmeldung und Admin-Verwaltung prüfen. Der zuvor fehlende ownergeschützte Kalendervertrag ist lokal implementiert und regressionsgeprüft; Deployment und authentifizierter Live-Nachweis stehen noch aus.
+- [x] Finalen Typecheck, OXLint, Tests, Production-Build, Secret-Tracking und Diff-Check ausführen. Ergebnis: 19 Testdateien und 95/95 Tests bestanden; bekannte externe `use client`-Hinweise bleiben nicht blockierend.
+- [x] Kompakten Präsentationsablauf, Architekturübersicht, bekannte Demo-Einschränkungen und einfachen Git-/Render-Rollback dokumentieren.
+- [ ] **GATE FS8 Demo:** Demo-Abnahme präsentieren und Abschlussprojekt als fertig markieren.
 
 ## Offene Entscheidungen vor der Reservierungsimplementierung
 
@@ -285,10 +318,10 @@ Der Auftrag vom 30.10.2026 erweitert den früher freigegebenen Umfang wesentlich
 5. `OFFEN` Soll jede passende Anfrage sofort bestätigt werden oder benötigen bestimmte Zeiten/Gruppen eine manuelle Freigabe?
 6. `OFFEN` Welche Änderungs-, Storno-, No-show- und Verspätungsregeln gelten?
 7. `OFFEN` Welche Pflichtfelder dürfen erhoben werden und wie lange werden Reservierungen, Anfragen und Logs gespeichert?
-8. `OFFEN` Wer erhält Restaurant-E-Mails, welche Absenderdomain wird verwendet und wer verwaltet Render und Resend?
+8. `TEILWEISE BESTÄTIGT` Resend wird als externer Dienst für Transaktions-E-Mails verwendet; Restaurantempfänger ist vorläufig `mohammad.amiri@dci-student.org`. `OFFEN` bleiben Absenderdomain sowie die verantwortliche Person für Render- und Resend-Konten.
 9. `OFFEN` Welche Personen erhalten Adminzugang und welche Rechte benötigen Owner und Mitarbeitende?
 10. `OFFEN` Sollen bestehende Reservierungen oder andere Daten importiert werden?
 11. `OFFEN` Soll die lokale MongoDB als Replica Set über Docker laufen oder ist bereits eine transaktionsfähige MongoDB-Entwicklungsumgebung vorhanden?
 12. `OFFEN` Welcher externe Objektspeicher darf später für hochgeladene Speisekartenbilder verwendet werden?
-13. `OFFEN` Welcher Clerk-OAuth-Anbieter soll erlaubt werden: Google, Microsoft oder beide?
-14. `OFFEN` Existiert bereits ein Clerk-Konto beziehungsweise eine Clerk-Anwendung, und welche Identität soll erster Owner werden?
+13. `VERIFIZIERT` Für die bestehende Clerk-Anwendung wird ausschließlich Google OAuth verwendet.
+14. `VERIFIZIERT` Zwei ausdrücklich freigegebene Personen besitzen `owner` mit Vollzugriff und werden dauerhaft über ihre jeweilige Clerk User-ID autorisiert. Weitere Owner werden ausschließlich über das kontrollierte Grant-Skript aufgenommen.

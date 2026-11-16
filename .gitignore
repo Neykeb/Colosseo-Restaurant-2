@@ -7,6 +7,8 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.test.example
+
 
 # Local Netlify folder
 .netlify

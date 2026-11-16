@@ -1,13 +1,11 @@
 # Funktionale und technische Spezifikation
 
-**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS1` freigegeben und in Arbeit
-**Letzte Aktualisierung:** 03.11.2026
+**Status:** Bestehende Phase 3 freigegeben; Full-Stack-Erweiterung `FS4` für das nicht-produktive Weiterbildungsprojekt technisch geprüft
+**Letzte Aktualisierung:** 10.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für funktionale Anforderungen, Routing, Integrationen, technische Architektur, Datenmodelle, SEO-Rendering, Teststrategie und Akzeptanzkriterien. Die bestehende Website-Spezifikation wurde mit Gate 3 freigegeben. `FS1` wurde am 02.11.2026 ausdrücklich freigegeben; spätere Full-Stack-Phasen bleiben bis zu ihrem jeweiligen Gate gesperrt.
 
 > **Änderungsauftrag 30.10.2026, bestätigt 02.11.2026:** Die Abschnitte 20 bis 29 planen ein eigenes Reservierungs-Backend, Administration und Inhaltsverwaltung. Der Zielstack ist Node.js/Express/TypeScript, MongoDB Atlas mit Mongoose, Render, Resend und Clerk OAuth für die Admin-Anmeldung. Eine zusätzliche lokale Docker-Datenbank ist ausgeschlossen. `FS1` ist freigegeben; spätere Phasen benötigen weiterhin jeweils ein eigenes `GO`.
-
-> **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. Der Ist-Zustand bleibt bis zur ausdrücklich freigegebenen Migration React Router Framework Mode. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
 
 > **Routing-Änderung 02.11.2026:** Für das Zielsystem ist TanStack Router anstelle von React Router festgelegt. Der Ist-Zustand bleibt bis zur ausdrücklich freigegebenen Migration React Router Framework Mode. Die Migration muss Routing, Sprachpfade, statische Auslieferung, SEO-Metadaten, Reloads, Netlify-/Render-Fallback und bestehende Tests nachweislich erhalten.
 
@@ -442,7 +440,7 @@ Weiter ausgeschlossen bleiben Online-Essensbestellung, Warenkorb und Zahlungsabw
 | Admin-Authentifizierung | Clerk mit OAuth über `@clerk/react` und `@clerk/express` | Clerk übernimmt Identität, OAuth-Ablauf und Sessionprüfung. Anbieter und zugelassene Identitäten bleiben zu konfigurieren. |
 | Autorisierung | eigene MongoDB-basierte Rollenprüfung mit `owner` und `staff` | Jede geschützte Route prüft zusätzlich zur Clerk-Session ein aktives Adminprofil und die erforderliche Rolle serverseitig. Exakte Rechte-Matrix bleibt `OFFEN`. |
 | Bilder | externer Objektspeicher `OFFEN`; MongoDB speichert nur Metadaten und URLs | Render-Web-Service-Dateien sind flüchtig. Uploadanbieter und Rechteprüfung werden vor `FS6` festgelegt. |
-| E-Mail | Resend über eine eigene Mail-Service-Schicht und Outbox | Domänenbasierter Transaktionsversand und Idempotenz; Absenderdomain und Empfänger bleiben `OFFEN`. |
+| E-Mail | `BESTÄTIGT 09.11.2026`: Resend über eine eigene serverseitige Mail-Service-Schicht und Outbox | Idempotenter Transaktionsversand; Restaurantempfänger vorläufig `mohammad.amiri@dci-student.org`, Absenderdomain `OFFEN`. |
 
 Render unterstützt Node-/Express-Web-Services und erwartet die Bindung an den bereitgestellten `PORT`. Das Dateisystem des Web Service ist flüchtig; dauerhafte Fachdaten liegen in MongoDB Atlas. Der Atlas-Connection-String bleibt ein Render-Secret. Ein kostenloser Render-Web-Service kann nach Inaktivität schlafen; dies wird für das Finalprojekt akzeptiert, aber nicht als Produktionsziel eines realen Reservierungsbetriebs bewertet.
 
@@ -506,19 +504,21 @@ Im lokalen Betrieb laufen Vite und Express als getrennte Prozesse; Vite leitet `
 
 ### Eigene Autorisierungsobjekte neben Clerk
 
-- `admin_profiles`: eindeutige Clerk-User-ID, interne Rolle, Aktivstatus, Anzeigename, Erstellungs-/Änderungszeit und optional letzter erfolgreicher Adminzugriff.
+- `admin_profiles`: eindeutige Clerk-User-ID, interne Rolle, Aktivstatus, getrimmter Anzeigename mit maximal 120 Zeichen, Erstellungs-/Änderungszeit und optional letzter erfolgreicher Adminzugriff.
 - `audit_events`: administrative Aktion, Clerk-Akteur-ID, Zielobjekt, Zeitpunkt und sichere Metadaten ohne Tokens oder unnötige Gastdaten.
 
 Clerk bleibt Quelle für Identität und Session. MongoDB bleibt Quelle für die fachliche Adminberechtigung. Rollen werden nicht aus frei änderbaren Benutzer-Metadaten übernommen.
+
+**Freigegebene FS2-Entscheidung vom 05.11.2026:** Google ist der einzige OAuth-Anbieter. Mehrere ausdrücklich freigeschaltete Personen dürfen die interne Rolle `owner` mit Vollzugriff erhalten. Jede dauerhafte Berechtigung wird an die jeweilige eindeutige Clerk User-ID gebunden; eine E-Mail-Adresse dient höchstens zur kontrollierten Einladung und ist keine dauerhafte Autorisierungsquelle. `staff` bleibt ohne freigegebene Rechte zunächst gesperrt.
 
 ## 23. Fachliches Reservierungsmodell (`ENTWURF`)
 
 ### Kernobjekte
 
-- `restaurant_settings`: Zeitzone, Buchungshorizont, Vorlauf, Standarddauer und veröffentlichte Regeln.
-- `dining_areas`: optionale Bereiche wie Gastraum oder Terrasse; reale Bereiche sind `OFFEN`.
-- `restaurant_tables`: interner Name, Mindest-/Maximalkapazität, Bereich, aktiv/inaktiv und gegebenenfalls Kombinationsgruppe.
-- `service_periods`: wöchentliche buchbare Servicezeiten getrennt von bloßen Öffnungszeiten.
+- `restaurant_settings`: Zeitzone, Buchungshorizont, Vorlauf, Standarddauer und veröffentlichte Regeln. Vorläufig konfiguriert sind `Europe/Berlin`, 60 Tage Buchungshorizont, 120 Minuten Vorlauf, 120 Minuten Standarddauer, 15 Minuten Puffer, 30-Minuten-Zeitfenster und Gruppengrößen von 1 bis 10 Personen.
+- `dining_areas`: interner Schlüssel, Name und Aktivstatus. Vorläufig konfiguriert sind `Gastraum` und `Nebenraum` mit neutralen betrieblichen Schlüsseln.
+- `restaurant_tables`: interner Schlüssel und Name, Mindest-/Maximalkapazität, Bereich, Aktivstatus und optionale Kombinationsgruppe. Eine Kombinationsgruppe bezeichnet genau die Tische, die gemeinsam belegt werden dürfen. Vorläufig konfiguriert sind acht Tische und drei zulässige Tischpaare.
+- `service_periods`: wöchentliche buchbare Servicezeiten getrennt von bloßen Öffnungszeiten. Vorläufig konfiguriert sind Dienstag bis Freitag und Sonntag jeweils 12:00–14:00 sowie 17:00–21:00, Samstag 17:00–21:00 und montags keine buchbare Servicezeit.
 - `special_openings` und `closures`: datierte Abweichungen, Feiertage, private Veranstaltungen und Sperrzeiten.
 - `reservations`: öffentlicher Referenzcode, Gastdaten, Personenanzahl, Start/Ende, Locale, Status, Quelle, Datenschutzzeitpunkte und interne Notiz getrennt von Gastnotizen.
 - `reservation_table_assignments`: Zuordnung einer Reservierung zu einem oder mehreren Tischen.
@@ -544,27 +544,36 @@ Ob eine Anfrage sofort `confirmed` oder zunächst `pending` wird, hängt von den
 4. Deterministisch die kleinste passende zulässige Belegung auswählen.
 5. Innerhalb einer MongoDB-Transaktion für jeden belegten Tisch und jedes betroffene Zeitsegment Sperrdokumente mit eindeutigem zusammengesetztem Index anlegen. Ein Indexkonflikt bedeutet, dass eine parallele Anfrage zuvor gewonnen hat.
 6. Bei Konflikt erneut berechnen oder ablehnen; ansonsten Reservierung, Tischzuordnung und Sperrdokumente gemeinsam speichern oder vollständig zurückrollen.
-7. Erst nach erfolgreichem Commit ein Outbox-Ereignis für E-Mails erzeugen.
+7. Reservierung und eindeutige Outbox-Ereignisse in derselben Transaktion speichern; der Versand erfolgt erst nach erfolgreichem Commit und kann die Reservierungsentscheidung nicht zurückrollen.
 
 Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließlich der erfolgreiche Transaktionsabschluss bestätigt die Buchung. Mongoose-Transaktionen laufen nicht mit parallelen Operationen innerhalb derselben Session; alle beteiligten Schreibschritte werden bewusst seriell ausgeführt.
 
-## 24. Vorläufiges API-Inventar (`VORSCHLAG`)
+**Bestätigungsstatus:** Die vorläufigen Bereiche, Tische, Kombinationen, Servicezeiten und Reservierungswerte sind technisch konsistent, aber noch keine vom Restaurant bestätigten Betriebsdaten. Vor Produktionsbetrieb müssen sie fachlich geprüft und bei Abweichungen über eine versionierte Migration geändert werden.
+
+## 24. API-Inventar (`TEILWEISE IMPLEMENTIERT`)
 
 ### Öffentlich
 
-- `GET /api/public/config` – veröffentlichte Buchungsregeln und notwendige Formularoptionen.
-- `GET /api/public/availability?date=…&partySize=…` – verfügbare Startzeiten ohne interne Tischdetails.
-- `POST /api/public/reservations` – atomare Reservierungsanfrage; wiederholte Übermittlung über Idempotency-Key absichern.
+- `GET /api/reservations/config` – implementiert; veröffentlichte Buchungsregeln und notwendige Formularoptionen.
+- Schlägt ausschließlich dieser automatische Konfigurationsabruf fehl, arbeitet das Formular mit den sicheren lokalen Standardgrenzen weiter und zeigt noch keinen Buchungsfehler. Eine sichtbare Fehlermeldung erscheint erst nach einer fehlgeschlagenen, bewusst ausgelösten Verfügbarkeitsprüfung oder Reservierungsanfrage.
+- `GET /api/reservations/availability?date=…&partySize=…` – implementiert; verfügbare Startzeiten ohne interne Tischdetails.
+- `POST /api/reservations` – implementiert; atomare Reservierungsanfrage, serverseitige Validierung, Rate-Limit und wiederholbare Übermittlung über `Idempotency-Key`.
 - `POST /api/public/reservations/:reference/cancel` – nur mit sicherem, zeitlich begrenztem Gast-Token; genaue Stornoregel `OFFEN`.
-- `GET /api/public/menu` und `GET /api/public/opening-hours` – ausschließlich veröffentlichte Inhalte.
+- `GET /api/public/menu` – ausschließlich aktive Kategorien und aktive Gerichte mit `published: true`; Preise werden als Minor Units (`priceCents`) ausgegeben.
+- `GET /api/public/opening-hours` – aktive reguläre Servicezeiten und datierte Sondertage ohne interne Verwaltungsfelder.
+- `GET /api/public/media/:id` – öffentliches Lesen eines gespeicherten GridFS-Mediums mit serverseitigem Content-Type und Cache-Header.
 - `POST /api/public/inquiries` – Veranstaltung anfragen; Felder und Empfänger `OFFEN`.
 
 ### Geschützt
 
-- `/api/admin/reservations` – Listen, Details, Anlegen, Ändern, Stornieren, Statuswechsel und Tischzuordnung.
-- `/api/admin/calendar` – Tages-/Wochenbelegung, Sperrungen und Sonderöffnungen.
+- `POST /api/admin/reservations` – implementiert; manuelles Anlegen durch einen serverseitig autorisierten Owner. Listen, Details und spätere Statusänderungen folgen in `FS5`.
+- `GET|POST|DELETE /api/admin/reservation-blocks` – implementiert; zeitlich begrenzte Restaurant-, Bereichs- oder Tischsperrungen mit demselben atomaren Sperrindex wie Reservierungen.
+- `/api/admin/calendar` – Tages-/Wochenbelegung und Sonderöffnungen folgen in `FS5`.
 - `/api/admin/tables` und `/api/admin/settings` – Kapazität und Buchungsregeln.
-- `/api/admin/menu` – Kategorien, Gerichte, Preise, Beschreibungen, Bilder, Sortierung und Veröffentlichung.
+- `/api/admin/menu/categories`, `/api/admin/menu/items`, `/api/admin/menu/preview` und `/api/admin/menu/items/:itemId/publication` – ownergeschützte Kategorien, Gerichte, Vorschau und explizites Publizieren.
+- `/api/admin/media` – ownergeschützter JSON-Upload und Löschung über MongoDB GridFS; JPEG/PNG/WebP, maximal 5 MB, Alternativtext verpflichtend, Binärsignatur serverseitig geprüft.
+- Menübilder akzeptieren als `imageUrl` nur `/api/public/media/<24-stellige ObjectId>` oder absolute `https://`-URLs; beliebige relative Pfade und nicht-HTTPS-URLs sind ungültig.
+- `/api/admin/opening-hours` – ownergeschützte Pflege regulärer wöchentlicher Servicezeiten; Zeitbereiche müssen serverseitig gültig und aufsteigend sein.
 - `/api/admin/opening-hours` – reguläre und datierte Abweichungen.
 - `/api/admin/inquiries` – Eingang, Status und interne Bearbeitung.
 
@@ -583,6 +592,8 @@ Fehler verwenden stabile maschinenlesbare Codes, eine sichere Nutzermeldung und 
 
 ## 26. Datenschutz und Aufbewahrung (`OFFEN`)
 
+**Bestätigter Projektumfang 11.11.2026:** Die Anwendung ist ein Weiterbildungs-/Demoprojekt und nicht für einen realen Restaurantbetrieb oder die Eingabe echter Gastdaten freigegeben. Für die Demo gilt der nachfolgende technische Rahmen als ausreichend; er ist keine Rechtsberatung und keine Produktionsfreigabe. Sollte die Anwendung später real genutzt werden, werden sämtliche offenen Punkte dieses Abschnitts wieder zu zwingenden Livegang-Voraussetzungen.
+
 Vor `FS4` müssen mindestens festgelegt und rechtlich geprüft sein:
 
 - Pflichtfelder, Zweck und Rechtsgrundlage je Formular.
@@ -592,6 +603,14 @@ Vor `FS4` müssen mindestens festgelegt und rechtlich geprüft sein:
 - Inhalt und Zeitpunkt der Einwilligung, falls Daten über die reine Reservierungsabwicklung hinaus verwendet werden.
 
 Marketing-Einwilligung wird nicht mit der Reservierung gebündelt. Zahlungsdaten und besondere Kategorien personenbezogener Daten werden nicht erhoben.
+
+### Fachlicher Prüfentwurf vom 11.11.2026 (`VORSCHLAG`, NICHT RECHTLICH FREIGEGEBEN)
+
+- Zweck der erhobenen Reservierungsdaten ist ausschließlich die Bearbeitung, Bestätigung und operative Durchführung der Tischreservierung. Für Marketing findet keine Mitverarbeitung statt.
+- Mindestens eine Kontaktmöglichkeit aus E-Mail-Adresse oder Telefonnummer wird benötigt. Name, Datum, Uhrzeit und Personenzahl sind für die Reservierungsabwicklung erforderlich; die Telefonnummer bleibt optional, wenn eine E-Mail-Adresse vorhanden ist.
+- Online-Stornierungen werden nur für Reservierungen mit gültigem, nicht im Klartext gespeichertem Gast-Token und nur bis zwei Stunden vor Reservierungsbeginn vorgeschlagen. Danach erfolgt die Klärung telefonisch. Zulässig sind ausschließlich noch offene oder bestätigte Reservierungen; die Freigabe dieser Geschäftsregel bleibt `OFFEN`.
+- Stornierte oder abgelehnte Reservierungen werden nach 90 Tagen anonymisiert; abgeschlossene Reservierungen und No-shows nach 180 Tagen. Erfolgreich versendete Outbox-Ereignisse werden nach 30 Tagen gelöscht, Auditereignisse nach 365 Tagen. Diese Fristen entsprechen dem vorhandenen technischen Entwurf und dürfen erst nach fachlicher/rechtlicher Freigabe produktiv automatisiert werden.
+- Für Veranstaltungsanfragen, Auskunft, Berichtigung, Löschung, Verantwortlichenangaben, Auftragsverarbeitung und mögliche Drittlandtransfers fehlen weiterhin verbindliche Regeln. Diese Lücken verhindern eine rechtliche Produktionsfreigabe.
 
 ## 27. Teststrategie der Full-Stack-Erweiterung (`VORSCHLAG`)
 
