@@ -54,9 +54,9 @@ export function ReservationForm({ locale }: { locale: Locale }) {
     fetch("/api/reservations/config", { signal: controller.signal })
       .then(async (response) => response.ok ? response.json() as Promise<PublicConfiguration> : Promise.reject(new Error("Configuration unavailable")))
       .then(setConfiguration)
-      .catch((fetchError: unknown) => { if ((fetchError as { name?: string }).name !== "AbortError") setError(labels.error); });
+      .catch(() => undefined);
     return () => controller.abort();
-  }, [labels.error]);
+  }, []);
 
   useEffect(() => () => availabilityRequest.current?.abort(), []);
 

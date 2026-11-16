@@ -555,6 +555,7 @@ Die öffentliche Verfügbarkeitsabfrage ist nur eine Momentaufnahme. Ausschließ
 ### Öffentlich
 
 - `GET /api/reservations/config` – implementiert; veröffentlichte Buchungsregeln und notwendige Formularoptionen.
+- Schlägt ausschließlich dieser automatische Konfigurationsabruf fehl, arbeitet das Formular mit den sicheren lokalen Standardgrenzen weiter und zeigt noch keinen Buchungsfehler. Eine sichtbare Fehlermeldung erscheint erst nach einer fehlgeschlagenen, bewusst ausgelösten Verfügbarkeitsprüfung oder Reservierungsanfrage.
 - `GET /api/reservations/availability?date=…&partySize=…` – implementiert; verfügbare Startzeiten ohne interne Tischdetails.
 - `POST /api/reservations` – implementiert; atomare Reservierungsanfrage, serverseitige Validierung, Rate-Limit und wiederholbare Übermittlung über `Idempotency-Key`.
 - `POST /api/public/reservations/:reference/cancel` – nur mit sicherem, zeitlich begrenztem Gast-Token; genaue Stornoregel `OFFEN`.

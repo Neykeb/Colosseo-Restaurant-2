@@ -1,7 +1,7 @@
 # Designsystem
 
 **Status:** Phase 2 - freigegeben  
-**Letzte Aktualisierung:** 09.11.2026
+**Letzte Aktualisierung:** 16.11.2026
 
 Diese Datei ist die einzige verbindliche Quelle für visuelle Tokens, Typografie, Farben, Abstände, Raster, Breakpoints, Komponentenvarianten, Medienverhältnisse, Zustände und Motion-Regeln. Sämtliche Festlegungen sind bis Gate 2 `VORSCHLAG`.
 
@@ -10,6 +10,8 @@ Diese Datei ist die einzige verbindliche Quelle für visuelle Tokens, Typografie
 **Design Read:** Hochwertige Restaurant-Website für Gäste ab 30, mit sinnlicher, editorialer und selbstbewusster Bildsprache. Sie übernimmt den Qualitätsanspruch und den großzügigen Medienrhythmus der Referenz, übersetzt ihn aber eigenständig in moderne italienische Gastlichkeit.
 
 Arbeitstitel der Richtung: **Materia Italiana**.
+
+Der gemeinsame helle Editorial-Hintergrund der Begrüßungs-, Speisekarten- und Anlass-Section ist als `--no-editorial-cream: #EEE5D7` definiert. Auf diesem Hintergrund werden Überschriften und Aktionen in `#17140F` sowie Fließtexte in `#514A40` gesetzt.
 
 Die Gestaltung soll nicht mit rot-weiß-grünen Klischees, rustikaler Trattoria-Dekoration oder künstlichem Luxus arbeiten. Der Kern ist Materialität: Mehlstaub, Teig, Tomate, Olivenöl, Dampf, Hände und echte Küchenarbeit. Die Website wirkt ruhig, präzise und appetitlich. Sie zeigt, dass Einfachheit nur dann hochwertig ist, wenn Zutaten und Handwerk stimmen.
 
@@ -98,9 +100,9 @@ Diese ausdrückliche Nutzerentscheidung ersetzt die frühere deterministische Ge
 
 ## 5. Form und Oberfläche
 
-- Grundsystem: überwiegend scharfkantig.
-- Interaktive Controls: 4 px Radius.
-- Medien und Inhaltsflächen: 0 px Radius.
+- Das freigegebene Notte-Frontend verwendet zwei konsistente Radien: `--no-radius-frame: clamp(16px, 1.6vw, 24px)` für Navigation, Karten, Formulare und gerahmte Inhaltsflächen sowie `--no-radius-control: 12px` für Buttons und Eingabefelder.
+- Speisekartenbilder verwenden den Frame-Radius und sind gegenüber der vorherigen Darstellung auf allen responsiven Stufen um exakt 40 % vergrößert.
+- Reine Trennlinien, Textlinks und redaktionelle Unterstreichungen bleiben gerade; Rundungen kennzeichnen nur tatsächliche Flächen oder Controls.
 - Pills werden nur für den Sprachumschalter verwendet, nicht als allgemeiner Dekorationsstil.
 - Schatten dienen ausschließlich schwebender Navigation oder Dialogen und bleiben weich sowie farblich an die Oberfläche angepasst.
 - Karten werden vermieden. Gruppierung erfolgt primär über Raum, Bildformat und wenige funktionale Linien.
@@ -203,7 +205,7 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 - GSAP ScrollTrigger bindet die Videozeit linear an den Scroll-Fortschritt: abwärts zerlegt sich die Pizza, aufwärts läuft derselbe Ablauf reversibel zurück.
 - Ab Tablet und bei präzisem Zeiger bleibt der Hero für eine Strecke von `300dvh` gepinnt. Ein kurzer Scrub-Nachlauf von `0,22 s` glättet die reversible Videozuordnung. Lenis liefert auf Wheel-Geräten die freigegebene Scroll-Trägheit und läuft mit ScrollTrigger über denselben GSAP-Ticker. Mobil nutzt der Hero das Poster im normalen Dokumentfluss und native Touch-Bewegung.
 - Video-Seeks werden mit `requestVideoFrameCallback` an die tatsächlich dekodierten Frames gekoppelt. So überholt der Scroll-Thread den Videodecoder nicht mit mehreren ausstehenden Suchpositionen.
-- Im letzten Viewport der gepinnten Hero-Sequenz schiebt sich die Intro-Section als eigenständige Ebene von unten über den Hero. Der Reveal nutzt ausschließlich eine lineare, scrollgebundene Y-Transformation mit `0,32 s` Scrub-Nachlauf; ein statischer, weicher Schatten trennt die Ebenen ohne zusätzlichen Paint pro Frame.
+- Im letzten Viewport der gepinnten Hero-Sequenz schiebt sich die Intro-Section als eigenständige Ebene von unten über den Hero. Der Reveal nutzt ausschließlich eine lineare, scrollgebundene Y-Transformation mit `0,32 s` Scrub-Nachlauf; ein zusätzlicher Schlagschatten entfällt.
 - Bei Reduced Motion entfällt auch der Layer-Overlap vollständig; die Intro-Section folgt dem Hero im normalen Dokumentfluss.
 - Der Text bleibt linksbündig auf einer abgedunkelten Bildzone, während die Pizza visuell in der rechten Hälfte wirken kann.
 - Bei `prefers-reduced-motion: reduce` entfallen Pinning und Scrubbing vollständig; das vorhandene Pizza-Poster ersetzt das Video.
@@ -212,7 +214,8 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 ### Deutsche Hauptseite „Notte“: Begrüßungssection
 
 - Die zweite Section verwendet einen asymmetrischen Split aus realem Innenraumfoto und Begrüßungstext; mobil steht das Bild oberhalb des Textes.
-- Das Foto bleibt quadratisch, erhält einen subtilen transformbasierten Scale-Reveal und wird bei Reduced Motion ohne Bewegung dargestellt.
+- Das Foto bleibt quadratisch, verwendet den gemeinsamen Frame-Radius, erhält einen subtilen transformbasierten Scale-Reveal und wird bei Reduced Motion ohne Bewegung dargestellt.
+- Begrüßung und Speisekarten-Vorschau verwenden ohne Schatten oder Trennkante denselben Editorial-Hintergrund und wirken dadurch als zusammenhängendes Kapitel.
 - Die Signaturfarbe `#D89478` ist ausschließlich „Buon Appetito!“ zugeordnet und wird nicht als allgemeiner CTA- oder UI-Akzent verwendet.
 - Das lokale WebP wird unterhalb der Falz lazy geladen, asynchron dekodiert und über feste Abmessungen sowie `sizes` ohne Layoutsprung reserviert.
 
@@ -234,7 +237,7 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 
 ### Deutsche Hauptseite „Notte“: Google-Bewertungen
 
-- Die Vertrauenssection ist auf Desktop exakt `50svh` hoch und folgt der Familiengeschichte. Mobil wächst sie mit dem Inhalt. Sie nutzt eine dunkle Fläche, eine kompakte Aggregatbewertung und horizontal erreichbare Originalauszüge.
+- Die Vertrauenssection ist auf Desktop exakt `50svh` hoch und folgt der Familiengeschichte. Mobil wächst sie mit dem Inhalt. Sie nutzt denselben warmen Editorial-Cremefond wie Begrüßung, Speisekarte und Anlass-Section, eine kompakte Aggregatbewertung und horizontal erreichbare Originalauszüge.
 - Zwölf verifizierte Stimmen laufen in zwei horizontalen Reihen mit `36 s` beziehungsweise `40 s` linear und in entgegengesetzter Richtung. Eine nur visuell duplizierte, `aria-hidden` gesetzte Kopie erzeugt den nahtlosen Loop; die zugängliche Inhaltsliste enthält jede Stimme genau einmal.
 - Hover und Tastaturfokus pausieren beide Reihen. Es gibt kein Pinning und keinen GSAP-Ticker; die kompositorische Bewegung läuft als GPU-freundliche CSS-Transformation.
 - Einzelwertungen erscheinen als `★★★★★` beziehungsweise `★★★★☆` und besitzen einen zugänglichen Namen wie „4 von 5 Sternen“.
@@ -243,18 +246,20 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 
 ### Deutsche Hauptseite „Notte“: Reservierungsabschluss
 
-- Der fokussierte Reservierungsabschluss folgt direkt nach den Bewertungen und bildet die Action-Stufe der Startseite. Ein heller, warmer Fond setzt ihn als ruhige typografische Zäsur von der dunklen Vertrauenssection ab.
+- Der fokussierte Reservierungsabschluss folgt direkt nach den Bewertungen und bildet die Action-Stufe der Startseite. Die dunkle Vino-Ember-Fläche setzt ihn als klare Action-Zäsur vom zusammenhängenden hellen Editorial-Kapitel ab.
 - Das Desktop-Raster umfasst zwölf vollständig belegte Spalten: Die Überschrift nutzt Spalten 1–7, Text und Telefonaktion Spalten 9–12; die Einleitung besetzt Spalten 1–3. Unter 900 px folgt alles in einer linearen Einzelspalte.
 - Die bestätigte Telefonnummer ist die einzige aktive Reservierungsaktion, solange der externe Dienst `OFFEN` ist. Der CTA besitzt mindestens 52 px Höhe, sichtbaren Tastaturfokus und einen nur für präzise Zeiger aktivierten Farbwechsel.
-- Beim erstmaligen Eintritt zeichnet sich die horizontale Regel per `scaleX` auf; anschließend erscheinen Begleittext und CTA mit maximal 24 px Y-Versatz. Die maskierten Überschriftwörter nutzen den bestehenden scrollgebundenen Reveal. Alle Bewegungen verwenden ausschließlich Transform und Opacity, erzeugen keine zusätzliche Scrollstrecke und entfallen bei Reduced Motion.
+- Beim erstmaligen Eintritt erscheint der Begleittext mit maximal 24 px Y-Versatz; die frühere horizontale Regel entfällt. Die maskierten Überschriftwörter nutzen den bestehenden scrollgebundenen Reveal. Alle Bewegungen verwenden ausschließlich Transform und Opacity, erzeugen keine zusätzliche Scrollstrecke und entfallen bei Reduced Motion.
 - Die Section ist auf mindestens `54svh` verdichtet. Zusätzliche Dekoration oder nicht belegte Reservierungsversprechen entfallen; die typografische Hierarchie, der kurze Erklärungstext und die bestätigte Telefonaktion füllen die zwölf Spalten ohne künstlichen Leerraum.
 - Das eigene Reservierungsformular liegt als kontrastreiche, halbtransparente Aktionsfläche im bestehenden 12-Spalten-Raster. Eingaben und Zeitfenster besitzen mindestens 44 px Bedienhöhe, sichtbare Fokuszustände und verständliche Lade-, Leer-, Fehler- sowie Bestätigungszustände.
 - Unter 900 px wird das Formular einspaltig und wächst inhaltsabhängig; Animation ist für die Buchung nicht erforderlich. Mobile und Reduced Motion zeigen alle Bedienzustände ohne WebGL- oder GSAP-Abhängigkeit.
 
 ### Deutsche Hauptseite „Notte“: Feiern und besondere Anlässe
 
-- Die bilddominante Zweiteilung bleibt ein eigenständiges Kapitel: Text und Anfrageaktion links, festlich gedeckter Tisch rechts; mobil werden beide Flächen linear gestapelt.
-- Die gesamte Section ist auf Desktop, Tablet und Mobil exakt `100svh` hoch. Desktop nutzt zwei gleich breite Spalten; unter 900 px teilen feste Text-/Bildzeilen dieselbe Viewporthöhe, ohne eine zweite Scrollstrecke zu erzeugen.
+- Die kompakte Zweiteilung bleibt ein eigenständiges Kapitel: Das festlich gedeckte Motiv steht links als eingerahmte, vollständig abgerundete Bildfläche, Text und Anfrageaktion rechts; mobil werden beide Flächen mit dem Bild zuerst linear gestapelt.
+- Die Section verwendet auf Desktop `48svh` als Mindesthöhe und ein Bild-/Textverhältnis von `40/60`. Bei kurzen Viewports wächst sie inhaltsabhängig, damit Überschrift, Beschreibung und Anfrageaktion niemals abgeschnitten werden. Unter 900 px erhält das Bild eine eigene `40svh` hohe Zeile und der Text folgt vollständig darunter.
+- Gemeinsamer Innenabstand und Spaltenabstand lösen das Motiv sichtbar von allen vier Außenkanten. Das Bild darf die Section deshalb weder randlos noch über die volle Sectionhöhe ausfüllen.
+- Auf kleinen Desktop- und Tabletbreiten skaliert der Bildrahmen auf ungefähr `20.5rem × 18.75rem`; auf breiteren Desktops wächst er begrenzt proportional. Unter `900 px` nutzt das Bild wieder die verfügbare Spaltenbreite.
 - Beim erstmaligen Eintritt wächst das Bild von `scale 0,94` auf seine natürliche Größe und blendet von `opacity 0,45` ein. Label, Fließtext und Anfrageaktion folgen mit 70 ms Abstand und maximal 24 px Y-Versatz; die Überschrift behält den bestehenden scrollgebundenen Wort-Reveal.
 - Die Animation verwendet nur Transform und Opacity, läuft einmal ohne Pinning und entfällt bei Reduced Motion vollständig.
 
@@ -325,6 +330,11 @@ Kein Scroll-Jacking. Keine endlosen Marquees. Parallax bleibt auf ein langsames 
 - Desktop verwendet ein vollständig belegtes `2 × 1`-Raster aus ruhigem Restaurantbild und Zugangsfläche; unter 800 px wird daraus eine lineare `1 × 2`-Komposition.
 - Instrument Serif bleibt auf Überschriften und Wortmarke beschränkt. Geist Variable dient ausschließlich der funktionalen Admin-Oberfläche und wird nur mit dem Admin-Chunk geladen.
 - Creme `#EEE7DA`, dunkles Braun `#211D18` und der bestehende warme Rotton bilden die reduzierte Admin-Palette. Zustandswechsel verwenden maximal 16 px Y-Versatz und entfallen bei Reduced Motion.
+- Admin-Flächen verwenden zwei konsistente Radien: `1.25rem` für größere Module und `0.75rem` für Controls, Statusflächen und kleinere Karten. Abstand und leicht getönte Flächen ersetzen dekorative durchgehende Trennlinien; notwendige Feld- und Fokusbegrenzungen bleiben erhalten.
+- Auf Geräten mit präzisem Zeiger reagieren bedienbare Flächen zurückhaltend mit höchstens `1px` Y-Versatz, leichter Hintergrundaufhellung oder weichem Schatten. Touch-Geräte und Reduced Motion erhalten keine bewegten Hovereffekte.
+- Die Admin-Sidebar bleibt ab `801 px` fest am linken Viewportrand und besitzt eine eigene `100svh` hohe Fläche; unterhalb dieses Breakpoints kehrt sie in den normalen Dokumentfluss zurück. Der Inhaltsbereich reserviert auf Desktop dauerhaft dieselben `15rem`, damit beim Scrollen nichts springt oder überdeckt wird.
+- Mehrteilige Umschalter schneiden aktive, Fokus- und Hoverflächen am gemeinsamen Radius ab; innere Segmente erzeugen keine eigenen Schatten oder sichtbaren scharfen Außenkanten.
+- Verwaltungsraster strecken nebeneinanderliegende Module nicht künstlich auf dieselbe Höhe. Öffnungszeiten zeigen zunächst drei Einträge und lassen die vollständige Liste über einen zugänglichen Disclosure-Button ein- und ausklappen; Sondertage und Kategorieverwaltung bleiben dadurch inhaltsnah und kompakt.
 
 ## Gate
 

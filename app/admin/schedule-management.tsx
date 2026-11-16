@@ -1,4 +1,4 @@
-import { CalendarCheck, LockKey, Trash } from "@phosphor-icons/react";
+import { CalendarCheck, CaretDown, LockKey, Trash } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type SpecialDay = {
@@ -58,6 +58,7 @@ function scopeLabel(block: ReservationBlock, tables: RestaurantTable[]): string 
 export function ScheduleManagement({ getToken }: { getToken: () => Promise<string | null> }) {
   const [specialDays, setSpecialDays] = useState<SpecialDay[]>([]);
   const [openingHours, setOpeningHours] = useState<OpeningHour[]>([]);
+  const [openingHoursExpanded, setOpeningHoursExpanded] = useState(false);
   const [blocks, setBlocks] = useState<ReservationBlock[]>([]);
   const [tables, setTables] = useState<RestaurantTable[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
@@ -78,6 +79,7 @@ export function ScheduleManagement({ getToken }: { getToken: () => Promise<strin
   const [reason, setReason] = useState("");
 
   const areas = useMemo(() => [...new Set(tables.map(({ areaKey }) => areaKey))].sort(), [tables]);
+  const visibleOpeningHours = openingHoursExpanded ? openingHours : openingHours.slice(0, 3);
 
   const loadData = useCallback(async () => {
     setState("loading");
@@ -203,9 +205,13 @@ export function ScheduleManagement({ getToken }: { getToken: () => Promise<strin
       {state === "ready" ? <div className="admin-operation-grid">
         <article className="admin-operation-card">
           <div className="admin-operation-title"><CalendarCheck aria-hidden="true" /><div><h3>Reguläre Öffnungszeiten</h3><p>Wöchentliche Servicezeiten verwalten.</p></div></div>
-          <div className="admin-operation-list" aria-label="Reguläre Öffnungszeiten">
-            {openingHours.length === 0 ? <p className="admin-compact-empty">Keine Öffnungszeiten eingetragen.</p> : openingHours.map((hour) => <div key={hour.key}><div><strong>{["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"][hour.weekday]}</strong><span>{hour.startTime}–{hour.endTime} Uhr{hour.active ? "" : " · inaktiv"}</span></div><button type="button" aria-label={`${hour.key} entfernen`} onClick={() => void deleteOpeningHour(hour.key)}><Trash aria-hidden="true" /></button></div>)}
+          <div className="admin-operation-list" id="regular-opening-hours" aria-label="Reguläre Öffnungszeiten">
+            {openingHours.length === 0 ? <p className="admin-compact-empty">Keine Öffnungszeiten eingetragen.</p> : visibleOpeningHours.map((hour) => <div key={hour.key}><div><strong>{["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"][hour.weekday]}</strong><span>{hour.startTime}–{hour.endTime} Uhr{hour.active ? "" : " · inaktiv"}</span></div><button type="button" aria-label={`${hour.key} entfernen`} onClick={() => void deleteOpeningHour(hour.key)}><Trash aria-hidden="true" /></button></div>)}
           </div>
+          {openingHours.length > 3 ? <button className="admin-disclosure-button" type="button" aria-expanded={openingHoursExpanded} aria-controls="regular-opening-hours" onClick={() => setOpeningHoursExpanded((expanded) => !expanded)}>
+            <span>{openingHoursExpanded ? "Weniger anzeigen" : `Alle ${openingHours.length} Zeiten anzeigen`}</span>
+            <CaretDown aria-hidden="true" />
+          </button> : null}
           <form className="admin-operation-form" onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); void saveOpeningHour({ key: String(form.get("key")), weekday: Number(form.get("weekday")), startTime: String(form.get("startTime")), endTime: String(form.get("endTime")), active: true }); }}>
             <label><span>Schlüssel</span><input name="key" required pattern="[a-z0-9-]{1,80}" placeholder="z. B. fri-evening" /></label>
             <label><span>Wochentag</span><select name="weekday" defaultValue="5">{["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"].map((day, index) => <option key={day} value={index}>{day}</option>)}</select></label>

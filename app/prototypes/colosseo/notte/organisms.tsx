@@ -122,7 +122,6 @@ export function ReviewsSection({ locale }: { locale: NotteLocale }) {
         {[false, true].map((duplicate) => <div className="no-review-set" aria-hidden={duplicate || undefined} key={duplicate ? "duplicate" : "original"}>{row.map((review) => <ReviewCard duplicate={duplicate} key={review.author} locale={locale} review={review} />)}</div>)}
       </div>)}
     </div>
-    <footer className="no-reviews-footer" data-reveal-item><a href={notteLinks.reviews} rel="noreferrer" target="_blank">{content.link} <ArrowRight /></a><small>{content.date}</small></footer>
   </section>;
 }
 
@@ -130,7 +129,7 @@ export function ReservationSection({ locale }: { locale: NotteLocale }) {
   const content = getNotteContent(locale).reservation;
   return <Velaris className="no-reservation-shell">
     <section className="no-reservation" id="action" aria-labelledby="reservation-title">
-      <div className="no-reservation-intro"><p>{content.eyebrow}</p><span className="no-reservation-rule" aria-hidden="true" /></div>
+      <div className="no-reservation-intro"><p>{content.eyebrow}</p></div>
       <h2 id="reservation-title" data-word-reveal><MaskedWords text={content.title} /></h2>
       <div className="no-reservation-details"><p>{content.body}</p></div>
       <ReservationForm locale={locale} />
